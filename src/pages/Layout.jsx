@@ -1,11 +1,11 @@
 import React from 'react';
+import Button from '../components/Button';
 
 export default function Layout() {
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
-      <header className="bg-blue-600 text-white p-4">
-        <h1 className="text-2xl">TEST</h1>
-      </header>
+      <div className="text-2xl text-blue-200">TEST</div>
+      <Button />
     </div>
   );
 }
