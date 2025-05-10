@@ -6,8 +6,8 @@
   --color-cornflower-100: #dee9fb;
   --color-cornflower-200: #c4daf9;
   --color-cornflower-300: #9cc2f4;
-  --color-cornflower-400: #6ea1ed;
-  --color-cornflower-500: #4b7fe6; /* Main */
+  --color-cornflower-400: #6ea1ed; /* Main */
+  --color-cornflower-500: #4b7fe6;
   --color-cornflower-600: #3661da;
   --color-cornflower-700: #2d4fc6;
   --color-cornflower-800: #2a41a3;
@@ -15,6 +15,49 @@
   --color-cornflower-950: #1c264f;
 
   --font-pretendard: 'Pretendard', sans-serif;
+}
+
+@tailwind utilities;
+
+/* 텍스트 스타일 유틸리티 */
+.head1 {
+  font-size: 32px;
+  line-height: 40px;
+  font-weight: 700;
+  font-family: var(--font-pretendard);
+  color: var(--color-cornflower-950);
+}
+
+.head2 {
+  font-size: 30px;
+  line-height: 38px;
+  font-weight: 600;
+  font-family: var(--font-pretendard);
+  color: var(--color-cornflower-950);
+}
+
+.body-text {
+  font-size: 24px;
+  line-height: 32px;
+  font-weight: 400;
+  font-family: var(--font-pretendard);
+  color: var(--color-cornflower-950);
+}
+
+.caption-bold {
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 500;
+  font-family: var(--font-pretendard);
+  color: var(--color-cornflower-950);
+}
+
+.caption {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+  font-family: var(--font-pretendard);
+  color: var(--color-cornflower-950);
 }
 
 html {
