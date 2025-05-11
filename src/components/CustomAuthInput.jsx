@@ -9,6 +9,7 @@ export default function CustomAuthInput({
   value,
   onChange,
   required = false,
+  error,
 }) {
   return (
     <div className="flex flex-col">
@@ -22,6 +23,7 @@ export default function CustomAuthInput({
         required={required}
         className="mt-1 rounded-lg border border-[#6EA1ED] bg-white p-2 placeholder-[#6EA1ED]"
       />
+      {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
     </div>
   );
 }
@@ -34,4 +36,5 @@ CustomAuthInput.propTypes = {
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   onChange: PropTypes.func.isRequired,
   required: PropTypes.bool,
+  error: PropTypes.string,
 };
