@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import CustomAuthInput from '../components/CustomAuthInput';
 import CheckboxField from '../components/CheckboxField';
-import Button from '../components/Button';
 
 export default function SignUp() {
   const [formData, setFormData] = useState({
@@ -15,17 +14,60 @@ export default function SignUp() {
     agreePrivacy: false,
   });
 
+  const [errors, setErrors] = useState({
+    username: '',
+    password: '',
+    confirmPassword: '',
+    businessNumber: '',
+  });
+
   const handleChange = (e) => {
     const { name, value, checked, type } = e.target;
-    setFormData({
-      ...formData,
+
+    setFormData((prevData) => ({
+      ...prevData,
       [name]: type === 'checkbox' ? checked : value,
-    });
+    }));
+  };
+
+  const validate = () => {
+    const newErrors = {};
+
+    const usernameRegex = /^[A-Za-z0-9]{4,16}$/;
+    if (!formData.username || !usernameRegex.test(formData.username)) {
+      newErrors.username = '아이디는 4~16자리 영어, 숫자 조합이어야 합니다.';
+    }
+
+    const passwordRegex =
+      /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,16}$/;
+    if (!formData.password || !passwordRegex.test(formData.password)) {
+      newErrors.password =
+        '비밀번호는 8~16자리 영어, 숫자, 특수문자 조합이어야 합니다.';
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = '비밀번호가 일치하지 않습니다.';
+    }
+
+    const businessNumberRegex = /^[0-9]{13}$/;
+    if (
+      !formData.businessNumber ||
+      !businessNumberRegex.test(formData.businessNumber)
+    ) {
+      newErrors.businessNumber = '사업자 등록 번호는 13자리 숫자여야 합니다.';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0; // 오류가 없으면 true 반환
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('가입하기 버튼 클릭됨:', formData);
+    if (validate()) {
+      console.log('가입하기 버튼 클릭됨:', formData);
+    } else {
+      console.log('유효성 검사 실패', errors);
+    }
   };
 
   return (
@@ -43,6 +85,7 @@ export default function SignUp() {
             value={formData.username}
             onChange={handleChange}
             required
+            error={errors.username}
           />
 
           <CustomAuthInput
@@ -53,6 +96,7 @@ export default function SignUp() {
             value={formData.password}
             onChange={handleChange}
             required
+            error={errors.password}
           />
 
           <CustomAuthInput
@@ -63,6 +107,7 @@ export default function SignUp() {
             value={formData.confirmPassword}
             onChange={handleChange}
             required
+            error={errors.confirmPassword}
           />
 
           <CustomAuthInput
@@ -85,14 +130,15 @@ export default function SignUp() {
                 value={formData.businessNumber}
                 onChange={handleChange}
                 required
+                error={errors.businessNumber}
               />
             </div>
-            <Button
-              label="중복 확인"
-              variant="white"
-              onClick={() => console.log('중복 확인 클릭')}
-              className="w-1/4"
-            />
+            <button
+              type="button"
+              className="mt-5 w-1/4 rounded-lg border border-[#6EA1ED] bg-white p-2 text-[#6EA1ED] hover:bg-[#6EA1ED] hover:text-white"
+            >
+              중복 확인
+            </button>
           </div>
 
           <div className="mt-4 flex flex-col gap-2">
@@ -118,12 +164,12 @@ export default function SignUp() {
             </div>
           </div>
 
-          <Button
-            text="가입하기"
+          <button
             type="submit"
-            variant="main"
-            className="w-full"
-          />
+            className="w-full rounded-[10px] bg-[#6EA1ED] py-3 text-white transition hover:bg-[#5b8cd7]"
+          >
+            가입하기
+          </button>
         </form>
       </div>
     </section>
