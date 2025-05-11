@@ -19,8 +19,10 @@ const DateInputField = ({
   const inputClass = clsx(
     'w-full h-[53px] px-4 text-[18px] rounded-xl border font-normal font-pretendard transition bg-white',
     {
-      'text-cornflower-950 placeholder-cornflower-400 border-cornflower-400': !error && !disabled && !isSuccess,
-      'focus:outline-none focus:border-cornflower-500 focus:placeholder-cornflower-950': !error && !disabled,
+      'text-cornflower-950 placeholder-cornflower-400 border-cornflower-400':
+        !error && !disabled && !isSuccess,
+      'focus:outline-none focus:border-cornflower-500 focus:placeholder-cornflower-950':
+        !error && !disabled,
 
       'border-cornflower-500': filled && !error,
       'border-green-500': isSuccess,
@@ -41,7 +43,9 @@ const DateInputField = ({
         disabled={disabled}
         className={inputClass}
       />
-      {error && <p className="text-sm text-red-500 pt-1 font-normal">{error}</p>}
+      {error && (
+        <p className="pt-1 text-sm font-normal text-red-500">{error}</p>
+      )}
     </div>
   );
 };

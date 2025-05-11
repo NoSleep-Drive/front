@@ -6,6 +6,7 @@ export const Switch = ({ checked, onCheckedChange, className }) => {
   return (
     <button
       role="switch"
+      type="button"
       aria-checked={checked}
       onClick={() => onCheckedChange(!checked)}
       className={clsx(

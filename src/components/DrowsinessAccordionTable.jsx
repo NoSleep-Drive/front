@@ -19,6 +19,7 @@ export default function DrowsinessAccordionTable({ data }) {
       render: (value, row) => (
         <div className="flex items-center gap-2">
           <button
+            type="button"
             onClick={() => toggleRow(row.vehicleNumber)}
             className="hover:bg-cornflower-100 text-cornflower-950 rounded-md p-2 text-2xl transition-colors hover:text-blue-600"
           >
@@ -117,6 +118,7 @@ export default function DrowsinessAccordionTable({ data }) {
                         {detail.timestamp}
                       </span>
                       <button
+                        type="button"
                         onClick={() => navigate(`/drowsiness/${detail.id}`)}
                         className="text-cornflower-500 whitespace-nowrap hover:underline"
                       >

@@ -7,9 +7,6 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { ko } from 'date-fns/locale';
 import DrowsinessAccordionTable from '@/components/DrowsinessAccordionTable';
 import Pagination from '@/components/Pagination';
-import DrowsinessDetail from '@/pages/DrowsinessDetail';
-<Route path="/drowsiness/:id" element={<DrowsinessDetail />} />;
-import { Route } from 'react-router-dom';
 
 export default function DrowsinessSearch() {
   const [startDate, setStartDate] = useState(null);
@@ -94,8 +91,11 @@ export default function DrowsinessSearch() {
         <div className="flex w-full flex-col justify-end md:basis-1/2">
           <div className="flex w-full justify-end gap-2 md:flex-nowrap">
             <div className="flex w-full flex-col">
-              <label className="caption-bold">검색 시작일</label>
+              <label htmlFor="startDate" className="caption-bold">
+                검색 시작일
+              </label>
               <DatePicker
+                id="startDate"
                 selected={startDate}
                 locale={ko}
                 dateFormat="yyyy년 MM월 dd일"
@@ -110,8 +110,11 @@ export default function DrowsinessSearch() {
             </span>
 
             <div className="flex w-full flex-col">
-              <label className="caption-bold">검색 종료일</label>
+              <label htmlFor="endDate" className="caption-bold">
+                검색 종료일
+              </label>
               <DatePicker
+                id="endDate"
                 selected={endDate}
                 locale={ko}
                 dateFormat="yyyy년 MM월 dd일"

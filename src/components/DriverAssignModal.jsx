@@ -44,7 +44,7 @@ export default function DriverAssignModal({
             label="운전자 이름"
             placeholder="운전자 이름을 입력하세요."
             value={driverName}
-            onChange={(e) => setDriverName(e.target.value)}
+            onChange={(name, value) => setDriverName(value)}
           />
         </div>
 

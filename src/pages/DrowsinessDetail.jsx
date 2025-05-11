@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams  } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Download } from 'lucide-react';
 import Button from '@/components/Button';
@@ -85,7 +85,11 @@ export default function DrowsinessDetail() {
 
   return (
     <div className="p-6">
-      <button onClick={() => navigate(-1)} className="body-text mb-4 font-bold">
+      <button
+        type="button"
+        onClick={() => navigate(-1)}
+        className="body-text mb-4 font-bold"
+      >
         목록으로
       </button>
       <div className="mx-auto flex max-w-6xl flex-col px-4">

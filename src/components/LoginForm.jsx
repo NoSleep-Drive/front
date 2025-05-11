@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import InputField from './InputField';
 import Button from './Button';
-//import PropTypes from 'prop-types';
 
 export default function LoginForm() {
   const [id, setId] = useState('');
@@ -11,7 +10,6 @@ export default function LoginForm() {
     if (name === 'id') setId(value);
     if (name === 'pw') setPw(value);
   };
-  //const [setError] = useState(null);
   const navigate = useNavigate();
 
   const handleLogin = () => {

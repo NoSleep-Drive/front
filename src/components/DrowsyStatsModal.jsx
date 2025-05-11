@@ -6,7 +6,7 @@ export default function DrowsyStatsModal({ isOpen, onConfirm, onClose, data }) {
   if (!isOpen) return null;
 
   return createPortal(
-<div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-400/50 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-400/50 backdrop-blur-sm">
       <div className="w-[90%] max-w-md rounded-2xl bg-white p-6 shadow-lg">
         <h2 className="head1 mb-6 text-center">운전자 졸음 통계</h2>
 
@@ -35,6 +35,7 @@ export default function DrowsyStatsModal({ isOpen, onConfirm, onClose, data }) {
 
         <div className="text-center">
           <button
+            type="button"
             onClick={() => {
               onConfirm();
               onClose();

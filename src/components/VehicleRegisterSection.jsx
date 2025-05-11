@@ -53,6 +53,13 @@ export default function VehicleRegisterSection({ data, setData }) {
 }
 
 VehicleRegisterSection.propTypes = {
-  data: PropTypes.array.isRequired,
+  data: PropTypes.arrayOf(
+    PropTypes.shape({
+      vehicleNumber: PropTypes.string.isRequired,
+      deviceUid: PropTypes.string.isRequired,
+      createdDate: PropTypes.string.isRequired,
+      isRented: PropTypes.bool.isRequired,
+    })
+  ).isRequired,
   setData: PropTypes.func.isRequired,
 };

@@ -46,6 +46,7 @@ export default function Pagination({ page, setPage, totalPages }) {
         }
         return (
           <button
+            type="button"
             key={p}
             onClick={() => setPage(p)}
             className={`h-8 w-8 rounded-full text-sm ${
@@ -59,6 +60,7 @@ export default function Pagination({ page, setPage, totalPages }) {
         );
       })}
       <button
+        type="button"
         onClick={handleNext}
         disabled={page === totalPages}
         className={`text-cornflower-950 hover:bg-cornflower-100 hover:text-cornflower-600 inline-flex items-center justify-center rounded-xl p-2 transition-colors ${page === totalPages ? 'cursor-not-allowed opacity-50' : ''}`}

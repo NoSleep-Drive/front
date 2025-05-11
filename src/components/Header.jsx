@@ -31,7 +31,7 @@ const Header = ({
   const getActivePage = () => {
     if (currentPath.startsWith('/dashboard')) return 'dashboard';
     if (currentPath.startsWith('/vehicles')) return 'vehicles';
-    if (currentPath.startsWith('/search')) return 'drowsiness';
+    if (currentPath.startsWith('/drowsiness')) return 'drowsiness';
     return '';
   };
   const activePage = getActivePage();

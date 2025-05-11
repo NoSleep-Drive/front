@@ -21,7 +21,7 @@ export default function VehicleEditModal({
   if (!isOpen) return null;
 
   return createPortal(
-<div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-400/50 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-400/50 backdrop-blur-sm">
       <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
         <h2 className="head2 mb-4 text-center">차량 번호 수정</h2>
         <InputField

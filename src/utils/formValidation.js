@@ -17,12 +17,12 @@ export const validate = (formData) => {
     errors.confirmPassword = '비밀번호가 일치하지 않습니다.';
   }
 
-  const businessNumberRegex = /^[0-9]{13}$/;
+  const businessNumberRegex = /^[0-9]{10}$/;
   if (
     !formData.businessNumber ||
     !businessNumberRegex.test(formData.businessNumber)
   ) {
-    errors.businessNumber = '사업자 등록 번호는 13자리 숫자여야 합니다.';
+    errors.businessNumber = '사업자 등록 번호는 10자리 숫자여야 합니다.';
   }
 
   return errors;
