@@ -2,8 +2,12 @@ import React, { useState } from 'react';
 import CustomAuthInput from '../components/CustomAuthInput';
 import CheckboxField from '../components/CheckboxField';
 import { validate } from '../utils/formValidation';
+import { signUpApi } from '../api/authApi';
+import { useNavigate } from 'react-router-dom';
 
 export default function SignUp() {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     username: '',
     password: '',
@@ -15,29 +19,39 @@ export default function SignUp() {
     agreePrivacy: false,
   });
 
-  const [errors, setErrors] = useState({
-    username: '',
-    password: '',
-    confirmPassword: '',
-    businessNumber: '',
-  });
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, checked, type } = e.target;
-
     setFormData((prevData) => ({
       ...prevData,
       [name]: type === 'checkbox' ? checked : value,
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validate(formData, setErrors)) {
-      console.log('가입하기 버튼 클릭됨:', formData);
-    } else {
-      console.log('유효성 검사 실패', errors);
+    if (!validateForm()) return;
+
+    setLoading(true);
+    try {
+      const responseMessage = await signUpApi(formData);
+      console.log('회원가입 통신 성공:', responseMessage);
+      alert('회원가입이 성공적으로 완료되었습니다!');
+      navigate('/login');
+    } catch (error) {
+      console.error('회원가입 실패:', error);
+      alert(error);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const validateForm = () => {
+    const validationErrors = validate(formData);
+    setErrors(validationErrors);
+    return Object.keys(validationErrors).length === 0;
   };
 
   return (
@@ -137,8 +151,9 @@ export default function SignUp() {
           <button
             type="submit"
             className="w-full rounded-[10px] bg-[#6EA1ED] py-3 text-white transition hover:bg-[#5b8cd7]"
+            disabled={loading}
           >
-            가입하기
+            {loading ? '가입 중...' : '가입하기'}
           </button>
         </form>
       </div>
