@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import CustomAuthInput from '../components/CustomAuthInput';
+import CheckboxField from '../components/CheckboxField';
+import Button from '../components/Button';
 
 export default function SignUp() {
   const [formData, setFormData] = useState({
@@ -32,150 +35,95 @@ export default function SignUp() {
           <h2 className="text-2xl font-bold text-blue-600">NoSleep Drive</h2>
         </div>
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* 아이디 입력 */}
-          <div className="flex flex-col">
-            <label
-              htmlFor="username"
-              className="text-sm font-semibold text-gray-700"
-            >
-              아이디
-            </label>
-            <input
-              type="text"
-              name="username"
-              id="username"
-              placeholder="영어, 숫자 조합 4~16자리"
-              className="form-input mt-1 rounded-lg border border-[#6EA1ED] bg-white p-2 placeholder-[#6EA1ED]" // 스타일 변경
-              onChange={handleChange}
-              required
-            />
-          </div>
+          <CustomAuthInput
+            label="아이디"
+            name="username"
+            type="text"
+            placeholder="영어, 숫자 조합 4~16자리"
+            value={formData.username}
+            onChange={handleChange}
+            required
+          />
 
-          {/* 비밀번호 입력 */}
-          <div className="flex flex-col">
-            <label
-              htmlFor="password"
-              className="text-sm font-semibold text-gray-700"
-            >
-              비밀번호
-            </label>
-            <input
-              type="password"
-              name="password"
-              id="password"
-              placeholder="영어, 숫자, 특수문자 조합 8~16자리"
-              className="form-input mt-1 rounded-lg border border-[#6EA1ED] bg-white p-2 placeholder-[#6EA1ED]" // 스타일 변경
-              onChange={handleChange}
-              required
-            />
-          </div>
+          <CustomAuthInput
+            label="비밀번호"
+            name="password"
+            type="password"
+            placeholder="영어, 숫자, 특수문자 조합 8~16자리"
+            value={formData.password}
+            onChange={handleChange}
+            required
+          />
 
-          {/* 비밀번호 확인 입력 */}
-          <div className="flex flex-col">
-            <label
-              htmlFor="confirmPassword"
-              className="text-sm font-semibold text-gray-700"
-            >
-              비밀번호 확인
-            </label>
-            <input
-              type="password"
-              name="confirmPassword"
-              id="confirmPassword"
-              placeholder="영어, 숫자, 특수문자 조합 8~16자리"
-              className="form-input mt-1 rounded-lg border border-[#6EA1ED] bg-white p-2 placeholder-[#6EA1ED]" // 스타일 변경
-              onChange={handleChange}
-              required
-            />
-          </div>
+          <CustomAuthInput
+            label="비밀번호 확인"
+            name="confirmPassword"
+            type="password"
+            placeholder="비밀번호와 동일"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            required
+          />
 
-          {/* 업체명 입력 */}
-          <div className="flex flex-col">
-            <label
-              htmlFor="companyName"
-              className="text-sm font-semibold text-gray-700"
-            >
-              업체명
-            </label>
-            <input
-              type="text"
-              name="companyName"
-              id="companyName"
-              placeholder="업체명을 입력하세요."
-              className="form-input mt-1 rounded-lg border border-[#6EA1ED] bg-white p-2 placeholder-[#6EA1ED]" // 스타일 변경
-              onChange={handleChange}
-              required
-            />
-          </div>
+          <CustomAuthInput
+            label="업체명"
+            name="companyName"
+            type="text"
+            placeholder="업체명을 입력하세요."
+            value={formData.companyName}
+            onChange={handleChange}
+            required
+          />
 
-          {/* 사업자 등록 번호 입력 */}
           <div className="flex items-center space-x-4">
             <div className="flex-1">
-              <label
-                htmlFor="businessNumber"
-                className="mb-2 text-sm font-semibold text-gray-700" // label 아래 간격 추가
-              >
-                사업자 등록 번호
-              </label>
-              <input
-                type="text"
+              <CustomAuthInput
+                label="사업자 등록 번호"
                 name="businessNumber"
-                id="businessNumber"
+                type="text"
                 placeholder="-없이 13자리 숫자"
-                className="form-input mb-2 w-full rounded-lg border border-[#6EA1ED] bg-white p-2 placeholder-[#6EA1ED]" // 스타일 변경
+                value={formData.businessNumber}
                 onChange={handleChange}
                 required
               />
             </div>
-
-            {/* 중복 확인 버튼 */}
-            <button
-              type="button"
-              className="mt-3 w-1/4 rounded-lg border border-[#6EA1ED] bg-white p-2 text-[#6EA1ED] hover:bg-[#6EA1ED] hover:text-white"
-            >
-              중복 확인
-            </button>
+            <Button
+              label="중복 확인"
+              variant="white"
+              onClick={() => console.log('중복 확인 클릭')}
+              className="w-1/4"
+            />
           </div>
 
-          {/* 동의 체크박스 */}
           <div className="mt-4 flex flex-col gap-2">
-            <label className="flex items-center">
-              <input
-                type="checkbox"
-                name="agreeAll"
-                onChange={handleChange}
-                checked={formData.agreeAll}
-              />
-              <span className="ml-2">모두 동의합니다.</span>
-            </label>
-            <label className="ml-4 flex items-center">
-              <input
-                type="checkbox"
+            <CheckboxField
+              label="모두 동의합니다."
+              name="agreeAll"
+              checked={formData.agreeAll}
+              onChange={handleChange}
+            />
+            <div className="ml-4 space-y-2">
+              <CheckboxField
+                label="이용약관에 동의합니다. (필수)"
                 name="agreeTerms"
-                onChange={handleChange}
                 checked={formData.agreeTerms}
-              />
-              <span className="ml-2">이용약관에 동의합니다. (필수)</span>
-            </label>
-            <label className="ml-4 flex items-center">
-              <input
-                type="checkbox"
-                name="agreePrivacy"
                 onChange={handleChange}
-                checked={formData.agreePrivacy}
               />
-              <span className="ml-2">
-                개인정보 수집 및 이용에 동의합니다. (필수)
-              </span>
-            </label>
+              <CheckboxField
+                label="개인정보 수집 및 이용에 동의합니다. (필수)"
+                name="agreePrivacy"
+                checked={formData.agreePrivacy}
+                onChange={handleChange}
+              />
+            </div>
           </div>
 
-          <button
+          <Button
+            text="가입하기"
             type="submit"
-            className="w-full rounded-[10px] bg-[#6EA1ED] py-3 text-white transition hover:bg-[#5b8cd7]"
-          >
-            가입하기
-          </button>
+            variant="main"
+            className="w-full"
+          />
         </form>
       </div>
     </section>
