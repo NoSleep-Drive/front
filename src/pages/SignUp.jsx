@@ -45,7 +45,7 @@ export default function SignUp() {
               name="username"
               id="username"
               placeholder="영어, 숫자 조합 4~16자리"
-              className="form-input mt-1 rounded border border-gray-300 p-2"
+              className="form-input mt-1 rounded-lg border border-[#6EA1ED] bg-white p-2 placeholder-[#6EA1ED]" // 스타일 변경
               onChange={handleChange}
               required
             />
@@ -64,7 +64,7 @@ export default function SignUp() {
               name="password"
               id="password"
               placeholder="영어, 숫자, 특수문자 조합 8~16자리"
-              className="form-input mt-1 rounded border border-gray-300 p-2"
+              className="form-input mt-1 rounded-lg border border-[#6EA1ED] bg-white p-2 placeholder-[#6EA1ED]" // 스타일 변경
               onChange={handleChange}
               required
             />
@@ -82,8 +82,8 @@ export default function SignUp() {
               type="password"
               name="confirmPassword"
               id="confirmPassword"
-              placeholder="비밀번호와 동일"
-              className="form-input mt-1 rounded border border-gray-300 p-2"
+              placeholder="영어, 숫자, 특수문자 조합 8~16자리"
+              className="form-input mt-1 rounded-lg border border-[#6EA1ED] bg-white p-2 placeholder-[#6EA1ED]" // 스타일 변경
               onChange={handleChange}
               required
             />
@@ -102,7 +102,7 @@ export default function SignUp() {
               name="companyName"
               id="companyName"
               placeholder="업체명을 입력하세요."
-              className="form-input mt-1 rounded border border-gray-300 p-2"
+              className="form-input mt-1 rounded-lg border border-[#6EA1ED] bg-white p-2 placeholder-[#6EA1ED]" // 스타일 변경
               onChange={handleChange}
               required
             />
@@ -122,7 +122,7 @@ export default function SignUp() {
                 name="businessNumber"
                 id="businessNumber"
                 placeholder="-없이 13자리 숫자"
-                className="form-input mb-2 w-full rounded border border-gray-300 p-2" // input 아래 간격 추가
+                className="form-input mb-2 w-full rounded-lg border border-[#6EA1ED] bg-white p-2 placeholder-[#6EA1ED]" // 스타일 변경
                 onChange={handleChange}
                 required
               />
@@ -131,7 +131,7 @@ export default function SignUp() {
             {/* 중복 확인 버튼 */}
             <button
               type="button"
-              className="mt-3 w-1/4 rounded bg-blue-600 p-2 text-white hover:bg-blue-700"
+              className="mt-3 w-1/4 rounded-lg border border-[#6EA1ED] bg-white p-2 text-[#6EA1ED] hover:bg-[#6EA1ED] hover:text-white"
             >
               중복 확인
             </button>
@@ -149,8 +149,6 @@ export default function SignUp() {
               <span className="ml-2">모두 동의합니다.</span>
             </label>
             <label className="ml-4 flex items-center">
-              {' '}
-              {/* 왼쪽 여백 추가 */}
               <input
                 type="checkbox"
                 name="agreeTerms"
@@ -160,8 +158,6 @@ export default function SignUp() {
               <span className="ml-2">이용약관에 동의합니다. (필수)</span>
             </label>
             <label className="ml-4 flex items-center">
-              {' '}
-              {/* 왼쪽 여백 추가 */}
               <input
                 type="checkbox"
                 name="agreePrivacy"
@@ -176,7 +172,7 @@ export default function SignUp() {
 
           <button
             type="submit"
-            className="w-full rounded bg-blue-600 py-2 text-white transition hover:bg-blue-700"
+            className="w-full rounded-[10px] bg-[#6EA1ED] py-3 text-white transition hover:bg-[#5b8cd7]"
           >
             가입하기
           </button>
