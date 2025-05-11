@@ -37,14 +37,14 @@ export default function DriverAssignModal({ isOpen, onClose, onConfirm, vehicleN
         <div className="space-y-4">
           <InputField
             label="운전자 이름"
-            placeholder="홍길동"
+            placeholder="운전자 이름을 입력하세요."
             value={driverName}
             onChange={(e) => setDriverName(e.target.value)}
           />
           <InputField
             label="생년월일"
             type="date"
-            placeholder="1990-01-01"
+            placeholder="예시: 1990-01-01"
             value={birthdate}
             onChange={(e) => setBirthdate(e.target.value)}
           />

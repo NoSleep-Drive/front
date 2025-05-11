@@ -10,7 +10,7 @@ export const Switch = ({ checked, onCheckedChange, className }) => {
       onClick={() => onCheckedChange(!checked)}
       className={clsx(
         'relative inline-flex h-6 w-11 items-center rounded-full transition',
-        checked ? 'bg-cornflower-500' : 'bg-gray-300',
+        checked ? 'bg-cornflower-400' : 'bg-gray-300',
         className
       )}
     >

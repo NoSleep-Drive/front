@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
-import { XIcon, CheckCircle } from 'lucide-react';
+import { XIcon, CheckCircle, Eye, EyeOff } from 'lucide-react';
 import Button from './Button';
 
 const InputField = ({
@@ -15,39 +15,41 @@ const InputField = ({
   disabled = false,
   withButton = false,
   isSuccess = false,
-  size = 'md', // default
+  size = 'md',
+  type = 'text',
 }) => {
+  const [showPassword, setShowPassword] = useState(false);
+
   const typed = value?.length > 0;
   const filled = typed && !error && !isSuccess;
 
   const sizeClass = {
     sm: 'h-10 text-sm px-3',
-    md: 'py-3 px-4 text-[18px]', 
+    md: 'py-3 px-4 text-[18px]',
     lg: 'py-4 px-5 text-[20px]',
   }[size];
 
   const inputClass = clsx(
-    "w-full pr-10 rounded-xl border font-normal font-pretendard transition bg-white",     sizeClass,
+    'w-full pr-10 rounded-xl border font-normal font-pretendard transition bg-white',
+    sizeClass,
     {
-      "text-cornflower-950 placeholder-cornflower-400 border-cornflower-400": !error && !disabled && !isSuccess,
-      "focus:outline-none focus:border-cornflower-500 focus:placeholder-cornflower-950": !error && !disabled,
-
-      "border-cornflower-500": filled && !error,
-      "border-green-500": isSuccess,
-
-      "bg-gray-100 text-gray-400 cursor-not-allowed border-gray-300": disabled,
-      "border-red-400 placeholder-red-400": error,
+      'text-cornflower-950 placeholder-cornflower-400 border-cornflower-400': !error && !disabled && !isSuccess,
+      'focus:outline-none focus:border-cornflower-500 focus:placeholder-cornflower-950': !error && !disabled,
+      'border-cornflower-500': filled && !error,
+      'border-green-500': isSuccess,
+      'bg-gray-100 text-gray-400 cursor-not-allowed border-gray-300': disabled,
+      'border-red-400 placeholder-red-400': error,
     }
   );
 
+  const renderType = type === 'password' ? (showPassword ? 'text' : 'password') : type;
+
   return (
     <div className="w-full space-y-1">
-      {label && (
-        <label className="caption-bold">{label}</label>
-      )}
-      <div className={clsx("relative", withButton && "flex gap-2 items-center")}>
+      {label && <label className="caption-bold">{label}</label>}
+      <div className={clsx('relative', withButton && 'flex gap-2 items-center')}>
         <input
-          type="text"
+          type={renderType}
           className={inputClass}
           placeholder={placeholder}
           value={value}
@@ -55,22 +57,36 @@ const InputField = ({
           disabled={disabled}
         />
 
+        {/* 입력값 초기화 */}
         {filled && (
           <button
             type="button"
-            onClick={() => onChange({ target: { value: "" } })}
+            onClick={() => onChange({ target: { value: '' } })}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-cornflower-400 hover:text-cornflower-600"
           >
             <XIcon size={18} />
           </button>
         )}
 
+        {/* 성공 상태 아이콘 */}
         {isSuccess && (
           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-cornflower-500">
             <CheckCircle size={20} />
           </span>
         )}
 
+        {/* 비밀번호 보기/숨김 toggle */}
+        {type === 'password' && (
+          <button
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)}
+            className="absolute right-10 top-1/2 -translate-y-1/2 text-cornflower-400 hover:text-cornflower-600"
+          >
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        )}
+
+        {/* 버튼  */}
         {withButton && (
           <Button
             label={buttonLabel}
@@ -97,7 +113,8 @@ InputField.propTypes = {
   disabled: PropTypes.bool,
   withButton: PropTypes.bool,
   isSuccess: PropTypes.bool,
-  size: PropTypes.oneOf(['sm', 'md', 'lg']), 
+  size: PropTypes.oneOf(['sm', 'md', 'lg']),
+  type: PropTypes.oneOf(['text', 'password']),
 };
 
 export default InputField;

@@ -1,7 +1,6 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import PropTypes from 'prop-types';
-import Button from './Button';
 
 export default function Pagination({ page, setPage, totalPages }) {
   const handlePrev = () => setPage(Math.max(1, page - 1));
@@ -28,14 +27,13 @@ export default function Pagination({ page, setPage, totalPages }) {
 
   return (
     <div className="mt-4 flex items-center justify-center gap-2">
-      <Button
-        onlyIcon
-        icon={<ChevronLeft size={18} />}
+      <button
         onClick={handlePrev}
-        variant="white"
-        size="sm"
-        className={page === 1 ? 'cursor-not-allowed opacity-50' : ''}
-      />
+        disabled={page === 1}
+        className={`text-cornflower-950 hover:bg-cornflower-100 hover:text-cornflower-600 inline-flex items-center justify-center rounded-xl p-2 transition-colors ${page === 1 ? 'cursor-not-allowed opacity-50' : ''}`}
+      >
+        <ChevronLeft size={18} />
+      </button>
       {getPageNumbers().map((p, index) => {
         if (p === 'prev-ellipsis' || p === 'next-ellipsis') {
           return (
@@ -49,21 +47,22 @@ export default function Pagination({ page, setPage, totalPages }) {
             key={p}
             onClick={() => setPage(p)}
             className={`h-8 w-8 rounded-full text-sm ${
-              p === page ? 'bg-cornflower-200 text-cornflower-950 font-semibold' : 'hover:bg-gray-100'
+              p === page
+                ? 'bg-cornflower-200 text-cornflower-950 font-semibold'
+                : 'hover:bg-gray-100'
             }`}
           >
             {p}
           </button>
         );
       })}
-      <Button
-        onlyIcon
-        icon={<ChevronRight size={18} />}
+      <button
         onClick={handleNext}
-        variant="white"
-        size="sm"
-        className={page === totalPages ? 'cursor-not-allowed opacity-50' : ''}
-      />
+        disabled={page === totalPages}
+        className={`text-cornflower-950 hover:bg-cornflower-100 hover:text-cornflower-600 inline-flex items-center justify-center rounded-xl p-2 transition-colors ${page === totalPages ? 'cursor-not-allowed opacity-50' : ''}`}
+      >
+        <ChevronRight size={18} />
+      </button>
     </div>
   );
 }

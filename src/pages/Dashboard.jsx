@@ -118,7 +118,7 @@ export default function Dashboard() {
         <div className="mb-6 flex items-center gap-2">
           <h2 className="head1">최근 졸음 데이터</h2>
           <Link
-            to="/search"
+            to="/drowsiness/search"
             className="text-cornflower-950 hover:text-cornflower-500 transition"
             aria-label="최근 졸음 데이터 더보기"
           >
@@ -126,7 +126,7 @@ export default function Dashboard() {
           </Link>
         </div>
         <div className="mx-auto w-full max-w-6xl overflow-x-auto rounded-xl">
-          <BaseTable columns={columns} data={sleepData.slice(0, 7)} />
+          <BaseTable columns={columns} data={sleepData.slice(0, 5)} />
         </div>{' '}
         {/*  최근 졸음 데이터 테이블*/}
       </section>

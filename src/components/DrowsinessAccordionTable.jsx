@@ -3,10 +3,11 @@ import BaseTable from './BaseTable';
 import { Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import axios from 'axios';
+
 export default function DrowsinessAccordionTable({ data }) {
   const [expandedRow, setExpandedRow] = useState(null);
   const navigate = useNavigate();
-
   const toggleRow = (vehicleNumber) => {
     setExpandedRow((prev) => (prev === vehicleNumber ? null : vehicleNumber));
   };
@@ -19,7 +20,7 @@ export default function DrowsinessAccordionTable({ data }) {
         <div className="flex items-center gap-2">
           <button
             onClick={() => toggleRow(row.vehicleNumber)}
-            className=" text-2xl hover:bg-cornflower-100 text-cornflower-950 rounded-md p-2 transition-colors hover:text-blue-600"
+            className="hover:bg-cornflower-100 text-cornflower-950 rounded-md p-2 text-2xl transition-colors hover:text-blue-600"
           >
             {expandedRow === row.vehicleNumber ? '▾' : '▸'}
           </button>
@@ -32,16 +33,66 @@ export default function DrowsinessAccordionTable({ data }) {
     {
       key: 'download',
       label: '일괄 다운로드',
-      render: () => (
-        <button
-          type="button"
-          className="text-cornflower-950 hover:bg-cornflower-100 hover:text-cornflower-600 inline-flex items-center justify-center rounded-xl p-2 transition-colors"
-        >
-          <Download size={18} />
-        </button>
-      ),
+      render: (value, row) => {
+        const ids = row.drowsinessDetails?.map((d) => d.id) || [];
+        return (
+          <button
+            type="button"
+            onClick={() => handleBulkDownload(ids)}
+            className="text-cornflower-950 hover:bg-cornflower-100 hover:text-cornflower-600 inline-flex items-center justify-center rounded-xl p-2 transition-colors"
+          >
+            <Download size={18} />
+          </button>
+        );
+      },
     },
   ];
+
+  const handleBulkDownload = async (ids) => {
+    if (!ids || ids.length === 0) {
+      alert('다운로드할 영상이 없습니다.');
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        '/api/sleep/videos/download',
+        { ids },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+          responseType: 'blob',
+        }
+      );
+
+      const blob = new Blob([response.data], { type: 'application/zip' });
+      const contentDisposition = response.headers['content-disposition'];
+      const filenameMatch = contentDisposition?.match(/filename="(.+)"/);
+      const filename = filenameMatch ? filenameMatch[1] : 'videos.zip';
+
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(link.href);
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        if (status === 401) {
+          alert('인증 정보가 유효하지 않습니다.');
+        } else if (status === 404) {
+          alert('일부 영상이 존재하지 않아 다운로드할 수 없습니다.');
+        } else {
+          alert('일괄 다운로드 중 오류가 발생했습니다.');
+        }
+      } else {
+        alert('알 수 없는 오류가 발생했습니다.');
+      }
+    }
+  };
 
   return (
     <BaseTable
@@ -66,9 +117,7 @@ export default function DrowsinessAccordionTable({ data }) {
                         {detail.timestamp}
                       </span>
                       <button
-                        onClick={() =>
-                          navigate(`/drowsiness/detail/${detail.id}`)
-                        }
+                        onClick={() => navigate(`/drowsiness/${detail.id}`)}
                         className="text-cornflower-500 whitespace-nowrap hover:underline"
                       >
                         자세히 보기

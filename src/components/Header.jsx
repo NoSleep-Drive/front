@@ -29,7 +29,7 @@ const Header = ({
 
   const currentPath = location.pathname;
   const getActivePage = () => {
-    if (currentPath === '/') return 'dashboard';
+    if (currentPath.startsWith('/dashboard')) return 'dashboard';
     if (currentPath.startsWith('/vehicles')) return 'vehicles';
     if (currentPath.startsWith('/search')) return 'drowsiness';
     return '';
@@ -39,7 +39,7 @@ const Header = ({
   const handleLogout = () => {
     //log out 시 동작
     onLogout();
-    navigate('/onboarding');
+    navigate('/welcomepage');
   };
 
   return (
@@ -54,7 +54,7 @@ const Header = ({
         <nav className="flex gap-6">
           <NavItem
             label="대시보드"
-            to="/"
+            to="/dashboard"
             isActive={activePage === 'dashboard'}
           />
           <NavItem
@@ -64,7 +64,7 @@ const Header = ({
           />
           <NavItem
             label="졸음 데이터 조회"
-            to="/search"
+            to="/drowsiness/search"
             isActive={activePage === 'drowsiness'}
           />
         </nav>

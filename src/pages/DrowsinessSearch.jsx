@@ -7,6 +7,9 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { ko } from 'date-fns/locale';
 import DrowsinessAccordionTable from '@/components/DrowsinessAccordionTable';
 import Pagination from '@/components/Pagination';
+import DrowsinessDetail from '@/pages/DrowsinessDetail';
+<Route path="/drowsiness/:id" element={<DrowsinessDetail />} />;
+import { Route } from 'react-router-dom';
 
 export default function DrowsinessSearch() {
   const [startDate, setStartDate] = useState(null);
