@@ -116,7 +116,6 @@ export default function VehicleTable({ data, setData }) {
       ),
     },
   ];
-
   const rowActions = (row) => (
     <div className="flex justify-center gap-2">
       <Button
@@ -135,7 +134,9 @@ export default function VehicleTable({ data, setData }) {
       />
     </div>
   );
-
+  const handleChange = (name, value) => {
+    if (name === 'search') setSearch(value);
+  };
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-4">
@@ -144,7 +145,8 @@ export default function VehicleTable({ data, setData }) {
           <InputField
             placeholder="차량 번호 검색"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            name="search"
+            onChange={handleChange}
             size="sm"
           />
           <Button

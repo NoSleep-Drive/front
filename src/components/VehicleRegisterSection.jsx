@@ -27,15 +27,17 @@ export default function VehicleRegisterSection({ data, setData }) {
       <div className="mx-auto flex max-w-4xl flex-row items-end justify-center gap-4 sm:gap-6">
         <InputField
           label="차량 번호"
+          name="vehicleNumber"
           placeholder="차량 번호를 입력하세요."
           value={vehicleNumber}
-          onChange={(e) => setVehicleNumber(e.target.value)}
+          onChange={(name, value) => setVehicleNumber(value)}
         />
         <InputField
           label="카메라 ID"
+          name="deviceUid"
           placeholder="카메라 ID를 입력하세요."
           value={deviceUid}
-          onChange={(e) => setDeviceUid(e.target.value)}
+          onChange={(name, value) => setDeviceUid(value)}
         />
         <div>
           <Button

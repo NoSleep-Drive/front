@@ -1,20 +1,21 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
-//import { Download, Search } from "lucide-react";
 
 const Button = ({
   label,
   onClick,
-  variant = 'main', 
+  variant = 'main',
   size = 'md',
   icon,
-  iconPosition = 'left', // "left" or "right"
-  onlyIcon = false, 
+  iconPosition = 'left',
+  onlyIcon = false,
   className = '',
+  disabled = false,
+  type = 'button',
 }) => {
   const base =
-    'inline-flex items-center justify-center font-pretendard rounded-xl transition whitespace-nowrap';
+    'inline-flex items-center justify-center font-pretendard rounded-xl transition whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-50';
 
   const variants = {
     main: 'bg-cornflower-400 text-white hover:bg-cornflower-500',
@@ -31,6 +32,8 @@ const Button = ({
   return (
     <button
       onClick={onClick}
+      type={type}
+      disabled={disabled}
       className={clsx(base, variants[variant], sizes[size], className)}
     >
       {onlyIcon && icon}
@@ -54,6 +57,8 @@ Button.propTypes = {
   iconPosition: PropTypes.oneOf(['left', 'right']),
   onlyIcon: PropTypes.bool,
   className: PropTypes.string,
+  disabled: PropTypes.bool,
+  type: PropTypes.oneOf(['button', 'submit', 'reset']),
 };
 
 export default Button;

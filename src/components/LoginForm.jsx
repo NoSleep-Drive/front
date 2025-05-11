@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import InputField from './InputField';
 import Button from './Button';
 //import PropTypes from 'prop-types';
@@ -7,16 +7,16 @@ import Button from './Button';
 export default function LoginForm() {
   const [id, setId] = useState('');
   const [pw, setPw] = useState('');
-  const [error, setError] = useState(null);
+  const handleChange = (name, value) => {
+    if (name === 'id') setId(value);
+    if (name === 'pw') setPw(value);
+  };
+  //const [setError] = useState(null);
+  const navigate = useNavigate();
 
   const handleLogin = () => {
-    if (!id || !pw) {
-      setError('아이디와 비밀번호를 모두 입력해주세요.');
-      return;
-    }
-
-    setError(null);
-    // 로그인 연결
+    // TODO:로그인 연결 - 현재는 임시 처리
+    navigate('/dashboard');
   };
 
   return (
@@ -42,17 +42,19 @@ export default function LoginForm() {
       <div className="mb-6 flex flex-col gap-3">
         <InputField
           placeholder="ID"
+          name="id"
+          required
           value={id}
-          onChange={(e) => setId(e.target.value)}
-          error={error && !id ? '아이디를 입력해주세요' : ''}
+          onChange={handleChange}
           size="md"
         />
         <InputField
           placeholder="PASSWORD"
           value={pw}
+          name="pw"
+          required
           type="password"
-          onChange={(e) => setPw(e.target.value)}
-          error={error && !pw ? '비밀번호를 입력해주세요' : ''}
+          onChange={handleChange}
           size="md"
         />
       </div>
@@ -62,6 +64,7 @@ export default function LoginForm() {
         label="로그인"
         size="md"
         className="mb-4 w-full"
+        disabled={!id || !pw}
       />
       <div className="text-center text-[18px]">
         <Link to="/signup" className="text-cornflower-500 hover:underline">

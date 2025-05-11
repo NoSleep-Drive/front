@@ -15,6 +15,10 @@ export default function DrowsinessSearch() {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [vehicleNumber, setVehicleNumber] = useState('');
+  const handleChange = (name, value) => {
+    if (name === 'vehicleNumber') setVehicleNumber(value);
+  };
+
   const [dateError, setDateError] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 5;
@@ -81,7 +85,8 @@ export default function DrowsinessSearch() {
             label="차량 번호"
             placeholder="차량 번호를 입력하세요."
             value={vehicleNumber}
-            onChange={(e) => setVehicleNumber(e.target.value)}
+            name="vehicleNumber"
+            onChange={handleChange}
             className="w-full"
           />
         </div>
@@ -138,13 +143,11 @@ export default function DrowsinessSearch() {
 
       <DrowsinessAccordionTable data={currentRows} />
 
-      {filteredData.length > 0 && (
-        <Pagination
-          page={currentPage}
-          setPage={setCurrentPage}
-          totalPages={Math.ceil(filteredData.length / rowsPerPage)}
-        />
-      )}
+      <Pagination
+        page={currentPage}
+        setPage={setCurrentPage}
+        totalPages={Math.ceil(filteredData.length / rowsPerPage)}
+      />
     </div>
   );
 }

@@ -37,9 +37,9 @@ const Header = ({
   const activePage = getActivePage();
 
   const handleLogout = () => {
-    //log out 시 동작
+    //TODO: log out 시 동작- 토큰 삭제
     onLogout();
-    navigate('/welcomepage');
+    navigate('/');
   };
 
   return (

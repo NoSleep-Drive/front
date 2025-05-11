@@ -3,6 +3,8 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import PropTypes from 'prop-types';
 
 export default function Pagination({ page, setPage, totalPages }) {
+  if (totalPages === 0) return null;
+
   const handlePrev = () => setPage(Math.max(1, page - 1));
   const handleNext = () => setPage(Math.min(totalPages, page + 1));
 
