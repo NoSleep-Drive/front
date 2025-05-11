@@ -24,10 +24,22 @@ export default function SignUp() {
 
   const handleChange = (e) => {
     const { name, value, checked, type } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
+    setFormData((prevData) => {
+      const updatedData = {
+        ...prevData,
+        [name]: type === 'checkbox' ? checked : value,
+      };
+
+      if (name === 'agreeAll') {
+        updatedData.agreeTerms = checked;
+        updatedData.agreePrivacy = checked;
+      } else if (name === 'agreeTerms' || name === 'agreePrivacy') {
+        updatedData.agreeAll =
+          updatedData.agreeTerms && updatedData.agreePrivacy;
+      }
+
+      return updatedData;
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -150,8 +162,12 @@ export default function SignUp() {
 
           <button
             type="submit"
-            className="w-full rounded-[10px] bg-[#6EA1ED] py-3 text-white transition hover:bg-[#5b8cd7]"
-            disabled={loading}
+            className={`w-full rounded-[10px] py-3 text-white transition ${
+              formData.agreeAll
+                ? 'bg-[#6EA1ED] hover:bg-[#5b8cd7]'
+                : 'cursor-not-allowed bg-gray-400'
+            }`}
+            disabled={!formData.agreeAll || loading}
           >
             {loading ? '가입 중...' : '가입하기'}
           </button>
