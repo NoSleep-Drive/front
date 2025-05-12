@@ -5,25 +5,26 @@ export default function CustomAuthInput({
   label,
   name,
   type = 'text',
-  placeholder,
   value,
   onChange,
-  required = false,
-  error,
+  placeholder,
 }) {
   return (
-    <div className="flex flex-col">
-      <label className="text-sm font-semibold text-gray-700">{label}</label>
+    <div className="flex flex-col space-y-1">
+      {label && (
+        <label htmlFor={name} className="text-sm font-medium">
+          {label}
+        </label>
+      )}
       <input
-        type={type}
+        id={name}
         name={name}
-        placeholder={placeholder}
+        type={type}
         value={value}
         onChange={onChange}
-        required={required}
-        className="mt-1 rounded-lg border border-[#6EA1ED] bg-white p-2 placeholder-[#6EA1ED]"
+        placeholder={placeholder}
+        className="w-full rounded border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
       />
-      {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
     </div>
   );
 }
