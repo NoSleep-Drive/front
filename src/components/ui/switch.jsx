@@ -9,7 +9,6 @@ export const Switch = ({ checked, onCheckedChange, className }) => {
       type="button"
       aria-checked={checked}
       onClick={() => {
-        console.log('스위치 클릭됨');
         onCheckedChange(!checked);
       }}
       className={clsx(

@@ -46,7 +46,7 @@ export default function DrowsinessDetail() {
     try {
       const response = await axios.get(`/api/sleep/${id}/video/download`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
         responseType: 'blob',
       });

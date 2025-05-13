@@ -7,10 +7,11 @@ import { registerVehicle, getVehicles } from '../api/vehicleApi';
 export default function VehicleRegisterSection({ setData, token }) {
   const [vehicleNumber, setVehicleNumber] = useState('');
   const [deviceUid, setDeviceUid] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleRegister = async () => {
     if (!vehicleNumber || !deviceUid) return;
-
+    setIsLoading(true);
     try {
       await registerVehicle(vehicleNumber, deviceUid, token);
       const updated = await getVehicles(100, 0, token);
@@ -21,6 +22,8 @@ export default function VehicleRegisterSection({ setData, token }) {
     } catch (error) {
       console.error('🚨 차량 등록 실패:', error);
       alert('차량 등록 실패');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -48,6 +51,8 @@ export default function VehicleRegisterSection({ setData, token }) {
             size="md"
             variant="main"
             onClick={handleRegister}
+            disabled={isLoading}
+            isLoading={isLoading}
           />
         </div>
       </div>

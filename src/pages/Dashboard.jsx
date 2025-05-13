@@ -32,7 +32,7 @@ export default function Dashboard() {
     fetchRecentVehicles();
     fetchRecentSleep();
     fetchSummaryData();
-  }, []);
+  }, [token]);
 
   const fetchSummaryData = async () => {
     try {
@@ -67,6 +67,7 @@ export default function Dashboard() {
       setRecentVehicles(data);
     } catch (err) {
       console.error('🚨 차량 조회 실패:', err);
+      alert('차량 정보를 불러오는 데 실패했습니다.');
     }
   };
   //
@@ -182,7 +183,6 @@ export default function Dashboard() {
           </Link>
         </div>
         <div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
-          {/* TODO: API 연동 - 최근 등록 차량 3대*/}
           {recentVehicles.map((vehicle) => (
             <VehicleCard
               key={vehicle.deviceUid}
@@ -224,7 +224,7 @@ export default function Dashboard() {
             deleteVehicle(selectedVehicle.deviceUid, token)
               .then(() => {
                 alert('삭제 완료');
-                fetchRecentVehicles(); // 🔁 목록 갱신
+                fetchRecentVehicles();
                 setShowDeleteModal(false);
               })
               .catch((err) => {

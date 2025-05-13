@@ -50,12 +50,15 @@ export default function DrowsinessAccordionTable({ data }) {
   ];
 
   const handleBulkDownload = async (ids) => {
+    const [setIsDownloading] = useState(false);
+
     if (!ids || ids.length === 0) {
       alert('다운로드할 영상이 없습니다.');
       return;
     }
 
     try {
+      setIsDownloading(true);
       const response = await axios.post(
         '/api/sleep/videos/download',
         { ids },
@@ -92,6 +95,8 @@ export default function DrowsinessAccordionTable({ data }) {
       } else {
         alert('알 수 없는 오류가 발생했습니다.');
       }
+    } finally {
+      setIsDownloading(false);
     }
   };
 

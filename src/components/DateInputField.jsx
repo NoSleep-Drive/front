@@ -2,6 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import DatePicker from 'react-datepicker';
 import clsx from 'clsx';
+import { ko } from 'date-fns/locale';
+
 import 'react-datepicker/dist/react-datepicker.css';
 
 const DateInputField = ({
@@ -34,12 +36,18 @@ const DateInputField = ({
 
   return (
     <div className="w-full space-y-1">
-      {label && <label className="caption-bold">{label}</label>}
+      {label && (
+        <label htmlFor="date-picker" className="caption-bold">
+          {label}
+        </label>
+      )}
       <DatePicker
+        id="date-picker"
         selected={selected}
         onChange={onChange}
         placeholderText={placeholder}
         dateFormat="yyyy년 MM월 dd일"
+        locale={ko}
         disabled={disabled}
         className={inputClass}
       />

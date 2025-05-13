@@ -29,14 +29,15 @@ export default function VehicleTable({ data, setData }) {
   const [driverListModalOpen, setDriverListModalOpen] = useState(false);
 
   useEffect(() => {
-    const result = data.filter((v) =>
-      v.vehicleNumber.toLowerCase().includes(searchQuery.toLowerCase())
+    const result = data.filter(
+      (v) =>
+        typeof v.vehicleNumber === 'string' &&
+        v.vehicleNumber.toLowerCase().includes(searchQuery.toLowerCase())
     );
     setFilteredVehicles(result);
   }, [data, searchQuery]);
 
   const handleToggle = async (val, row) => {
-    console.log('토글 클릭됨:', val, row);
     setSelectedRow(row);
     if (!val) {
       setDrowsyModalOpen(true);
@@ -58,6 +59,11 @@ export default function VehicleTable({ data, setData }) {
   };
 
   const handleToggleOffConfirm = () => {
+    rentVehicle(
+      selectedRow.vehicleNumber,
+      localStorage.getItem('token'),
+      false
+    ).catch((err) => console.error('렌트 종료 실패:', err));
     setData((prev) =>
       prev.map((item) =>
         item.vehicleNumber === selectedRow.vehicleNumber
