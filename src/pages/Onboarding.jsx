@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Carousel } from '@/components/ui/carousel';
-import { loginApi } from '../api/authApi';
+import { loginApi } from '@/api/authApi';
 import CustomAuthInput from '@/components/CustomAuthInput';
 import Button from '@/components/Button';
 
 export default function AuthOnboarding() {
-  const [username, setUsername] = useState('');
+  const [id, setId] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   const navigate = useNavigate();
@@ -15,16 +15,17 @@ export default function AuthOnboarding() {
     e.preventDefault();
     setError(null);
 
-    console.log('로그인 시도', { username, password });
+    console.log('로그인 시도', { id, password });
 
     try {
-      const response = await loginApi({ id: username, password });
+      const response = await loginApi({ id: id, password });
 
       console.log('로그인 API 응답:', response);
 
       if (response.message === '로그인 성공.') {
         const { token } = response;
-        localStorage.setItem(`token_${username}`, token);
+        localStorage.setItem('auth_token', token);
+        localStorage.setItem('id', id);
         navigate('/');
       }
     } catch (err) {
@@ -53,10 +54,10 @@ export default function AuthOnboarding() {
           <form className="space-y-4" onSubmit={handleLogin}>
             <CustomAuthInput
               label=""
-              name="username"
+              name="id"
               placeholder="ID"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              value={id}
+              onChange={(e) => setId(e.target.value)}
             />
             <CustomAuthInput
               label=""

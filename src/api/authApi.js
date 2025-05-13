@@ -3,7 +3,7 @@ import apiClient from './apiClient';
 export const signUpApi = async (formData) => {
   try {
     const response = await apiClient.post('/company/signup', {
-      id: formData.username, // 프론트 username -> 백엔드 id
+      id: formData.id,
       password: formData.password,
       companyName: formData.companyName,
       businessNumber: formData.businessNumber,

@@ -9,7 +9,7 @@ export default function SignUp() {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    username: '',
+    id: '',
     password: '',
     confirmPassword: '',
     companyName: '',
@@ -75,13 +75,13 @@ export default function SignUp() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <CustomAuthInput
             label="아이디"
-            name="username"
+            name="id"
             type="text"
             placeholder="영어, 숫자 조합 4~16자리"
-            value={formData.username}
+            value={formData.id}
             onChange={handleChange}
             required
-            error={errors.username}
+            error={errors.id}
           />
 
           <CustomAuthInput
