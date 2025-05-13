@@ -76,7 +76,6 @@ export default function AuthOnboarding() {
                 variant="main"
                 className="bg-[#6EA1ED] py-2 text-white hover:bg-[#5a8cce]"
                 type="submit"
-                onClick={handleLogin}
               />
               <Button
                 label="회원 가입"
