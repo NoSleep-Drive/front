@@ -1,9 +1,9 @@
 export const validate = (formData) => {
   const errors = {};
 
-  const usernameRegex = /^[A-Za-z0-9]{4,16}$/;
+  const usernameRegex = /^[A-Za-z0-9]{8,16}$/;
   if (!formData.username || !usernameRegex.test(formData.username)) {
-    errors.username = '아이디는 4~16자리 영어, 숫자 조합이어야 합니다.';
+    errors.username = '아이디는 8~16자리 영어, 숫자 조합이어야 합니다.';
   }
 
   const passwordRegex =

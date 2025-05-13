@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import InputField from '../components/InputField';
 import Button from '../components/Button';
 import PropTypes from 'prop-types';
-
-export default function VehicleRegisterSection({ vehicles, setVehicles }) {
+export default function VehicleRegisterSection({ data, setData }) {
   const [vehicleNumber, setVehicleNumber] = useState('');
   const [deviceUid, setDeviceUid] = useState('');
 
@@ -17,36 +16,35 @@ export default function VehicleRegisterSection({ vehicles, setVehicles }) {
       isRented: false,
     };
 
-    setVehicles([...vehicles, newVehicle]);
+    setData([...data, newVehicle]);
     setVehicleNumber('');
     setDeviceUid('');
-    // TODO: 유효성 검사 + 등록 API 연결
   };
 
   return (
     <section>
       <h2 className="head2 mb-4">새 차량 등록</h2>
-
-      <div className="mx-auto flex max-w-4xl flex-row justify-center gap-4 sm:gap-6">
+      <div className="mx-auto flex max-w-4xl flex-row items-end justify-center gap-4 sm:gap-6">
         <InputField
           label="차량 번호"
+          name="vehicleNumber"
           placeholder="차량 번호를 입력하세요."
           value={vehicleNumber}
-          onChange={(e) => setVehicleNumber(e.target.value)}
+          onChange={(name, value) => setVehicleNumber(value)}
         />
         <InputField
           label="카메라 ID"
+          name="deviceUid"
           placeholder="카메라 ID를 입력하세요."
           value={deviceUid}
-          onChange={(e) => setDeviceUid(e.target.value)}
+          onChange={(name, value) => setDeviceUid(value)}
         />
-        <div className="mt-[31px] h-[62px]">
+        <div>
           <Button
             label="등록"
-            size="lg"
+            size="md"
             variant="main"
             onClick={handleRegister}
-            className=""
           />
         </div>
       </div>
@@ -55,6 +53,13 @@ export default function VehicleRegisterSection({ vehicles, setVehicles }) {
 }
 
 VehicleRegisterSection.propTypes = {
-  vehicles: PropTypes.array.isRequired,
-  setVehicles: PropTypes.func.isRequired,
+  data: PropTypes.arrayOf(
+    PropTypes.shape({
+      vehicleNumber: PropTypes.string.isRequired,
+      deviceUid: PropTypes.string.isRequired,
+      createdDate: PropTypes.string.isRequired,
+      isRented: PropTypes.bool.isRequired,
+    })
+  ).isRequired,
+  setData: PropTypes.func.isRequired,
 };

@@ -15,6 +15,10 @@ export default defineConfig([
     },
   },
   {
+    files: ['vite.config.js'], // 👈 Node 환경 지정
+    languageOptions: { globals: globals.node },
+  },
+  {
     files: ['**/*.{js,mjs,cjs,jsx}'],
     plugins: { js },
     extends: ['js/recommended'],

@@ -33,8 +33,8 @@ export default function VehicleManagement() {
     <div className="flex flex-col gap-10 px-4">
       <h1 className="head1">차량 등록 관리</h1>
 
-      <VehicleRegisterSection vehicles={vehicles} setVehicles={setVehicles} />
-      <VehicleTable data={vehicles} />
+      <VehicleRegisterSection data={vehicles} setData={setVehicles} />
+      <VehicleTable data={vehicles} setData={setVehicles} />
     </div>
   );
 }

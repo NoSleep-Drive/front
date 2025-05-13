@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import CustomAuthInput from '../components/CustomAuthInput';
+import InputField from '../components/InputField';
 import CheckboxField from '../components/CheckboxField';
 import { validate } from '../utils/formValidation';
 import { signUpApi } from '../api/authApi';
 import { useNavigate } from 'react-router-dom';
-
+import Button from '@/components/Button';
 export default function SignUp() {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    id: '',
+    username: '',
     password: '',
     confirmPassword: '',
     companyName: '',
@@ -22,20 +22,21 @@ export default function SignUp() {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => {
-    const { name, value, checked, type } = e.target;
+  const handleChange = (name, value) => {
     setFormData((prevData) => {
       const updatedData = {
         ...prevData,
-        [name]: type === 'checkbox' ? checked : value,
+        [name]: value,
       };
 
       if (name === 'agreeAll') {
-        updatedData.agreeTerms = checked;
-        updatedData.agreePrivacy = checked;
-      } else if (name === 'agreeTerms' || name === 'agreePrivacy') {
+        updatedData.agreeTerms = value;
+        updatedData.agreePrivacy = value;
+      }
+      if (name === 'agreeTerms' || name === 'agreePrivacy') {
         updatedData.agreeAll =
-          updatedData.agreeTerms && updatedData.agreePrivacy;
+          (name === 'agreeTerms' ? value : updatedData.agreeTerms) &&
+          (name === 'agreePrivacy' ? value : updatedData.agreePrivacy);
       }
 
       return updatedData;
@@ -68,23 +69,32 @@ export default function SignUp() {
 
   return (
     <section className="flex min-h-screen items-center justify-center bg-blue-50 p-4">
-      <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-lg">
+      <div className="w-full max-w-lg rounded-xl bg-white p-8 shadow-lg">
         <div className="mb-6 text-center">
-          <h2 className="text-2xl font-bold text-blue-600">NoSleep Drive</h2>
+          <img
+            src="/NOSLEEPDRIVE-blue.svg"
+            alt="slogan"
+            className="mx-auto select-none"
+            draggable={false}
+            onContextMenu={(e) => e.preventDefault()}
+          />{' '}
         </div>
         <form onSubmit={handleSubmit} className="space-y-6">
-          <CustomAuthInput
+          <InputField
             label="아이디"
-            name="id"
+            name="username"
             type="text"
             placeholder="영어, 숫자 조합 4~16자리"
-            value={formData.id}
+            value={formData.username}
             onChange={handleChange}
             required
-            error={errors.id}
+            error={errors.username}
+            withButton
+            buttonLabel="중복 확인"
+            onClickButton={() => alert('아이디 중복 확인 기능 연결 예정')}
           />
 
-          <CustomAuthInput
+          <InputField
             label="비밀번호"
             name="password"
             type="password"
@@ -95,7 +105,7 @@ export default function SignUp() {
             error={errors.password}
           />
 
-          <CustomAuthInput
+          <InputField
             label="비밀번호 확인"
             name="confirmPassword"
             type="password"
@@ -106,7 +116,7 @@ export default function SignUp() {
             error={errors.confirmPassword}
           />
 
-          <CustomAuthInput
+          <InputField
             label="업체명"
             name="companyName"
             type="text"
@@ -118,7 +128,7 @@ export default function SignUp() {
 
           <div className="flex items-center space-x-4">
             <div className="flex-1">
-              <CustomAuthInput
+              <InputField
                 label="사업자 등록 번호"
                 name="businessNumber"
                 type="text"
@@ -127,50 +137,46 @@ export default function SignUp() {
                 onChange={handleChange}
                 required
                 error={errors.businessNumber}
+                withButton
+                buttonLabel="중복 확인"
+                onClickButton={() =>
+                  alert('사업자 번호 중복 확인 기능 연결 예정')
+                }
               />
             </div>
-            <button
-              type="button"
-              className="mt-5 w-1/4 rounded-lg border border-[#6EA1ED] bg-white p-2 text-[#6EA1ED] hover:bg-[#6EA1ED] hover:text-white"
-            >
-              중복 확인
-            </button>
           </div>
 
           <div className="mt-4 flex flex-col gap-2">
             <CheckboxField
-              label="모두 동의합니다."
+              label={<span className="caption-bold">모두 동의합니다.</span>}
               name="agreeAll"
               checked={formData.agreeAll}
-              onChange={handleChange}
+              onChange={(e) => handleChange(e.target.name, e.target.checked)}
             />
-            <div className="ml-4 space-y-2">
+            <div className="caption ml-4 space-y-2">
               <CheckboxField
                 label="이용약관에 동의합니다. (필수)"
                 name="agreeTerms"
                 checked={formData.agreeTerms}
-                onChange={handleChange}
+                onChange={(e) => handleChange(e.target.name, e.target.checked)}
               />
               <CheckboxField
                 label="개인정보 수집 및 이용에 동의합니다. (필수)"
                 name="agreePrivacy"
                 checked={formData.agreePrivacy}
-                onChange={handleChange}
+                onChange={(e) => handleChange(e.target.name, e.target.checked)}
               />
             </div>
           </div>
 
-          <button
+          <Button
             type="submit"
-            className={`w-full rounded-[10px] py-3 text-white transition ${
-              formData.agreeAll
-                ? 'bg-[#6EA1ED] hover:bg-[#5b8cd7]'
-                : 'cursor-not-allowed bg-gray-400'
-            }`}
+            label={loading ? '가입 중...' : '가입하기'}
+            size="md"
+            variant="main"
+            className="w-full rounded-[10px]"
             disabled={!formData.agreeAll || loading}
-          >
-            {loading ? '가입 중...' : '가입하기'}
-          </button>
+          />
         </form>
       </div>
     </section>

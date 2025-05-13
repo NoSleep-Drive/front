@@ -12,7 +12,7 @@ const BaseTable = ({ columns, data, rowActions, expandableRow }) => {
                 {col.label}
               </th>
             ))}
-            {rowActions && <th className="px-4 py-3">작업</th>}
+            {rowActions && <th className="px-4 py-3">차량 관리</th>}
           </tr>
         </thead>
         <tbody>
