@@ -7,7 +7,7 @@ export const getVehicleCount = async (token) => {
     });
     return res.data.data;
   } catch (error) {
-    console.error('총총 차량 수 조회 오류', error);
+    console.error('총 차량 수 조회 오류', error);
     throw error;
   }
 };
@@ -43,7 +43,7 @@ export const getRecentSleepData = async (token) => {
     });
     return res.data.data;
   } catch (error) {
-    console.error('최근 졸음 데이터터 조회 오류', error);
+    console.error('최근 졸음 데이터 조회 오류', error);
     throw error;
   }
 };

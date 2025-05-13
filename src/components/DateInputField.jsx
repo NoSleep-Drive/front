@@ -36,13 +36,8 @@ const DateInputField = ({
 
   return (
     <div className="w-full space-y-1">
-      {label && (
-        <label htmlFor="date-picker" className="caption-bold">
-          {label}
-        </label>
-      )}
+      {label && <label className="caption-bold">{label}</label>}
       <DatePicker
-        id="date-picker"
         selected={selected}
         onChange={onChange}
         placeholderText={placeholder}

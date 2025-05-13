@@ -6,26 +6,7 @@ import Button from '@/components/Button';
 export default function DrowsinessDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const mockData = [
-    {
-      id: '1',
-      carNumber: '1111',
-      driverHash: '운전자자1',
-      time: '11:11:11',
-      date: '11/11/11',
-      videoUrl: '',
-    },
-    {
-      id: '2',
-      carNumber: '2222',
-      driverHash: '111',
-      time: '11:11:11',
-      date: '11/11/12',
-      videoUrl: '',
-    },
-  ];
-
-  const [sleepData, setSleepData] = useState(mockData);
+  const [sleepData, setSleepData] = useState(null);
 
   useEffect(() => {
     const fetchSleepData = async () => {
@@ -81,7 +62,7 @@ export default function DrowsinessDetail() {
     }
   };
 
-  if (!sleepData) return <div>로딩 중...</div>;
+  if (sleepData === null) return <div>로딩 중...</div>;
 
   return (
     <div>

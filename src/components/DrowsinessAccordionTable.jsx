@@ -8,6 +8,7 @@ import axios from 'axios';
 export default function DrowsinessAccordionTable({ data }) {
   const [expandedRow, setExpandedRow] = useState(null);
   const navigate = useNavigate();
+  const setIsDownloading = useState(false);
   const toggleRow = (vehicleNumber) => {
     setExpandedRow((prev) => (prev === vehicleNumber ? null : vehicleNumber));
   };
@@ -50,8 +51,6 @@ export default function DrowsinessAccordionTable({ data }) {
   ];
 
   const handleBulkDownload = async (ids) => {
-    const [setIsDownloading] = useState(false);
-
     if (!ids || ids.length === 0) {
       alert('다운로드할 영상이 없습니다.');
       return;
@@ -70,7 +69,7 @@ export default function DrowsinessAccordionTable({ data }) {
         }
       );
 
-      const blob = new Blob([response.data], { type: 'application/zip' });
+      const blob = response.data;
       const contentDisposition = response.headers['content-disposition'];
       const filenameMatch = contentDisposition?.match(/filename="(.+)"/);
       const filename = filenameMatch ? filenameMatch[1] : 'videos.zip';
