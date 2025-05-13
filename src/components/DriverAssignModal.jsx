@@ -35,7 +35,7 @@ export default function DriverAssignModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-400/50 backdrop-blur-sm">
       <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
         <h2 className="head2 mb-4 text-center">운전자 등록</h2>
-        <p className="text-cornflower-950 mb-6 text-center text-xl font-normal whitespace-pre-line">
+        <p className="text-cornflower-950 mb-6 text-center whitespace-pre-line">
           차량 <strong>{vehicleNumber}</strong>에{'\n'}
           등록할 운전자 정보를 입력하세요.
         </p>

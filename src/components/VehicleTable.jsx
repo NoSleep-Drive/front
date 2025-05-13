@@ -9,7 +9,8 @@ import Pagination from './Pagination.jsx';
 import DrowsyStatsModal from './DrowsyStatsModal.jsx';
 import VehicleEditModal from './VehicleEditModal.jsx';
 import VehicleDeleteModal from './VehicleDeleteModal.jsx';
-import DriverAssignModal from './DriverAssignModal.jsx';
+import DriverListModal from './DriverListModal.jsx';
+import { rentVehicle, updateVehicle, deleteVehicle } from '@/api/vehicleApi';
 
 export default function VehicleTable({ data, setData }) {
   const [currentPage, setCurrentPage] = useState(1);
@@ -25,7 +26,7 @@ export default function VehicleTable({ data, setData }) {
   const [editRow, setEditRow] = useState(null);
   const [deleteRow, setDeleteRow] = useState(null);
 
-  const [driverModalOpen, setDriverModalOpen] = useState(false);
+  const [driverListModalOpen, setDriverListModalOpen] = useState(false);
 
   useEffect(() => {
     const result = data.filter((v) =>
@@ -34,13 +35,25 @@ export default function VehicleTable({ data, setData }) {
     setFilteredVehicles(result);
   }, [data, searchQuery]);
 
-  const handleToggle = (val, row) => {
+  const handleToggle = async (val, row) => {
+    console.log('토글 클릭됨:', val, row);
+    setSelectedRow(row);
     if (!val) {
-      setSelectedRow(row);
       setDrowsyModalOpen(true);
     } else {
-      setSelectedRow(row);
-      setDriverModalOpen(true);
+      try {
+        await rentVehicle(row.vehicleNumber, localStorage.getItem('token'));
+        setData((prev) =>
+          prev.map((item) =>
+            item.vehicleNumber === row.vehicleNumber
+              ? { ...item, isRented: true }
+              : item
+          )
+        );
+      } catch (error) {
+        console.error('렌트 시작 실패:', error);
+      }
+      setSelectedRow(null);
     }
   };
 
@@ -56,39 +69,35 @@ export default function VehicleTable({ data, setData }) {
     setSelectedRow(null);
   };
 
-  const handleDriverAssignConfirm = ({
-    driverName,
-    driverHash,
-    vehicleNumber,
-  }) => {
-    // TODO: 백엔드에 driverHash와 vehicleNumber 매핑 요청
-    console.log('운전자 매핑:', { driverName, driverHash, vehicleNumber });
-    setData((prev) =>
-      prev.map((item) =>
-        item.vehicleNumber === vehicleNumber
-          ? { ...item, isRented: true }
-          : item
-      )
-    );
-    setDriverModalOpen(false);
-    setSelectedRow(null);
-  };
-
-  const handleEditConfirm = (newNumber) => {
-    setData((prev) =>
-      prev.map((item) =>
-        item.vehicleNumber === editRow.vehicleNumber
-          ? { ...item, vehicleNumber: newNumber }
-          : item
-      )
-    );
+  const handleEditConfirm = async (newNumber) => {
+    try {
+      await updateVehicle(
+        editRow.deviceUid,
+        newNumber,
+        localStorage.getItem('token')
+      );
+      setData((prev) =>
+        prev.map((item) =>
+          item.vehicleNumber === editRow.vehicleNumber
+            ? { ...item, vehicleNumber: newNumber }
+            : item
+        )
+      );
+    } catch (err) {
+      console.error('차량 수정 실패:', err);
+    }
     setEditRow(null);
   };
 
-  const handleDeleteConfirm = () => {
-    setData((prev) =>
-      prev.filter((item) => item.vehicleNumber !== deleteRow.vehicleNumber)
-    );
+  const handleDeleteConfirm = async () => {
+    try {
+      await deleteVehicle(deleteRow.deviceUid, localStorage.getItem('token'));
+      setData((prev) =>
+        prev.filter((item) => item.vehicleNumber !== deleteRow.vehicleNumber)
+      );
+    } catch (err) {
+      console.error('차량 삭제 실패:', err);
+    }
     setDeleteRow(null);
   };
 
@@ -115,7 +124,24 @@ export default function VehicleTable({ data, setData }) {
         />
       ),
     },
+    {
+      key: 'drivers',
+      label: '운전자',
+      render: (_, row) => (
+        <Button
+          label="조회"
+          size="sm"
+          variant="white"
+          className="w-16"
+          onClick={() => {
+            setSelectedRow(row);
+            setDriverListModalOpen(true);
+          }}
+        />
+      ),
+    },
   ];
+
   const rowActions = (row) => (
     <div className="flex justify-center gap-2">
       <Button
@@ -134,9 +160,11 @@ export default function VehicleTable({ data, setData }) {
       />
     </div>
   );
+
   const handleChange = (name, value) => {
     if (name === 'search') setSearch(value);
   };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-4">
@@ -205,15 +233,14 @@ export default function VehicleTable({ data, setData }) {
         />
       )}
 
-      {driverModalOpen && (
-        <DriverAssignModal
+      {driverListModalOpen && selectedRow && (
+        <DriverListModal
           isOpen={true}
-          vehicleNumber={selectedRow?.vehicleNumber || ''}
           onClose={() => {
-            setDriverModalOpen(false);
+            setDriverListModalOpen(false);
             setSelectedRow(null);
           }}
-          onConfirm={handleDriverAssignConfirm}
+          deviceUid={selectedRow.deviceUid}
         />
       )}
     </div>

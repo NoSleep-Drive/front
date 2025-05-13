@@ -8,7 +8,10 @@ export const Switch = ({ checked, onCheckedChange, className }) => {
       role="switch"
       type="button"
       aria-checked={checked}
-      onClick={() => onCheckedChange(!checked)}
+      onClick={() => {
+        console.log('스위치 클릭됨');
+        onCheckedChange(!checked);
+      }}
       className={clsx(
         'relative inline-flex h-6 w-11 items-center rounded-full transition',
         checked ? 'bg-cornflower-400' : 'bg-gray-300',

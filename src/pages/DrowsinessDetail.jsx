@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
-import { Download } from 'lucide-react';
+import { Download, ChevronLeft } from 'lucide-react';
 import Button from '@/components/Button';
 export default function DrowsinessDetail() {
   const { id } = useParams();
@@ -10,9 +10,9 @@ export default function DrowsinessDetail() {
     {
       id: '1',
       carNumber: '1111',
-      driverHash: '111',
+      driverHash: '운전자자1',
       time: '11:11:11',
-      date: '111',
+      date: '11/11/11',
       videoUrl: '',
     },
     {
@@ -20,7 +20,7 @@ export default function DrowsinessDetail() {
       carNumber: '2222',
       driverHash: '111',
       time: '11:11:11',
-      date: '111',
+      date: '11/11/12',
       videoUrl: '',
     },
   ];
@@ -84,15 +84,19 @@ export default function DrowsinessDetail() {
   if (!sleepData) return <div>로딩 중...</div>;
 
   return (
-    <div className="p-6">
-      <button
-        type="button"
-        onClick={() => navigate(-1)}
-        className="body-text mb-4 font-bold"
-      >
-        목록으로
-      </button>
-      <div className="mx-auto flex max-w-6xl flex-col px-4">
+    <div>
+      <div className="mb-4">
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          className="text-cornflower-950 hover:bg-cornflower-100 hover:text-cornflower-600 mb-4 flex items-center gap-1 rounded-md px-3 py-2 font-bold transition-colors duration-150"
+        >
+          <ChevronLeft size={16} className="mr-2" />
+          <span className="body-text">목록으로</span>
+        </button>
+      </div>
+
+      <div className="mx-auto flex max-w-6xl flex-col items-center px-4">
         <h1 className="head1 mb-2">졸음 데이터 상세 조회</h1>
         <div className="mb-4 flex w-full max-w-4xl justify-between">
           <div className="flex flex-wrap items-center gap-4">
@@ -109,8 +113,8 @@ export default function DrowsinessDetail() {
             onClick={handleDownload}
           />
         </div>
-        <div className="flex max-w-4xl justify-center overflow-hidden rounded bg-black">
-          <video controls className="max-h-[500px] w-full justify-center">
+        <div className="w-full max-w-4xl justify-center overflow-hidden rounded bg-black">
+          <video controls className="w-full object-contain">
             <source src={sleepData.videoUrl} type="video/mp4" />
             지원되지 않는 브라우저입니다.
           </video>

@@ -1,4 +1,4 @@
-import { React, useState } from 'react';
+import { React, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Download, ChevronRight, Car, EyeClosed, VideoOff } from 'lucide-react';
 
@@ -7,69 +7,69 @@ import VehicleCard from '../components/VehicleCard';
 import BaseTable from '../components/BaseTable';
 import VehicleEditModal from '../components/VehicleEditModal';
 import VehicleDeleteModal from '../components/VehicleDeleteModal.jsx';
-//임시 졸음 데이터
-const sleepData = [
-  {
-    uid: 1,
-    vehicleNumber: '111가 1111',
-    detectedTime: '2025-05-07T12:34:56',
-    driverHash: 'abc123',
-  },
-  {
-    uid: 2,
-    vehicleNumber: '222가 1111',
-    detectedTime: '2025-05-07T17:34:56',
-    driverHash: 'abc333',
-  },
-  {
-    uid: 3,
-    vehicleNumber: '333가 1111',
-    detectedTime: '2025-05-07T02:34:56',
-    driverHash: 'abc777',
-  },
-  {
-    uid: 1,
-    vehicleNumber: '111가 1111',
-    detectedTime: '2025-05-07T12:34:56',
-    driverHash: 'abc123',
-  },
-  {
-    uid: 2,
-    vehicleNumber: '222가 1111',
-    detectedTime: '2025-05-07T17:34:56',
-    driverHash: 'abc333',
-  },
-  {
-    uid: 3,
-    vehicleNumber: '333가 1111',
-    detectedTime: '2025-05-07T02:34:56',
-    driverHash: 'abc777',
-  },
-  {
-    uid: 1,
-    vehicleNumber: '111가 1111',
-    detectedTime: '2025-05-07T12:34:56',
-    driverHash: 'abc123',
-  },
-  {
-    uid: 2,
-    vehicleNumber: '222가 1111',
-    detectedTime: '2025-05-07T17:34:56',
-    driverHash: 'abc333',
-  },
-  {
-    uid: 3,
-    vehicleNumber: '333가 1111',
-    detectedTime: '2025-05-07T02:34:56',
-    driverHash: 'abc777',
-  },
-];
+import { getVehicles, deleteVehicle, updateVehicle } from '../api/vehicleApi';
+import { getRecentSleepData } from '../api/dashboardApi';
+import {
+  getVehicleCount,
+  getSleepTodayCount,
+  getAbnormalVehicleCount,
+} from '../api/dashboardApi';
 
 export default function Dashboard() {
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [recentVehicles, setRecentVehicles] = useState([]);
+  const token = localStorage.getItem('token');
+  const [recentSleepData, setRecentSleepData] = useState([]);
+  const [summaryData, setSummaryData] = useState({
+    totalVehicles: 0,
+    sleepDetectedToday: 0,
+    abnormalVehicles: 0,
+  });
 
+  useEffect(() => {
+    fetchRecentVehicles();
+    fetchRecentSleep();
+    fetchSummaryData();
+  }, []);
+
+  const fetchSummaryData = async () => {
+    try {
+      const [vehicle, sleep, abnormal] = await Promise.all([
+        getVehicleCount(token),
+        getSleepTodayCount(token),
+        getAbnormalVehicleCount(token),
+      ]);
+
+      setSummaryData({
+        totalVehicles: vehicle.totalVehicles,
+        sleepDetectedToday: sleep.sleepDetectedToday,
+        abnormalVehicles: abnormal.abnormalVehicles,
+      });
+    } catch (err) {
+      console.error('대시보드 요약 정보 불러오기 실패:', err);
+    }
+  };
+
+  const fetchRecentSleep = async () => {
+    try {
+      const data = await getRecentSleepData(token);
+      setRecentSleepData(data);
+    } catch (err) {
+      console.error(' 졸음 데이터 불러오기 실패:', err);
+    }
+  };
+
+  const fetchRecentVehicles = async () => {
+    try {
+      const data = await getVehicles(3, 0, token);
+      setRecentVehicles(data);
+    } catch (err) {
+      console.error('🚨 차량 조회 실패:', err);
+    }
+  };
+  //
   const openEditModal = (vehicle) => {
     setSelectedVehicle(vehicle);
     setShowEditModal(true);
@@ -82,7 +82,6 @@ export default function Dashboard() {
 
   const handleDownload = async (uid) => {
     try {
-      const token = localStorage.getItem('token');
       const response = await fetch(`/api/sleep/${uid}/video/download`, {
         method: 'GET',
         headers: {
@@ -139,22 +138,19 @@ export default function Dashboard() {
         <div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
           <SummaryCard
             label="총 등록 차량 수"
-            count={125}
+            count={summaryData.totalVehicles}
             icon={<Car size={24} />}
-          />{' '}
-          {/*TODO: 총 차량수 api 연동*/}
+          />
           <SummaryCard
             label="오늘 졸음 감지 횟수"
-            count={125}
+            count={summaryData.sleepDetectedToday}
             icon={<EyeClosed size={24} />}
-          />{' '}
-          {/*TODO: api 연동 - 졸음 감지 횟수*/}
+          />
           <SummaryCard
             label="이상 카메라 수"
-            count={125}
+            count={summaryData.abnormalVehicles}
             icon={<VideoOff size={24} />}
-          />{' '}
-          {/*TODO: api 연동 - 이상 카메라 수 */}
+          />
         </div>
       </section>
 
@@ -170,7 +166,7 @@ export default function Dashboard() {
           </Link>
         </div>
         <div className="mx-auto w-full max-w-6xl overflow-x-auto rounded-xl">
-          <BaseTable columns={columns} data={sleepData.slice(0, 5)} />
+          <BaseTable columns={columns} data={recentSleepData.slice(0, 5)} />
         </div>
       </section>
 
@@ -187,48 +183,16 @@ export default function Dashboard() {
         </div>
         <div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
           {/* TODO: API 연동 - 최근 등록 차량 3대*/}
-          <VehicleCard
-            vehicleNumber={'99카 9999'}
-            deviceUid={'XYZ789'}
-            createdDate={new Date()}
-            onEdit={() =>
-              openEditModal({ vehicleNumber: '99카 9999', deviceUid: 'XYZ789' })
-            }
-            onDelete={() =>
-              openDeleteModal({
-                vehicleNumber: '99카 9999',
-                deviceUid: 'XYZ789',
-              })
-            }
-          />
-          <VehicleCard
-            vehicleNumber={'99카 9999'}
-            deviceUid={'XYZ789'}
-            createdDate={new Date()}
-            onEdit={() =>
-              openEditModal({ vehicleNumber: '99카 9999', deviceUid: 'XYZ789' })
-            }
-            onDelete={() =>
-              openDeleteModal({
-                vehicleNumber: '99카 9999',
-                deviceUid: 'XYZ789',
-              })
-            }
-          />
-          <VehicleCard
-            vehicleNumber={'99카 9999'}
-            deviceUid={'XYZ789'}
-            createdDate={new Date()}
-            onEdit={() =>
-              openEditModal({ vehicleNumber: '99카 9999', deviceUid: 'XYZ789' })
-            }
-            onDelete={() =>
-              openDeleteModal({
-                vehicleNumber: '99카 9999',
-                deviceUid: 'XYZ789',
-              })
-            }
-          />
+          {recentVehicles.map((vehicle) => (
+            <VehicleCard
+              key={vehicle.deviceUid}
+              vehicleNumber={vehicle.vehicleNumber}
+              deviceUid={vehicle.deviceUid}
+              createdDate={new Date(vehicle.createdDate)}
+              onEdit={() => openEditModal(vehicle)}
+              onDelete={() => openDeleteModal(vehicle)}
+            />
+          ))}
         </div>
       </section>
       {showEditModal && selectedVehicle && (
@@ -237,8 +201,16 @@ export default function Dashboard() {
           originalVehicle={selectedVehicle}
           onClose={() => setShowEditModal(false)}
           onConfirm={(newNumber) => {
-            console.log('수정된 번호:', newNumber);
-            setShowEditModal(false);
+            updateVehicle(selectedVehicle.deviceUid, newNumber, token)
+              .then(() => {
+                alert('수정 완료');
+                fetchRecentVehicles();
+                setShowEditModal(false);
+              })
+              .catch((err) => {
+                alert('수정 실패');
+                console.error(err);
+              });
           }}
         />
       )}
@@ -249,8 +221,16 @@ export default function Dashboard() {
           vehicleNumber={selectedVehicle.vehicleNumber}
           onClose={() => setShowDeleteModal(false)}
           onConfirm={() => {
-            console.log('삭제 확인됨:', selectedVehicle);
-            setShowDeleteModal(false);
+            deleteVehicle(selectedVehicle.deviceUid, token)
+              .then(() => {
+                alert('삭제 완료');
+                fetchRecentVehicles(); // 🔁 목록 갱신
+                setShowDeleteModal(false);
+              })
+              .catch((err) => {
+                alert('삭제 실패');
+                console.error(err);
+              });
           }}
         />
       )}
