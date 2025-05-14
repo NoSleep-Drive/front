@@ -10,7 +10,7 @@ import DrowsinessSearch from './pages/DrowsinessSearch';
 import WelcomePage from './pages/WelcomePage';
 import Settings from './pages/Settings';
 import SignUp from './pages/SignUp';
-import EditProfile from './pages/EditProfile';
+import EditProfile from './pages/EditProfile/EditProfile';
 import VehicleManagement from './pages/VehicleManagement';
 
 function App() {
