@@ -12,3 +12,16 @@ export const getCompanyInformation = async (token) => {
     throw error.response ? error.response.data.message : error.message;
   }
 };
+
+export const deleteCompany = async (token) => {
+  try {
+    const response = await apiClient.delete('/company/me', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response ? error.response.data.message : error.message;
+  }
+};

@@ -1,7 +1,8 @@
-import React, { useReducer, useEffect } from 'react';
+import React, { useState, useReducer, useEffect } from 'react';
 import InputField from '../components/InputField';
 import Button from '../components/Button';
-import { getCompanyInformation } from '../api/companyApi';
+import { useNavigate } from 'react-router-dom';
+import { getCompanyInformation, deleteCompany } from '../api/companyApi';
 
 const initialState = {
   id: null,
@@ -38,6 +39,10 @@ function reducer(state, action) {
 
 export default function EditProfile() {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCompanyInfo = async () => {
@@ -59,6 +64,8 @@ export default function EditProfile() {
         }
       } catch (error) {
         console.error('회사 정보 로드 실패:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -74,6 +81,32 @@ export default function EditProfile() {
     console.log('Form submitted');
   };
 
+  const handleDelete = async () => {
+    const confirmed = window.confirm('정말 탈퇴하시겠습니까?');
+    if (!confirmed) return;
+
+    try {
+      setIsDeleting(true);
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        console.error('토큰이 없습니다.');
+        setIsDeleting(false);
+        return;
+      }
+
+      const response = await deleteCompany(token);
+      if (response.message == '회원 탈퇴가 완료되었습니다.') {
+        alert('탈퇴가 완료되었습니다.');
+        localStorage.removeItem('auth_token');
+        navigate('/');
+      }
+    } catch (error) {
+      alert(`탈퇴 실패: ${error}`);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <section className="flex min-h-screen items-center justify-center bg-white p-4">
       <div className="w-full max-w-lg p-8">
@@ -85,7 +118,7 @@ export default function EditProfile() {
             name="username"
             type="text"
             placeholder="아이디"
-            value={state.id ?? '불러오는 중...'}
+            value={isLoading ? '불러오는 중...' : state.id || ''}
             onChange={(name, value) => handleChange(name, value)}
           />
 
@@ -112,7 +145,7 @@ export default function EditProfile() {
             name="companyName"
             type="text"
             placeholder="업체명을 입력하세요."
-            value={state.companyName ?? '불러오는 중...'}
+            value={isLoading ? '불러오는 중...' : state.companyName || ''}
             onChange={(name, value) => handleChange(name, value)}
           />
 
@@ -121,7 +154,7 @@ export default function EditProfile() {
             name="businessNumber"
             type="text"
             placeholder="-없이 13자리 숫자"
-            value={state.businessNumber ?? '불러오는 중...'}
+            value={isLoading ? '불러오는 중...' : state.businessNumber || ''}
             onChange={(name, value) => handleChange(name, value)}
             withButton
             buttonLabel="중복 확인"
@@ -137,6 +170,8 @@ export default function EditProfile() {
             size="md"
             variant="white"
             className="w-full border border-blue-600"
+            onClick={handleDelete}
+            disabled={isDeleting}
           />
         </form>
       </div>

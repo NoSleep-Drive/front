@@ -3,7 +3,7 @@ import apiClient from './apiClient';
 export const signUpApi = async (formData) => {
   try {
     const response = await apiClient.post('/company/signup', {
-      id: formData.id,
+      id: formData.username,
       password: formData.password,
       companyName: formData.companyName,
       businessNumber: formData.businessNumber,

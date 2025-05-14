@@ -12,7 +12,7 @@ const Button = ({
   onlyIcon = false,
   className = '',
   disabled = false,
-  type = 'button',
+  type,
 }) => {
   const base =
     'inline-flex items-center justify-center font-pretendard rounded-xl transition whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-50';
