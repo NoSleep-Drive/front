@@ -2,21 +2,43 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Download, ChevronLeft } from 'lucide-react';
-import Button from '@/components/Button';
+import Button from '../components/Button';
+import { getDriverHashesByVehicle, getDriverIndex } from '../utils/driverUtils'; // 👈 추가
+
 export default function DrowsinessDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [sleepData, setSleepData] = useState(null);
-
+  const [driverIndex, setDriverIndex] = useState(null);
   useEffect(() => {
     const fetchSleepData = async () => {
       try {
         const response = await axios.get(`/api/sleep/${id}`, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
+            Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
           },
         });
-        setSleepData(response.data);
+        const sleep = response.data;
+        setSleepData(sleep);
+
+        const sleepListRes = await axios.get('/api/sleep', {
+          params: {
+            vehicleNumber: sleep.vehicleNumber,
+            pageSize: 1000,
+            pageIdx: 0,
+          },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
+          },
+        });
+
+        const hashList = getDriverHashesByVehicle(
+          sleepListRes.data.data,
+          sleep.vehicleNumber
+        );
+
+        const index = getDriverIndex(hashList, sleep.driverHash);
+        setDriverIndex(index);
       } catch (error) {
         console.error('졸음 데이터 조회 실패:', error);
       }
@@ -27,7 +49,7 @@ export default function DrowsinessDetail() {
     try {
       const response = await axios.get(`/api/sleep/${id}/video/download`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
+          Authorization: `Bearer ${localStorage.getItem('auth_auth_token')}`,
         },
         responseType: 'blob',
       });
@@ -82,7 +104,10 @@ export default function DrowsinessDetail() {
         <div className="mb-4 flex w-full max-w-4xl justify-between">
           <div className="flex flex-wrap items-center gap-4">
             <span>차량 번호: {sleepData.carNumber}</span>
-            <span>운전자: {sleepData.driverHash}</span>
+            <span>
+              운전자:{' '}
+              {driverIndex ? `운전자 ${driverIndex}` : sleepData.driverHash}
+            </span>
             <span>감지 날짜: {sleepData.date}</span>
             <span>감지 시각: {sleepData.time}</span>
           </div>

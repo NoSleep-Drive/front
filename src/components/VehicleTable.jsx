@@ -11,7 +11,8 @@ import VehicleEditModal from './VehicleEditModal.jsx';
 import VehicleDeleteModal from './VehicleDeleteModal.jsx';
 import DriverListModal from './DriverListModal.jsx';
 import { rentVehicle, updateVehicle, deleteVehicle } from '@/api/vehicleApi';
-
+import { getMostFrequent3hrSlot } from '../utils/statistics';
+import axios from 'axios';
 export default function VehicleTable({ data, setData }) {
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 5;
@@ -21,6 +22,8 @@ export default function VehicleTable({ data, setData }) {
   const [filteredVehicles, setFilteredVehicles] = useState([]);
 
   const [drowsyModalOpen, setDrowsyModalOpen] = useState(false);
+  const [drowsyModalData, setDrowsyModalData] = useState(null);
+
   const [selectedRow, setSelectedRow] = useState(null);
 
   const [editRow, setEditRow] = useState(null);
@@ -57,22 +60,55 @@ export default function VehicleTable({ data, setData }) {
       setSelectedRow(null);
     }
   };
+  const handleToggleOffConfirm = async () => {
+    try {
+      await rentVehicle(
+        selectedRow.vehicleNumber,
+        localStorage.getItem('token'),
+        false
+      );
 
-  const handleToggleOffConfirm = () => {
-    rentVehicle(
-      selectedRow.vehicleNumber,
-      localStorage.getItem('token'),
-      false
-    ).catch((err) => console.error('렌트 종료 실패:', err));
-    setData((prev) =>
-      prev.map((item) =>
-        item.vehicleNumber === selectedRow.vehicleNumber
-          ? { ...item, isRented: false }
-          : item
-      )
-    );
-    setDrowsyModalOpen(false);
-    setSelectedRow(null);
+      setData((prev) =>
+        prev.map((item) =>
+          item.vehicleNumber === selectedRow.vehicleNumber
+            ? { ...item, isRented: false }
+            : item
+        )
+      );
+
+      const res = await axios.get('/api/sleep', {
+        params: {
+          vehicleNumber: selectedRow.vehicleNumber,
+          driverHash: selectedRow.driverHash, // 또는 선택된 운전자
+          startDate: selectedRow.rentStart, // 차량 렌트 시작일
+          endDate: new Date().toISOString().slice(0, 10), // 반납일 = 오늘
+          pageSize: 1000,
+          pageIdx: 0,
+        },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+
+      const records = res.data?.data || [];
+
+      const { label: peakTime } = getMostFrequent3hrSlot(records);
+
+      setDrowsyModalData({
+        name: selectedRow.driverName || '운전자',
+        vehicleNumber: selectedRow.vehicleNumber,
+        dateRange: `${selectedRow.rentStart} ~ ${new Date().toISOString().slice(0, 10)}`,
+        totalCount: getMostFrequent3hrSlot(records).label,
+        peakTime,
+      });
+
+      setDrowsyModalOpen(true);
+    } catch (err) {
+      console.error('렌트 종료 실패 또는 통계 계산 실패:', err);
+    } finally {
+      setDrowsyModalOpen(false);
+      setSelectedRow(null);
+    }
   };
 
   const handleEditConfirm = async (newNumber) => {
@@ -205,19 +241,12 @@ export default function VehicleTable({ data, setData }) {
 
       {drowsyModalOpen && (
         <DrowsyStatsModal
-          isOpen={true}
+          data={drowsyModalData}
           onClose={() => {
             setDrowsyModalOpen(false);
             setSelectedRow(null);
           }}
           onConfirm={handleToggleOffConfirm}
-          data={{
-            name: 'ㅁㅁㅁ',
-            vehicleNumber: selectedRow?.vehicleNumber || '',
-            dateRange: '2020-01-01 ~ 2020-02-02',
-            totalCount: 5,
-            peakTime: '14:00 ~ 16:00',
-          }}
         />
       )}
 

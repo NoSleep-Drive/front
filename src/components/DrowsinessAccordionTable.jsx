@@ -4,11 +4,34 @@ import { Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import axios from 'axios';
+import { getDriverIndexMap } from '../utils/driverUtils';
+
+const preprocessDataWithDriverIndex = (originalData) => {
+  const allDriverHashes = new Set();
+  originalData.forEach((row) => {
+    row.drowsinessDetails.forEach((detail) => {
+      if (detail.driverHash) {
+        allDriverHashes.add(detail.driverHash);
+      }
+    });
+  });
+
+  const hashList = Array.from(allDriverHashes);
+  const indexMap = getDriverIndexMap(hashList);
+
+  return originalData.map((row) => ({
+    ...row,
+    drowsinessDetails: row.drowsinessDetails.map((detail) => ({
+      ...detail,
+      driverIndex: indexMap[detail.driverHash] || null,
+    })),
+  }));
+};
 
 export default function DrowsinessAccordionTable({ data }) {
   const [expandedRow, setExpandedRow] = useState(null);
   const navigate = useNavigate();
-  const setIsDownloading = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const toggleRow = (vehicleNumber) => {
     setExpandedRow((prev) => (prev === vehicleNumber ? null : vehicleNumber));
   };
@@ -30,7 +53,6 @@ export default function DrowsinessAccordionTable({ data }) {
         </div>
       ),
     },
-    { key: 'driver', label: '운전자' },
     { key: 'detectDate', label: '감지 날짜' },
     {
       key: 'download',
@@ -41,7 +63,9 @@ export default function DrowsinessAccordionTable({ data }) {
           <button
             type="button"
             onClick={() => handleBulkDownload(ids)}
-            className="text-cornflower-950 hover:bg-cornflower-100 hover:text-cornflower-600 inline-flex items-center justify-center rounded-xl p-2 transition-colors"
+            className={`text-cornflower-950 hover:bg-cornflower-100 hover:text-cornflower-600 inline-flex items-center justify-center rounded-xl p-2 transition-colors ${
+              isDownloading ? 'cursor-not-allowed opacity-50' : ''
+            }`}
           >
             <Download size={18} />
           </button>
@@ -98,11 +122,11 @@ export default function DrowsinessAccordionTable({ data }) {
       setIsDownloading(false);
     }
   };
-
+  const processedData = preprocessDataWithDriverIndex(data);
   return (
     <BaseTable
       columns={columns}
-      data={data}
+      data={processedData}
       expandableRow={(row) =>
         expandedRow === row.vehicleNumber ? (
           <tr className="bg-gray-100">
@@ -121,6 +145,8 @@ export default function DrowsinessAccordionTable({ data }) {
                       <span className="text-cornflower-950 max-w-[180px] min-w-[160px]">
                         {detail.timestamp}
                       </span>
+                      <span>운전자 {detail.driverIndex}</span>
+
                       <button
                         type="button"
                         onClick={() => navigate(`/drowsiness/${detail.id}`)}

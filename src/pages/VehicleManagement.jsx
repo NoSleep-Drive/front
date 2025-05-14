@@ -4,7 +4,7 @@ import VehicleRegisterSection from '../components/VehicleRegisterSection';
 import { getVehicles } from '../api/vehicleApi';
 
 export default function VehicleManagement() {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('auth_token');
   const [vehicles, setVehicles] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);

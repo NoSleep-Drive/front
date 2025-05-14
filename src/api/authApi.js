@@ -12,3 +12,15 @@ export const signUpApi = async (formData) => {
     throw error.response ? error.response.data.message : error.message;
   }
 };
+
+export const loginApi = async (formData) => {
+  try {
+    const response = await apiClient.post('/company/login', {
+      id: formData.id,
+      password: formData.password,
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response ? error.response.data.message : error.message;
+  }
+};

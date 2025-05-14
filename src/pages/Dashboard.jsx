@@ -22,6 +22,7 @@ export default function Dashboard() {
   const [recentVehicles, setRecentVehicles] = useState([]);
   const token = localStorage.getItem('token');
   const [recentSleepData, setRecentSleepData] = useState([]);
+  const [driverIndexMap, setDriverIndexMap] = useState({});
   const [summaryData, setSummaryData] = useState({
     totalVehicles: 0,
     sleepDetectedToday: 0,
@@ -56,6 +57,14 @@ export default function Dashboard() {
     try {
       const data = await getRecentSleepData(token);
       setRecentSleepData(data);
+      const hashes = [
+        ...new Set(data.map((d) => d.driverHash).filter(Boolean)),
+      ];
+      const map = {};
+      hashes.forEach((hash, i) => {
+        map[hash] = i + 1;
+      });
+      setDriverIndexMap(map);
     } catch (err) {
       console.error(' 졸음 데이터 불러오기 실패:', err);
     }
@@ -66,11 +75,10 @@ export default function Dashboard() {
       const data = await getVehicles(3, 0, token);
       setRecentVehicles(data);
     } catch (err) {
-      console.error('🚨 차량 조회 실패:', err);
+      console.error('차량 조회 실패:', err);
       alert('차량 정보를 불러오는 데 실패했습니다.');
     }
   };
-  //
   const openEditModal = (vehicle) => {
     setSelectedVehicle(vehicle);
     setShowEditModal(true);
@@ -112,7 +120,12 @@ export default function Dashboard() {
 
   const columns = [
     { key: 'vehicleNumber', label: '차량 번호' },
-    { key: 'driverHash', label: '운전자' },
+    {
+      key: 'driverHash',
+      label: '운전자',
+      render: (value) =>
+        driverIndexMap[value] ? `운전자 ${driverIndexMap[value]}` : value,
+    },
     {
       key: 'detectedTime',
       label: '감지 날짜',
