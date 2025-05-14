@@ -2,11 +2,14 @@ import React, { useState, useReducer, useEffect } from 'react';
 import InputField from '../components/InputField';
 import Button from '../components/Button';
 import { useNavigate } from 'react-router-dom';
-import { getCompanyInformation, deleteCompany } from '../api/companyApi';
+import {
+  getCompanyInformation,
+  updateCompany,
+  deleteCompany,
+} from '../api/companyApi';
 
 const initialState = {
   id: null,
-  username: '',
   password: '',
   confirmPassword: '',
   companyName: null,
@@ -76,9 +79,39 @@ export default function EditProfile() {
     dispatch({ type: 'SET_FIELD', field, value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form submitted');
+
+    if (state.password && state.password !== state.confirmPassword) {
+      alert('비밀번호가 일치하지 않습니다.');
+      return;
+    }
+
+    const confirmed = window.confirm('회원 정보를 수정하시겠습니까?');
+    if (!confirmed) return;
+
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        console.error('토큰이 없습니다.');
+        return;
+      }
+
+      const formData = {
+        password: state.password,
+        companyName: state.companyName,
+        businessNumber: state.businessNumber,
+      };
+
+      const response = await updateCompany(token, formData);
+
+      if (response.message === '회원 정보가 수정되었습니다.') {
+        alert('회원 정보가 수정되었습니다.');
+        navigate('/edit');
+      }
+    } catch (error) {
+      alert(`회원 정보 수정 실패: ${error}`);
+    }
   };
 
   const handleDelete = async () => {
@@ -115,11 +148,11 @@ export default function EditProfile() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <InputField
             label="아이디"
-            name="username"
+            name="id"
             type="text"
             placeholder="아이디"
             value={isLoading ? '불러오는 중...' : state.id || ''}
-            onChange={(name, value) => handleChange(name, value)}
+            readOnly
           />
 
           <InputField
