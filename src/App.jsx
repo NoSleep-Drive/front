@@ -10,6 +10,7 @@ import DrowsinessSearch from './pages/DrowsinessSearch';
 import WelcomePage from './pages/WelcomePage';
 import Settings from './pages/Settings';
 import SignUp from './pages/SignUp';
+import EditProfile from './pages/EditProfile';
 import VehicleManagement from './pages/VehicleManagement';
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
         <Route path="drowsiness/:id" element={<DrowsinessDetail />} />
         <Route path="settings" element={<Settings />} />
         <Route path="signup" element={<SignUp />} />
+        <Route path="edit" element={<EditProfile />} />
         <Route path="vehicles" element={<VehicleManagement />} />
       </Route>
     </Routes>
