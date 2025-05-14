@@ -74,13 +74,21 @@ export function useEditProfile() {
     const token = localStorage.getItem('auth_token');
     if (!token) return;
 
-    const formData = {
-      password: state.password,
-      companyName: state.companyName,
-      businessNumber: state.businessNumber,
-    };
-    await updateCompany(token, formData);
-    navigate('/edit');
+    try {
+      const formData = {
+        password: state.password,
+        companyName: state.companyName,
+        businessNumber: state.businessNumber,
+      };
+
+      const response = await updateCompany(token, formData);
+      const { message } = response;
+      if (message === '회원 정보가 수정되었습니다.') {
+        alert('회원 정보가 성공적으로 수정되었습니다.');
+      }
+    } catch (error) {
+      alert(`회원 정보 수정 실패: ${error.message}`);
+    }
   };
 
   const handleDelete = async () => {
