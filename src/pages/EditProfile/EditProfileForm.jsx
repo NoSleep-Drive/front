@@ -13,6 +13,10 @@ function EditProfileForm({
 }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {state.errors.fetch && (
+        <div className="mb-4 text-sm text-red-500">{state.errors.fetch}</div>
+      )}
+
       <InputField
         label="아이디"
         name="id"
@@ -26,7 +30,7 @@ function EditProfileForm({
         label="비밀번호"
         name="password"
         type="password"
-        placeholder="비밀번호"
+        placeholder="8자 이상, 대소문자, 숫자, 특수문자 포함"
         value={state.password}
         onChange={(name, value) => handleChange(name, value)}
       />
@@ -35,7 +39,7 @@ function EditProfileForm({
         label="비밀번호 확인"
         name="confirmPassword"
         type="password"
-        placeholder="비밀번호 확인"
+        placeholder="비밀번호와 동일"
         value={state.confirmPassword}
         onChange={(name, value) => handleChange(name, value)}
       />
@@ -87,6 +91,7 @@ EditProfileForm.propTypes = {
     confirmPassword: PropTypes.string,
     companyName: PropTypes.string,
     businessNumber: PropTypes.string,
+    errors: PropTypes.list,
   }).isRequired,
   isLoading: PropTypes.bool.isRequired,
   isDeleting: PropTypes.bool.isRequired,

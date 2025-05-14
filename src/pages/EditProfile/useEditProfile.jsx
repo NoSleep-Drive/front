@@ -49,6 +49,15 @@ export function useEditProfile() {
             payload: { id, companyName, businessNumber },
           });
         }
+      } catch (error) {
+        dispatch({
+          type: 'SET_FIELD',
+          field: 'errors',
+          value: {
+            fetch:
+              error.message || '회사 정보를 불러오는 중 오류가 발생했습니다.',
+          },
+        });
       } finally {
         setIsLoading(false);
       }
