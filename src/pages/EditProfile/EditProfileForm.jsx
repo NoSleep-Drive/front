@@ -42,6 +42,12 @@ function EditProfileForm({
         placeholder="비밀번호와 동일"
         value={state.confirmPassword}
         onChange={(name, value) => handleChange(name, value)}
+        error={
+          state.password !== state.confirmPassword &&
+          state.confirmPassword !== ''
+            ? '비밀번호가 일치하지 않습니다.'
+            : ''
+        }
       />
 
       <InputField
