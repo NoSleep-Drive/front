@@ -83,7 +83,7 @@ function EditProfileForm({
         className="w-full border border-blue-600"
         onClick={handleDelete}
         disabled={isDeleting}
-        type="submit"
+        type="button"
       />
     </form>
   );
