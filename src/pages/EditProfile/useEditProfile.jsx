@@ -7,11 +7,11 @@ import {
 import { useNavigate } from 'react-router-dom';
 
 const initialState = {
-  id: null,
+  id: '',
   password: '',
   confirmPassword: '',
-  companyName: null,
-  businessNumber: null,
+  companyName: '',
+  businessNumber: '',
   errors: {},
 };
 
