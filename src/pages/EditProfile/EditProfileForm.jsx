@@ -65,6 +65,7 @@ function EditProfileForm({
         size="md"
         className="w-full bg-blue-600 text-white"
         disabled={isLoading || isDeleting}
+        type="submit"
       />
       <Button
         label="탈퇴하기"
@@ -73,6 +74,7 @@ function EditProfileForm({
         className="w-full border border-blue-600"
         onClick={handleDelete}
         disabled={isDeleting}
+        type="submit"
       />
     </form>
   );
