@@ -1,13 +1,15 @@
-import React, { useReducer } from 'react';
+import React, { useReducer, useEffect } from 'react';
 import InputField from '../components/InputField';
 import Button from '../components/Button';
+import { getCompanyInformation } from '../api/companyApi';
 
 const initialState = {
+  id: null,
   username: '',
   password: '',
   confirmPassword: '',
-  companyName: '',
-  businessNumber: '',
+  companyName: null,
+  businessNumber: null,
   errors: {},
 };
 
@@ -20,6 +22,13 @@ function reducer(state, action) {
         ...state,
         errors: { ...state.errors, [action.field]: action.error },
       };
+    case 'SET_COMPANY_INFO':
+      return {
+        ...state,
+        id: action.payload.id,
+        companyName: action.payload.companyName,
+        businessNumber: action.payload.businessNumber,
+      };
     case 'RESET':
       return initialState;
     default:
@@ -29,6 +38,32 @@ function reducer(state, action) {
 
 export default function EditProfile() {
   const [state, dispatch] = useReducer(reducer, initialState);
+
+  useEffect(() => {
+    const fetchCompanyInfo = async () => {
+      try {
+        const token = localStorage.getItem('auth_token');
+        if (token) {
+          const response = await getCompanyInformation(token);
+          const { id, companyName, businessNumber } = response.data;
+          dispatch({
+            type: 'SET_COMPANY_INFO',
+            payload: {
+              id,
+              companyName,
+              businessNumber,
+            },
+          });
+        } else {
+          console.error('토큰을 불러오지 못함');
+        }
+      } catch (error) {
+        console.error('회사 정보 로드 실패:', error);
+      }
+    };
+
+    fetchCompanyInfo();
+  }, []);
 
   const handleChange = (field, value) => {
     dispatch({ type: 'SET_FIELD', field, value });
@@ -50,7 +85,7 @@ export default function EditProfile() {
             name="username"
             type="text"
             placeholder="아이디"
-            value={state.username}
+            value={state.id ?? '불러오는 중...'}
             onChange={(name, value) => handleChange(name, value)}
           />
 
@@ -77,7 +112,7 @@ export default function EditProfile() {
             name="companyName"
             type="text"
             placeholder="업체명을 입력하세요."
-            value={state.companyName}
+            value={state.companyName ?? '불러오는 중...'}
             onChange={(name, value) => handleChange(name, value)}
           />
 
@@ -86,7 +121,7 @@ export default function EditProfile() {
             name="businessNumber"
             type="text"
             placeholder="-없이 13자리 숫자"
-            value={state.businessNumber}
+            value={state.businessNumber ?? '불러오는 중...'}
             onChange={(name, value) => handleChange(name, value)}
             withButton
             buttonLabel="중복 확인"
