@@ -17,7 +17,7 @@ export default function EditProfile() {
         <h2 className="text-center text-2xl font-semibold">회원 정보 수정</h2>
         {isLoading ? (
           <div className="mt-4 flex justify-center">
-            <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
+            <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600" />
           </div>
         ) : (
           <EditProfileForm

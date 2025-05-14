@@ -66,8 +66,7 @@ function EditProfileForm({
         placeholder="-없이 13자리 숫자"
         value={isLoading ? '불러오는 중...' : state.businessNumber || ''}
         onChange={(name, value) => handleChange(name, value)}
-        withButton
-        buttonLabel="중복 확인"
+        onClickButton={() => alert('아이디 중복 확인 기능 연결 예정')}
       />
 
       <Button
@@ -97,7 +96,7 @@ EditProfileForm.propTypes = {
     confirmPassword: PropTypes.string,
     companyName: PropTypes.string,
     businessNumber: PropTypes.string,
-    errors: PropTypes.list,
+    errors: PropTypes.object,
   }).isRequired,
   isLoading: PropTypes.bool.isRequired,
   isDeleting: PropTypes.bool.isRequired,
