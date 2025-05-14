@@ -8,9 +8,6 @@ const initialState = {
   confirmPassword: '',
   companyName: '',
   businessNumber: '',
-  agreeAll: false,
-  agreeTerms: false,
-  agreePrivacy: false,
   errors: {},
 };
 
