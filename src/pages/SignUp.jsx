@@ -9,7 +9,7 @@ export default function SignUp() {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    username: '',
+    id: '',
     password: '',
     confirmPassword: '',
     companyName: '',
@@ -52,7 +52,7 @@ export default function SignUp() {
       const responseMessage = await signUpApi(formData);
       console.log('회원가입 통신 성공:', responseMessage);
       alert('회원가입이 성공적으로 완료되었습니다!');
-      navigate('/login');
+      navigate('/');
     } catch (error) {
       console.error('회원가입 실패:', error);
       alert(error);
@@ -82,13 +82,13 @@ export default function SignUp() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <InputField
             label="아이디"
-            name="username"
+            name="id"
             type="text"
             placeholder="영어, 숫자 조합 4~16자리"
-            value={formData.username}
+            value={formData.id}
             onChange={handleChange}
             required
-            error={errors.username}
+            error={errors.id}
             withButton
             buttonLabel="중복 확인"
             onClickButton={() => alert('아이디 중복 확인 기능 연결 예정')}
