@@ -73,21 +73,31 @@ export function useEditProfile() {
     e.preventDefault();
     const token = localStorage.getItem('auth_token');
     if (!token) return;
-
     try {
+      setIsLoading(true);
       const formData = {
         password: state.password,
         companyName: state.companyName,
         businessNumber: state.businessNumber,
       };
-
       const response = await updateCompany(token, formData);
       const { message } = response;
       if (message === '회원 정보가 수정되었습니다.') {
         alert('회원 정보가 성공적으로 수정되었습니다.');
+        dispatch({ type: 'SET_FIELD', field: 'password', value: '' });
+        dispatch({ type: 'SET_FIELD', field: 'confirmPassword', value: '' });
       }
     } catch (error) {
       alert(`회원 정보 수정 실패: ${error.message}`);
+      dispatch({
+        type: 'SET_FIELD',
+        field: 'errors',
+        value: {
+          submit: error.message || '회원 정보 업데이트 중 오류가 발생했습니다.',
+        },
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -98,10 +108,17 @@ export function useEditProfile() {
       setIsDeleting(true);
       const token = localStorage.getItem('auth_token');
       if (token) {
-        await deleteCompany(token);
-        localStorage.removeItem('auth_token');
-        navigate('/');
+        const response = await deleteCompany(token);
+        const { message } = response;
+        if (message === '회원 탈퇴가 완료되었습니다.') {
+          alert('성공적으로 탈퇴되었습니다.');
+          localStorage.removeItem('auth_token');
+          localStorage.removeItem('id');
+          navigate('/');
+        }
       }
+    } catch (error) {
+      alert(`회원 탈퇴 실패: ${error.message}`);
     } finally {
       setIsDeleting(false);
     }
