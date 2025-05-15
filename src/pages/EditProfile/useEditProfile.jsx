@@ -103,7 +103,6 @@ export function useEditProfile() {
 
   const handleDelete = async () => {
     if (!window.confirm('정말 탈퇴하시겠습니까?')) return;
-
     try {
       setIsDeleting(true);
       const token = localStorage.getItem('auth_token');
@@ -119,6 +118,13 @@ export function useEditProfile() {
       }
     } catch (error) {
       alert(`회원 탈퇴 실패: ${error.message}`);
+      dispatch({
+        type: 'SET_FIELD',
+        field: 'errors',
+        value: {
+          delete: error.message || '회원 탈퇴 중 오류가 발생했습니다.',
+        },
+      });
     } finally {
       setIsDeleting(false);
     }
