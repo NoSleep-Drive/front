@@ -18,7 +18,7 @@ export default function VehicleRegisterSection({ setData, token }) {
       setData(updated);
       setVehicleNumber('');
       setDeviceUid('');
-      alert('🚗 차량 등록 완료');
+      alert('차량 등록 완료!');
     } catch (error) {
       console.error('🚨 차량 등록 실패:', error);
       alert('차량 등록 실패');

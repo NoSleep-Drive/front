@@ -16,7 +16,7 @@ import {
   handleRentVehicle,
   handleReturnVehicle,
 } from '@/utils/vehicleHandlers';
-
+import { setDriverIndex } from '@/utils/driverUtils';
 export default function VehicleTable({ data, setData }) {
   const token = localStorage.getItem('auth_token');
 
@@ -59,9 +59,25 @@ export default function VehicleTable({ data, setData }) {
 
   const handleToggle = async (val, row) => {
     setSelectedRow(row);
+    const deviceUid = row.deviceUid || deviceUidMap[row.vehicleNumber];
 
     if (val) {
-      await handleRentVehicle(row, setData, driverIndexMapRef);
+      const driverList = await handleRentVehicle(row, setData);
+      if (driverList?.length) {
+        setDriverIndex(
+          deviceUid,
+          row.vehicleNumber,
+          driverList,
+          driverIndexMapRef
+        );
+      }
+      setData((prev) =>
+        prev.map((item) =>
+          item.vehicleNumber === row.vehicleNumber
+            ? { ...item, isRented: true }
+            : item
+        )
+      );
     } else {
       await handleReturnVehicle(
         row,

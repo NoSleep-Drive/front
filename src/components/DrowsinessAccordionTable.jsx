@@ -4,31 +4,23 @@ import { Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import axios from 'axios';
-import { getDriverIndexMap } from '../utils/driverUtils';
+import { getDriverIndexMap } from '../utils/driverUtils.js';
 
-const preprocessDataWithDriverIndex = (originalData) => {
-  const allDriverHashes = new Set();
-  originalData.forEach((row) => {
-    row.drowsinessDetails.forEach((detail) => {
-      if (detail.driverHash) {
-        allDriverHashes.add(detail.driverHash);
-      }
-    });
+const preprocessDataWithDriverIndex = (originalData, driverIndexMapRef) => {
+  return originalData.map((row) => {
+    const deviceUid = row.deviceUid;
+    const indexMap = getDriverIndexMap(deviceUid, driverIndexMapRef);
+
+    return {
+      ...row,
+      drowsinessDetails: row.drowsinessDetails.map((detail) => ({
+        ...detail,
+        driverIndex: indexMap[detail.driverHash] || null,
+      })),
+    };
   });
-
-  const hashList = Array.from(allDriverHashes);
-  const indexMap = getDriverIndexMap(hashList);
-
-  return originalData.map((row) => ({
-    ...row,
-    drowsinessDetails: row.drowsinessDetails.map((detail) => ({
-      ...detail,
-      driverIndex: indexMap[detail.driverHash] || null,
-    })),
-  }));
 };
-
-export default function DrowsinessAccordionTable({ data }) {
+export default function DrowsinessAccordionTable({ data, driverIndexMapRef }) {
   const [expandedRow, setExpandedRow] = useState(null);
   const navigate = useNavigate();
   const [isDownloading, setIsDownloading] = useState(false);
@@ -122,7 +114,7 @@ export default function DrowsinessAccordionTable({ data }) {
       setIsDownloading(false);
     }
   };
-  const processedData = preprocessDataWithDriverIndex(data);
+  const processedData = preprocessDataWithDriverIndex(data, driverIndexMapRef);
   return (
     <BaseTable
       columns={columns}
@@ -170,14 +162,19 @@ DrowsinessAccordionTable.propTypes = {
   data: PropTypes.arrayOf(
     PropTypes.shape({
       vehicleNumber: PropTypes.string.isRequired,
-      driver: PropTypes.string.isRequired,
+      driver: PropTypes.string,
       detectDate: PropTypes.string.isRequired,
+      deviceUid: PropTypes.string.isRequired,
       drowsinessDetails: PropTypes.arrayOf(
         PropTypes.shape({
           timestamp: PropTypes.string.isRequired,
           id: PropTypes.number.isRequired,
+          driverHash: PropTypes.string.isRequired,
         })
       ),
     })
   ).isRequired,
+  driverIndexMapRef: PropTypes.shape({
+    current: PropTypes.object.isRequired,
+  }).isRequired,
 };

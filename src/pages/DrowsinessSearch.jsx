@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import InputField from '../components/InputField';
 import Button from '../components/Button';
 import { Search } from 'lucide-react';
@@ -7,80 +7,83 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { ko } from 'date-fns/locale';
 import DrowsinessAccordionTable from '@/components/DrowsinessAccordionTable';
 import Pagination from '@/components/Pagination';
+import axios from 'axios';
 
 export default function DrowsinessSearch() {
+  const driverIndexMapRef = useRef({});
+
   const [selectedDriverIndex, setSelectedDriverIndex] = useState(null);
   const [driverIndexMap, setDriverIndexMap] = useState({});
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [vehicleNumber, setVehicleNumber] = useState('');
+  const [dateError, setDateError] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPage = 5;
+  const [filteredData, setFilteredData] = useState([]);
   const handleVehicleInputChange = (name, value) => {
     if (name === 'vehicleNumber') setVehicleNumber(value);
   };
 
-  const [dateError, setDateError] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const rowsPerPage = 5;
+  //const [allData] = useState(mockData);
+  //const [filteredData, setFilteredData] = useState(mockData); // 초기값으로 mockData 전체
 
-  const mockData = [
-    {
-      vehicleNumber: '111가 1111',
-      driver: 'abc123',
-      detectDate: '2025-04-28',
-      drowsinessDetails: [
-        { timestamp: '2025-04-28 08:30:00', id: 1 },
-        { timestamp: '2025-04-28 09:45:00', id: 2 },
-      ],
-    },
-    {
-      vehicleNumber: '222나 2222',
-      driver: 'xyz456',
-      detectDate: '2025-04-29',
-      drowsinessDetails: [],
-    },
-    {
-      vehicleNumber: '333다 3333',
-      driver: 'qwe789',
-      detectDate: '2025-04-30',
-      drowsinessDetails: [{ timestamp: '2025-04-30 14:00:00', id: 3 }],
-    },
-  ];
+  const getDriverHashByIndex = (index, indexMap) => {
+    if (!index) return undefined;
+    return Object.entries(indexMap).find(([, i]) => i === index)?.[0];
+  };
 
-  const [allData] = useState(mockData);
-  const [filteredData, setFilteredData] = useState(mockData); // 초기값으로 mockData 전체
-
-  useEffect(() => {
-    const driverHashes = [...new Set(mockData.map((d) => d.driver))];
-    const indexMap = {};
-    driverHashes.forEach((hash, i) => {
-      indexMap[hash] = i + 1;
-    });
-    setDriverIndexMap(indexMap);
-  }, []);
-  const handleSearch = () => {
+  const handleSearch = async () => {
     if (startDate && endDate && startDate > endDate) {
       setDateError('검색 시작일은 종료일보다 이전이어야 합니다.');
       return;
     }
     setDateError('');
 
-    const result = allData.filter((item) => {
-      const date = new Date(item.detectDate);
-      const matchesDate =
-        (!startDate || date >= startDate) && (!endDate || date <= endDate);
-      const matchesVehicle =
-        !vehicleNumber || item.vehicleNumber.includes(vehicleNumber);
-      const driverIndex = driverIndexMap[item.driver];
-      const matchesDriver =
-        !selectedDriverIndex || driverIndex === selectedDriverIndex;
+    try {
+      const token = localStorage.getItem('auth_token');
 
-      return matchesDate && matchesVehicle && matchesDriver;
-    });
+      const params = {
+        pageSize: 1000,
+        pageIdx: 0,
+      };
 
-    setFilteredData(result);
-    setCurrentPage(1);
+      if (startDate) {
+        params.startDate = startDate.toISOString().split('T')[0];
+      }
+      if (endDate) {
+        params.endDate = endDate.toISOString().split('T')[0];
+      }
+      if (vehicleNumber) {
+        params.vehicleNumber = vehicleNumber;
+      }
+      if (selectedDriverIndex) {
+        const hash = getDriverHashByIndex(selectedDriverIndex, driverIndexMap);
+        if (hash) params.driverHash = hash;
+      }
+
+      const res = await axios.get('/api/sleep', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params,
+      });
+
+      const data = res.data.data || [];
+      const hashSet = new Set(data.map((item) => item.driverHash));
+      const newMap = {};
+      Array.from(hashSet).forEach((hash, i) => {
+        newMap[hash] = i + 1;
+      });
+
+      setDriverIndexMap(newMap);
+      setFilteredData(data);
+      setCurrentPage(1);
+    } catch (error) {
+      console.error('졸음 데이터 조회 실패:', error);
+      alert('데이터 조회 중 오류가 발생했습니다.');
+    }
   };
-
   const indexOfLastRow = currentPage * rowsPerPage;
   const indexOfFirstRow = indexOfLastRow - rowsPerPage;
   const currentRows = filteredData.slice(indexOfFirstRow, indexOfLastRow);
@@ -174,7 +177,10 @@ export default function DrowsinessSearch() {
         )}
       </div>
 
-      <DrowsinessAccordionTable data={currentRows} />
+      <DrowsinessAccordionTable
+        data={currentRows}
+        driverIndexMapRef={driverIndexMapRef}
+      />
 
       <Pagination
         page={currentPage}

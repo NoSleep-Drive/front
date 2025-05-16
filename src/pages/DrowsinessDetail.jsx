@@ -3,9 +3,10 @@ import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Download, ChevronLeft } from 'lucide-react';
 import Button from '../components/Button';
-import { getDriverHashesByVehicle, getDriverIndex } from '../utils/driverUtils'; // 👈 추가
+import { getDriverIndex } from '../utils/driverUtils';
+import PropTypes from 'prop-types';
 
-export default function DrowsinessDetail() {
+export default function DrowsinessDetail({ driverIndexMapRef }) {
   const { id } = useParams();
   const navigate = useNavigate();
   const [sleepData, setSleepData] = useState(null);
@@ -13,43 +14,33 @@ export default function DrowsinessDetail() {
   useEffect(() => {
     const fetchSleepData = async () => {
       try {
-        const response = await axios.get(`/api/sleep/${id}`, {
+        const res = await axios.get(`/api/sleep/${id}`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
           },
         });
-        const sleep = response.data;
-        setSleepData(sleep);
+        const data = res.data.data;
+        setSleepData(data);
 
-        const sleepListRes = await axios.get('/api/sleep', {
-          params: {
-            vehicleNumber: sleep.vehicleNumber,
-            pageSize: 1000,
-            pageIdx: 0,
-          },
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-          },
-        });
-
-        const hashList = getDriverHashesByVehicle(
-          sleepListRes.data.data,
-          sleep.vehicleNumber
+        const index = getDriverIndex(
+          data.deviceUid, // 이게 sleepData에 있어야 함
+          data.driverHash,
+          driverIndexMapRef
         );
-
-        const index = getDriverIndex(hashList, sleep.driverHash);
         setDriverIndex(index);
       } catch (error) {
         console.error('졸음 데이터 조회 실패:', error);
       }
     };
+
     fetchSleepData();
-  }, [id]);
+  }, [id, driverIndexMapRef]);
+
   const handleDownload = async () => {
     try {
       const response = await axios.get(`/api/sleep/${id}/video/download`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('auth_auth_token')}`,
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
         responseType: 'blob',
       });
@@ -121,7 +112,10 @@ export default function DrowsinessDetail() {
         </div>
         <div className="w-full max-w-4xl justify-center overflow-hidden rounded bg-black">
           <video controls className="w-full object-contain">
-            <source src={sleepData.videoUrl} type="video/mp4" />
+            <source
+              src={`/api/sleep/${sleepData.id}/video/stream`}
+              type="video/mp4"
+            />
             지원되지 않는 브라우저입니다.
           </video>
         </div>
@@ -129,3 +123,9 @@ export default function DrowsinessDetail() {
     </div>
   );
 }
+
+DrowsinessDetail.propTypes = {
+  driverIndexMapRef: PropTypes.shape({
+    current: PropTypes.object.isRequired,
+  }).isRequired,
+};
