@@ -52,7 +52,7 @@ export default function SignUp() {
       const responseMessage = await signUpApi(formData);
       console.log('회원가입 통신 성공:', responseMessage);
       alert('회원가입이 성공적으로 완료되었습니다!');
-      navigate('/login');
+      navigate('/');
     } catch (error) {
       console.error('회원가입 실패:', error);
       alert(error);

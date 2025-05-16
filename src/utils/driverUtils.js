@@ -19,3 +19,20 @@ export const getDriverIndexMap = (hashList) => {
     return acc;
   }, {});
 };
+export const getDriverIndexMapFromDriverList = (drivers = []) => {
+  const sorted = drivers
+    .filter((d) => d.driverHash && d.startTime)
+    .sort((a, b) => new Date(a.startTime) - new Date(b.startTime)); // 렌트 시간 순 정렬
+
+  return sorted.reduce((acc, driver, i) => {
+    acc[driver.driverHash] = i + 1;
+    return acc;
+  }, {});
+};
+
+export const getDriverHashByIndex = (indexMap, targetIndex) => {
+  return (
+    Object.entries(indexMap).find(([, index]) => index === targetIndex)?.[0] ??
+    null
+  );
+};

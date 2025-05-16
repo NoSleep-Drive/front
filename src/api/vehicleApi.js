@@ -1,5 +1,4 @@
 import apiClient from './apiClient';
-
 export const getVehicles = async (pageSize, pageIdx, token) => {
   const res = await apiClient.get('/vehicles', {
     params: { pageSize, pageIdx },
@@ -39,6 +38,12 @@ export const updateVehicle = async (deviceUid, newNumber, token) => {
 
 export const rentVehicle = async (vehicleNumber, token) => {
   const res = await apiClient.post(`/vehicles/${vehicleNumber}/rent`, null, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.data;
+};
+export const returnVehicle = async (vehicleNumber, token) => {
+  const res = await apiClient.post(`/vehicles/${vehicleNumber}/return`, null, {
     headers: { Authorization: `Bearer ${token}` },
   });
   return res.data;

@@ -5,7 +5,8 @@ import BaseTable from './BaseTable';
 import Pagination from './Pagination';
 import { fetchDriversByDeviceUid } from '@/api/driverApi';
 import Button from './Button';
-const DriverListModal = ({ isOpen, onClose, deviceUid }) => {
+
+const DriverListModal = ({ isOpen, onClose, deviceUid, vehicle }) => {
   const [drivers, setDrivers] = useState([]);
   const [pageIdx, setPageIdx] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
@@ -53,9 +54,11 @@ const DriverListModal = ({ isOpen, onClose, deviceUid }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-400/50 backdrop-blur-sm">
       <div className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-xl">
         <h2 className="head2 mb-4 text-center">운전자 목록</h2>
+
         <div className="mb-6 text-center text-xl font-normal whitespace-pre-line">
-          차량 <strong>{deviceUid}</strong>의 운전자 목록입니다.
+          차량 <strong>{vehicle?.vehicleNumber}</strong>의 운전자 목록입니다.
         </div>
+
         <BaseTable columns={columns} data={drivers} />
         <div className="mt-6">
           <Pagination
@@ -84,6 +87,14 @@ DriverListModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   deviceUid: PropTypes.string.isRequired,
+  vehicle: PropTypes.shape({
+    vehicleNumber: PropTypes.string.isRequired,
+    createdDate: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.instanceOf(Date),
+    ]),
+    deviceUid: PropTypes.string,
+  }),
 };
 
 export default DriverListModal;

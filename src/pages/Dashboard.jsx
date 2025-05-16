@@ -9,26 +9,28 @@ import VehicleEditModal from '../components/VehicleEditModal';
 import VehicleDeleteModal from '../components/VehicleDeleteModal.jsx';
 import { getVehicles, deleteVehicle, updateVehicle } from '../api/vehicleApi';
 import { getRecentSleepData } from '../api/dashboardApi';
+
+import useDriverIndexMap from '@/hooks/useDriverIndexMap';
+
 import {
   getVehicleCount,
   getSleepTodayCount,
   getAbnormalVehicleCount,
 } from '../api/dashboardApi';
-
+//import { mockData } from '@/mockData'; //TODO
 export default function Dashboard() {
+  const token = localStorage.getItem('auth_token');
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [recentVehicles, setRecentVehicles] = useState([]);
-  const token = localStorage.getItem('token');
   const [recentSleepData, setRecentSleepData] = useState([]);
-  const [driverIndexMap, setDriverIndexMap] = useState({});
+  const [, setDriverIndexMap] = useState({});
   const [summaryData, setSummaryData] = useState({
     totalVehicles: 0,
     sleepDetectedToday: 0,
     abnormalVehicles: 0,
   });
-
   useEffect(() => {
     fetchRecentVehicles();
     fetchRecentSleep();
@@ -52,18 +54,23 @@ export default function Dashboard() {
       console.error('대시보드 요약 정보 불러오기 실패:', err);
     }
   };
+  const { driverIndexMapRef } = useDriverIndexMap();
 
   const fetchRecentSleep = async () => {
     try {
       const data = await getRecentSleepData(token);
       setRecentSleepData(data);
-      const hashes = [
-        ...new Set(data.map((d) => d.driverHash).filter(Boolean)),
-      ];
       const map = {};
-      hashes.forEach((hash, i) => {
-        map[hash] = i + 1;
+      data.forEach((item) => {
+        const uid = item.deviceUid;
+        const hash = item.driverHash;
+        const index = driverIndexMapRef.current?.[uid]?.hashToIndex?.[hash];
+
+        if (hash && index) {
+          map[hash] = index; // UI에서 `운전자 ${index}` 표기용
+        }
       });
+
       setDriverIndexMap(map);
     } catch (err) {
       console.error(' 졸음 데이터 불러오기 실패:', err);
@@ -123,8 +130,12 @@ export default function Dashboard() {
     {
       key: 'driverHash',
       label: '운전자',
-      render: (value) =>
-        driverIndexMap[value] ? `운전자 ${driverIndexMap[value]}` : value,
+      render: (value, row) => {
+        const uid = row.deviceUid;
+        const hash = row.driverHash;
+        const index = driverIndexMapRef.current?.[uid]?.hashToIndex?.[hash];
+        return index ? `운전자 ${index}` : hash;
+      },
     },
     {
       key: 'detectedTime',
@@ -211,6 +222,7 @@ export default function Dashboard() {
       {showEditModal && selectedVehicle && (
         <VehicleEditModal
           isOpen={true}
+          token={token}
           originalVehicle={selectedVehicle}
           onClose={() => setShowEditModal(false)}
           onConfirm={(newNumber) => {
@@ -231,6 +243,7 @@ export default function Dashboard() {
       {showDeleteModal && selectedVehicle && (
         <VehicleDeleteModal
           isOpen={true}
+          token={token}
           vehicleNumber={selectedVehicle.vehicleNumber}
           onClose={() => setShowDeleteModal(false)}
           onConfirm={() => {
