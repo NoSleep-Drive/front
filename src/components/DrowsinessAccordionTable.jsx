@@ -4,10 +4,26 @@ import { Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import axios from 'axios';
+import { getDriverIndexMap } from '../utils/driverUtils.js';
 
-export default function DrowsinessAccordionTable({ data }) {
+const preprocessDataWithDriverIndex = (originalData, driverIndexMapRef) => {
+  return originalData.map((row) => {
+    const deviceUid = row.deviceUid;
+    const indexMap = getDriverIndexMap(deviceUid, driverIndexMapRef);
+
+    return {
+      ...row,
+      drowsinessDetails: row.drowsinessDetails.map((detail) => ({
+        ...detail,
+        driverIndex: indexMap[detail.driverHash] || null,
+      })),
+    };
+  });
+};
+export default function DrowsinessAccordionTable({ data, driverIndexMapRef }) {
   const [expandedRow, setExpandedRow] = useState(null);
   const navigate = useNavigate();
+  const [isDownloading, setIsDownloading] = useState(false);
   const toggleRow = (vehicleNumber) => {
     setExpandedRow((prev) => (prev === vehicleNumber ? null : vehicleNumber));
   };
@@ -29,7 +45,6 @@ export default function DrowsinessAccordionTable({ data }) {
         </div>
       ),
     },
-    { key: 'driver', label: '운전자' },
     { key: 'detectDate', label: '감지 날짜' },
     {
       key: 'download',
@@ -40,7 +55,9 @@ export default function DrowsinessAccordionTable({ data }) {
           <button
             type="button"
             onClick={() => handleBulkDownload(ids)}
-            className="text-cornflower-950 hover:bg-cornflower-100 hover:text-cornflower-600 inline-flex items-center justify-center rounded-xl p-2 transition-colors"
+            className={`text-cornflower-950 hover:bg-cornflower-100 hover:text-cornflower-600 inline-flex items-center justify-center rounded-xl p-2 transition-colors ${
+              isDownloading ? 'cursor-not-allowed opacity-50' : ''
+            }`}
           >
             <Download size={18} />
           </button>
@@ -56,18 +73,19 @@ export default function DrowsinessAccordionTable({ data }) {
     }
 
     try {
+      setIsDownloading(true);
       const response = await axios.post(
         '/api/sleep/videos/download',
         { ids },
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
+            Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
           },
           responseType: 'blob',
         }
       );
 
-      const blob = new Blob([response.data], { type: 'application/zip' });
+      const blob = response.data;
       const contentDisposition = response.headers['content-disposition'];
       const filenameMatch = contentDisposition?.match(/filename="(.+)"/);
       const filename = filenameMatch ? filenameMatch[1] : 'videos.zip';
@@ -92,13 +110,15 @@ export default function DrowsinessAccordionTable({ data }) {
       } else {
         alert('알 수 없는 오류가 발생했습니다.');
       }
+    } finally {
+      setIsDownloading(false);
     }
   };
-
+  const processedData = preprocessDataWithDriverIndex(data, driverIndexMapRef);
   return (
     <BaseTable
       columns={columns}
-      data={data}
+      data={processedData}
       expandableRow={(row) =>
         expandedRow === row.vehicleNumber ? (
           <tr className="bg-gray-100">
@@ -117,6 +137,8 @@ export default function DrowsinessAccordionTable({ data }) {
                       <span className="text-cornflower-950 max-w-[180px] min-w-[160px]">
                         {detail.timestamp}
                       </span>
+                      <span>운전자 {detail.driverIndex}</span>
+
                       <button
                         type="button"
                         onClick={() => navigate(`/drowsiness/${detail.id}`)}
@@ -140,14 +162,19 @@ DrowsinessAccordionTable.propTypes = {
   data: PropTypes.arrayOf(
     PropTypes.shape({
       vehicleNumber: PropTypes.string.isRequired,
-      driver: PropTypes.string.isRequired,
+      driver: PropTypes.string,
       detectDate: PropTypes.string.isRequired,
+      deviceUid: PropTypes.string.isRequired,
       drowsinessDetails: PropTypes.arrayOf(
         PropTypes.shape({
           timestamp: PropTypes.string.isRequired,
           id: PropTypes.number.isRequired,
+          driverHash: PropTypes.string.isRequired,
         })
       ),
     })
   ).isRequired,
+  driverIndexMapRef: PropTypes.shape({
+    current: PropTypes.object.isRequired,
+  }).isRequired,
 };
