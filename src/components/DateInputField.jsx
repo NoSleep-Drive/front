@@ -2,6 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import DatePicker from 'react-datepicker';
 import clsx from 'clsx';
+import { ko } from 'date-fns/locale';
+
 import 'react-datepicker/dist/react-datepicker.css';
 
 const DateInputField = ({
@@ -40,6 +42,7 @@ const DateInputField = ({
         onChange={onChange}
         placeholderText={placeholder}
         dateFormat="yyyy년 MM월 dd일"
+        locale={ko}
         disabled={disabled}
         className={inputClass}
       />
