@@ -46,7 +46,6 @@ const Header = ({
   return (
     <header className="bg-cornflower-400 text-normal font-pretendard flex h-20 items-center justify-between px-10 text-xl text-white sm:text-2xl">
       {' '}
-      {/* 로고, 네비 */}
       <div className="flex items-center gap-6">
         <div className="flex items-center gap-6 px-4 py-2">
           <img src="/logo.svg" alt="로고" className="h-10 w-auto" />
@@ -70,9 +69,8 @@ const Header = ({
           />
         </nav>
       </div>
-      {/* 회사명, 로그아웃 */}
       <div className="flex items-center gap-6">
-        <Link to="/settings" className="hover:underline">
+        <Link to="/edit" className="hover:underline">
           {companyName}
         </Link>
         <button onClick={handleLogout} className="hover:underline">

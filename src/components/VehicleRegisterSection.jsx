@@ -10,7 +10,10 @@ export default function VehicleRegisterSection({ setData, token }) {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleRegister = async () => {
-    if (!vehicleNumber || !deviceUid) return;
+    if (!vehicleNumber || !deviceUid) {
+      alert('차량 변호와 카메라 ID를 모두 입력해 주세요.');
+      return;
+    }
     setIsLoading(true);
     try {
       await registerVehicle(vehicleNumber, deviceUid, token);

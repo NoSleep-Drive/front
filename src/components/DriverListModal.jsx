@@ -5,8 +5,9 @@ import BaseTable from './BaseTable';
 import Pagination from './Pagination';
 import { fetchDriversByDeviceUid } from '@/api/driverApi';
 import Button from './Button';
-
+import useDriverIndexMap from '@/hooks/useDriverIndexMap';
 const DriverListModal = ({ isOpen, onClose, deviceUid, vehicle }) => {
+  const driverIndexMapRef = useDriverIndexMap();
   const [drivers, setDrivers] = useState([]);
   const [pageIdx, setPageIdx] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
@@ -32,10 +33,17 @@ const DriverListModal = ({ isOpen, onClose, deviceUid, vehicle }) => {
 
   const columns = [
     {
-      key: 'index',
+      key: 'driverHash',
       label: '운전자',
-      render: (_, __, idx) => `운전자 ${idx + 1 + pageIdx * pageSize}`,
+      render: (_, row) => {
+        if (!row || !row.driverHash) return '운전자 ?';
+
+        const index =
+          driverIndexMapRef.current?.[deviceUid]?.hashToIndex?.[row.driverHash];
+        return index !== undefined ? `운전자 ${index + 1}` : '운전자 ?';
+      },
     },
+
     {
       key: 'startTime',
       label: '대여 시작 시간',
@@ -71,7 +79,7 @@ const DriverListModal = ({ isOpen, onClose, deviceUid, vehicle }) => {
           <Button
             size="sm"
             className="h-10 w-16"
-            label="확인"
+            label="닫기"
             onClick={onClose}
           >
             닫기

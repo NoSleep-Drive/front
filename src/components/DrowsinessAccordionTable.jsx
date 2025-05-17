@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import BaseTable from './BaseTable';
 import { Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -9,13 +9,13 @@ import { getDriverIndexMap } from '../utils/driverUtils.js';
 const preprocessDataWithDriverIndex = (originalData, driverIndexMapRef) => {
   return originalData.map((row) => {
     const deviceUid = row.deviceUid;
-    const indexMap = getDriverIndexMap(deviceUid, driverIndexMapRef);
+    const indexMap = getDriverIndexMap(deviceUid, driverIndexMapRef) ?? {};
 
     return {
       ...row,
-      drowsinessDetails: row.drowsinessDetails.map((detail) => ({
+      drowsinessDetails: (row.drowsinessDetails || []).map((detail) => ({
         ...detail,
-        driverIndex: indexMap[detail.driverHash] || null,
+        driverIndex: indexMap?.[detail.driverHash] || null,
       })),
     };
   });
@@ -114,7 +114,9 @@ export default function DrowsinessAccordionTable({ data, driverIndexMapRef }) {
       setIsDownloading(false);
     }
   };
-  const processedData = preprocessDataWithDriverIndex(data, driverIndexMapRef);
+  const processedData = useMemo(() => {
+    return preprocessDataWithDriverIndex(data, driverIndexMapRef);
+  }, [data, driverIndexMapRef.current]);
   return (
     <BaseTable
       columns={columns}
@@ -135,7 +137,7 @@ export default function DrowsinessAccordionTable({ data, driverIndexMapRef }) {
                       className="flex w-fit items-start gap-6 rounded border border-gray-200 bg-white px-4 py-1.5 text-[15px]"
                     >
                       <span className="text-cornflower-950 max-w-[180px] min-w-[160px]">
-                        {detail.timestamp}
+                        {detail.timestamp.replace('T', ' ').slice(0, 19)}
                       </span>
                       <span>운전자 {detail.driverIndex}</span>
 

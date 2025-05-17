@@ -1,29 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
 import { Download, ChevronLeft } from 'lucide-react';
 import Button from '../components/Button';
 import { getDriverIndex } from '../utils/driverUtils';
 import PropTypes from 'prop-types';
-
+import { getSleepDetail, downloadSleepVideo } from '../api/sleepApi';
 export default function DrowsinessDetail({ driverIndexMapRef }) {
+  const token = localStorage.getItem('auth_token');
+
   const { id } = useParams();
   const navigate = useNavigate();
   const [sleepData, setSleepData] = useState(null);
   const [driverIndex, setDriverIndex] = useState(null);
+
   useEffect(() => {
     const fetchSleepData = async () => {
       try {
-        const res = await axios.get(`/api/sleep/${id}`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-          },
-        });
-        const data = res.data.data;
+        const token = localStorage.getItem('auth_token');
+        const data = await getSleepDetail(id, token);
         setSleepData(data);
 
         const index = getDriverIndex(
-          data.deviceUid, // 이게 sleepData에 있어야 함
+          data.deviceUid,
           data.driverHash,
           driverIndexMapRef
         );
@@ -38,44 +36,15 @@ export default function DrowsinessDetail({ driverIndexMapRef }) {
 
   const handleDownload = async () => {
     try {
-      const response = await axios.get(`/api/sleep/${id}/video/download`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-        },
-        responseType: 'blob',
-      });
-
-      const blob = new Blob([response.data], {
-        type: 'application/octet-stream',
-      });
-      const contentDisposition = response.headers['content-disposition'];
-      const filenameMatch = contentDisposition?.match(/filename="(.+)"/);
-      const filename = filenameMatch ? filenameMatch[1] : 'sleep_video.mp4';
-
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(link.href);
+      await downloadSleepVideo(token, id);
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        const status = error.response?.status;
-        if (status === 401) {
-          alert('인증 정보가 유효하지 않습니다.');
-        } else if (status === 404) {
-          alert('해당 영상이 존재하지 않습니다.');
-        } else {
-          alert('다운로드 중 오류가 발생했습니다.');
-        }
-      } else {
-        alert('알 수 없는 오류가 발생했습니다.');
-      }
+      console.error('비디오 다운로드 실패:', error);
+      alert(error);
     }
   };
 
   if (sleepData === null) return <div>로딩 중...</div>;
+  const [date, time] = sleepData.detectedTime?.split('T') || [];
 
   return (
     <div>
@@ -94,13 +63,13 @@ export default function DrowsinessDetail({ driverIndexMapRef }) {
         <h1 className="head1 mb-2">졸음 데이터 상세 조회</h1>
         <div className="mb-4 flex w-full max-w-4xl justify-between">
           <div className="flex flex-wrap items-center gap-4">
-            <span>차량 번호: {sleepData.carNumber}</span>
+            <span>차량 번호: {sleepData.vehicleNumber}</span>
             <span>
               운전자:{' '}
               {driverIndex ? `운전자 ${driverIndex}` : sleepData.driverHash}
             </span>
-            <span>감지 날짜: {sleepData.date}</span>
-            <span>감지 시각: {sleepData.time}</span>
+            <span>감지 날짜: {date}</span>
+            <span>감지 시각: {time?.slice(0, 8)}</span>
           </div>
           <Button
             label="다운로드"

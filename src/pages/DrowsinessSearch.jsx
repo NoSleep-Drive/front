@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useMemo, useState, useContext, useEffect } from 'react';
 import InputField from '../components/InputField';
 import Button from '../components/Button';
 import { Search } from 'lucide-react';
@@ -7,11 +7,31 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { ko } from 'date-fns/locale';
 import DrowsinessAccordionTable from '@/components/DrowsinessAccordionTable';
 import Pagination from '@/components/Pagination';
-import axios from 'axios';
+import { getSleepRecords } from '@/api/sleepApi';
+import { DriverIndexMapContext } from '@/contexts/DriverIndexMapContext';
 
 export default function DrowsinessSearch() {
-  const driverIndexMapRef = useRef({});
-
+  const driverIndexMapRef = useContext(DriverIndexMapContext);
+  {
+    /*const mockSleepData = [
+    {
+      uid: 101,
+      vehicleNumber: '12가1234',
+      deviceUid: 'rasp-0001', // 차량 연결
+      detectedTime: '2025-05-16T14:33:00',
+      driverHash: 'driver-aaa-111',
+      videoPath: '/videos/sleep_101.mp4',
+    },
+    {
+      uid: 102,
+      vehicleNumber: '34나5678',
+      deviceUid: 'rasp-0002',
+      detectedTime: '2025-05-16T15:10:00',
+      driverHash: 'driver-bbb-222',
+      videoPath: '/videos/sleep_102.mp4',
+    },
+  ];*/
+  }
   const [selectedDriverIndex, setSelectedDriverIndex] = useState(null);
   const [driverIndexMap, setDriverIndexMap] = useState({});
   const [startDate, setStartDate] = useState(null);
@@ -21,79 +41,94 @@ export default function DrowsinessSearch() {
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 5;
   const [filteredData, setFilteredData] = useState([]);
+  //const [filteredData, setFilteredData] = useState(mockSleepData);
+
   const handleVehicleInputChange = (name, value) => {
     if (name === 'vehicleNumber') setVehicleNumber(value);
   };
 
-  //const [allData] = useState(mockData);
-  //const [filteredData, setFilteredData] = useState(mockData); // 초기값으로 mockData 전체
-
   const getDriverHashByIndex = (index, indexMap) => {
-    if (!index) return undefined;
+    if (index == null) return undefined;
     return Object.entries(indexMap).find(([, i]) => i === index)?.[0];
   };
 
   const handleSearch = async () => {
     if (startDate && endDate && startDate > endDate) {
-      setDateError('검색 시작일은 종료일보다 이전이어야 합니다.');
+      setDateError('검색 시작일은 종료일보다 앞선 날짜여야 합니다.');
       return;
     }
     setDateError('');
 
     try {
-      const token = localStorage.getItem('auth_token');
+      const hash = getDriverHashByIndex(selectedDriverIndex, driverIndexMap);
 
-      const params = {
+      const adjusted = new Date(endDate);
+      adjusted.setHours(23, 59, 59, 999);
+
+      const data = await getSleepRecords({
+        vehicleNumber: vehicleNumber || undefined,
+        driverHash: hash || undefined,
+        start_date: startDate?.toISOString().split('T')[0],
+        end_date: adjusted,
         pageSize: 1000,
         pageIdx: 0,
-      };
-
-      if (startDate) {
-        params.startDate = startDate.toISOString().split('T')[0];
-      }
-      if (endDate) {
-        params.endDate = endDate.toISOString().split('T')[0];
-      }
-      if (vehicleNumber) {
-        params.vehicleNumber = vehicleNumber;
-      }
-      if (selectedDriverIndex) {
-        const hash = getDriverHashByIndex(selectedDriverIndex, driverIndexMap);
-        if (hash) params.driverHash = hash;
-      }
-
-      const res = await axios.get('/api/sleep', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        params,
       });
 
-      const data = res.data.data || [];
+      data.sort((a, b) => new Date(b.detectedTime) - new Date(a.detectedTime));
       const hashSet = new Set(data.map((item) => item.driverHash));
       const newMap = {};
       Array.from(hashSet).forEach((hash, i) => {
         newMap[hash] = i + 1;
       });
+      setDriverIndexMap(newMap);
 
       setDriverIndexMap(newMap);
-      setFilteredData(data);
+      const grouped = {};
+      data.forEach((item) => {
+        const { id, vehicleNumber, deviceUid, detectedTime, driverHash } = item;
+
+        if (!grouped[vehicleNumber]) {
+          grouped[vehicleNumber] = {
+            vehicleNumber,
+            deviceUid,
+            detectDate: detectedTime.split('T')[0],
+            drowsinessDetails: [],
+          };
+        }
+
+        grouped[vehicleNumber].drowsinessDetails.push({
+          id,
+          timestamp: detectedTime,
+          driverHash,
+        });
+      });
+
+      const groupedList = Object.values(grouped);
+      setFilteredData(groupedList);
       setCurrentPage(1);
     } catch (error) {
       console.error('졸음 데이터 조회 실패:', error);
       alert('데이터 조회 중 오류가 발생했습니다.');
     }
   };
-  const indexOfLastRow = currentPage * rowsPerPage;
-  const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-  const currentRows = filteredData.slice(indexOfFirstRow, indexOfLastRow);
+  useEffect(() => {
+    (async () => {
+      await handleSearch();
+    })();
+  }, []);
+
+  const currentRows = useMemo(() => {
+    const indexOfLastRow = currentPage * rowsPerPage;
+    const indexOfFirstRow = indexOfLastRow - rowsPerPage;
+    return filteredData.slice(indexOfFirstRow, indexOfLastRow);
+  }, [filteredData, currentPage, rowsPerPage]);
 
   return (
     <div className="flex flex-col gap-10 px-4">
       <h1 className="head1">졸음 데이터 조회</h1>
 
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-4">
-        <div className="flex flex-col gap-4 md:flex-row">
+        <div className="flex flex-col items-end gap-4 md:flex-row">
           <div className="flex-[2]">
             <InputField
               label="차량 번호"
@@ -104,7 +139,7 @@ export default function DrowsinessSearch() {
               className="w-full"
             />
           </div>
-          <div className="flex-[1]">
+          <div className="w-[180px]">
             <label htmlFor="driverIndex" className="caption-bold">
               운전자
             </label>
@@ -115,7 +150,7 @@ export default function DrowsinessSearch() {
               onChange={(e) =>
                 setSelectedDriverIndex(Number(e.target.value) || null)
               }
-              className="border-cornflower-400 text-cornflower-950 placeholder-cornflower-400 focus:border-cornflower-500 font-pretendard h-[53px] w-full rounded-xl border bg-white px-4 pr-10 text-[18px] font-normal transition focus:outline-none"
+              className="border-cornflower-400 text-cornflower-950 focus:border-cornflower-500 font-pretendard min-h-[53px] w-full rounded-xl border bg-white px-4 text-[18px] leading-[53px] font-normal transition focus:outline-none"
             >
               <option value="">전체</option>
               {Object.entries(driverIndexMap).map(([hash, index]) => (

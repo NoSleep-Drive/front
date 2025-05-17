@@ -12,9 +12,9 @@ export default function EditProfile() {
     handleDelete,
   } = useEditProfile();
   return (
-    <section className="flex min-h-screen items-center justify-center bg-white p-4">
-      <div className="w-full max-w-lg p-8">
-        <h2 className="text-center text-2xl font-semibold">회원 정보 수정</h2>
+    <section className="flex min-h-screen items-center justify-center">
+      <div className="w-full max-w-lg rounded-xl bg-white p-8">
+        <h2 className="head2 text-center">회원 정보 수정</h2>
         {isLoading ? (
           <div className="mt-4 flex justify-center">
             <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600" />

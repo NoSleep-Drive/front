@@ -13,11 +13,10 @@ import SignUp from './pages/SignUp';
 import EditProfile from './pages/EditProfile/EditProfile';
 import VehicleManagement from './pages/VehicleManagement';
 import { DriverIndexMapContext } from './contexts/DriverIndexMapContext';
-
 function App() {
   const driverIndexMapRef = useRef({});
   return (
-    <DriverIndexMapContext.Provider value={{ driverIndexMapRef }}>
+    <DriverIndexMapContext.Provider value={driverIndexMapRef}>
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<WelcomePage />} />

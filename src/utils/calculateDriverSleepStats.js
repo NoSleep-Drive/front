@@ -1,4 +1,7 @@
 export function calculateDriverSleepStats(sleepList, driverHash) {
+  if (!sleepList || !driverHash) {
+    return { totalCount: 0, peakTime: '없음' };
+  }
   const totalCount = sleepList.filter(
     (item) => item.driverHash === driverHash
   ).length;

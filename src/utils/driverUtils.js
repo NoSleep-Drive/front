@@ -21,7 +21,7 @@ export function setDriverIndex(
 ) {
   const hashToIndex = {};
   driverList.forEach((driver, idx) => {
-    hashToIndex[driver.driverHash] = idx + 1;
+    hashToIndex[driver.driverHash] = idx;
   });
 
   driverIndexMapRef.current[deviceUid] = {
@@ -40,18 +40,20 @@ export function getDeviceUidByVehicle(vehicleNumber, deviceUidMap) {
   return deviceUidMap[vehicleNumber] || null;
 }
 export function getDriverHashesByVehicle(dataList, vehicleNumber) {
-  const hashList = [];
-  const seen = new Set();
-
-  dataList.forEach((item) => {
-    if (item.vehicleNumber === vehicleNumber && !seen.has(item.driverHash)) {
-      hashList.push(item.driverHash);
-      seen.add(item.driverHash);
-    }
-  });
-
-  return hashList;
+  return [
+    ...new Set(
+      dataList
+        .filter(
+          (item) => item.vehicleNumber === vehicleNumber && item.driverHash
+        )
+        .map((item) => item.driverHash)
+    ),
+  ];
 }
+
 export function getDriverIndexMap(deviceUid, driverIndexMapRef) {
+  if (!deviceUid || !driverIndexMapRef) {
+    return {};
+  }
   return driverIndexMapRef.current?.[deviceUid]?.hashToIndex || {};
 }

@@ -11,18 +11,31 @@ export default function Pagination({ page, setPage, totalPages }) {
   const getPageNumbers = () => {
     const pages = [];
     const maxVisible = 5;
-    let startPage = Math.max(1, page - 2);
-    let endPage = Math.min(totalPages, startPage + maxVisible - 1);
 
-    if (endPage - startPage < maxVisible - 1) {
-      startPage = Math.max(1, endPage - maxVisible + 1);
-    }
+    if (totalPages <= maxVisible + 2) {
+      // 전체 페이지가 작으면 생략점 없이 전부 표시
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      const half = Math.floor(maxVisible / 2);
+      let start = Math.max(2, page - half);
+      let end = Math.min(totalPages - 1, page + half);
 
-    if (startPage > 1) pages.push('prev-ellipsis');
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i);
+      if (page <= 3) {
+        start = 2;
+        end = 2 + maxVisible - 1;
+      } else if (page >= totalPages - 2) {
+        start = totalPages - maxVisible + 1;
+        end = totalPages - 1;
+      }
+
+      pages.push(1);
+      if (start > 2) pages.push('prev-ellipsis');
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+      if (end < totalPages - 1) pages.push('next-ellipsis');
+      pages.push(totalPages);
     }
-    if (endPage < totalPages) pages.push('next-ellipsis');
 
     return pages;
   };
@@ -37,6 +50,7 @@ export default function Pagination({ page, setPage, totalPages }) {
       >
         <ChevronLeft size={18} />
       </button>
+
       {getPageNumbers().map((p, index) => {
         if (p === 'prev-ellipsis' || p === 'next-ellipsis') {
           return (
@@ -45,6 +59,7 @@ export default function Pagination({ page, setPage, totalPages }) {
             </span>
           );
         }
+
         return (
           <button
             type="button"
@@ -60,6 +75,7 @@ export default function Pagination({ page, setPage, totalPages }) {
           </button>
         );
       })}
+
       <button
         type="button"
         onClick={handleNext}

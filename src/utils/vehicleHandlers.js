@@ -44,14 +44,14 @@ export async function handleReturnVehicle(
   setDrowsyModalOpen,
   sleepLimit = 1000,
   sleepPage = 0,
-  setModalDeviceUid,
-  setModalVehicleNumber,
+  deviceUid,
+  vehicleNumber,
   driverIndexMapRef
 ) {
   const token = localStorage.getItem('auth_token');
 
   try {
-    await axios.post(`/api/vehicles/${row.vehicleNumber}/return`, null, {
+    await axios.post(`/api/vehicles/${vehicleNumber}/return`, null, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -59,7 +59,7 @@ export async function handleReturnVehicle(
 
     setData((prev) =>
       prev.map((item) =>
-        item.vehicleNumber === row.vehicleNumber
+        item.vehicleNumber === vehicleNumber
           ? { ...item, isRented: false }
           : item
       )
@@ -71,18 +71,15 @@ export async function handleReturnVehicle(
       params: {
         pageSize: sleepLimit,
         pageIdx: sleepPage,
-        vehicleNumber: row.vehicleNumber,
+        vehicleNumber: vehicleNumber,
       },
     });
 
     const sleepData = res.data?.data || [];
-    setModalDeviceUid(row.deviceUid);
-    setModalVehicleNumber(row.vehicleNumber);
     setDrowsyModalData({
-      vehicleNumber: row.vehicleNumber,
-      sleepList: sleepData,
-      driverIndexMap:
-        driverIndexMapRef.current?.[row.deviceUid]?.hashToIndex || {},
+      vehicleNumber,
+      sleepList: sleepData || [],
+      driverIndexMap: driverIndexMapRef.current?.[deviceUid]?.hashToIndex || {},
     });
     setDrowsyModalOpen(true);
   } catch (error) {

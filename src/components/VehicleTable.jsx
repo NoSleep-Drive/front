@@ -1,5 +1,5 @@
 // VehicleTable.jsx
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import PropTypes from 'prop-types';
 import { Switch } from '@/components/ui/switch';
 import Button from './Button.jsx';
@@ -12,10 +12,14 @@ import VehicleEditModal from './VehicleEditModal.jsx';
 import VehicleDeleteModal from './VehicleDeleteModal.jsx';
 import DriverListModal from './DriverListModal.jsx';
 import { updateVehicle, deleteVehicle } from '@/api/vehicleApi';
+import { fetchDriversByDeviceUid } from '@/api/driverApi';
+
 import {
   handleRentVehicle,
   handleReturnVehicle,
 } from '@/utils/vehicleHandlers';
+import { DriverIndexMapContext } from '@/contexts/DriverIndexMapContext';
+
 import { setDriverIndex } from '@/utils/driverUtils';
 export default function VehicleTable({ data, setData }) {
   const token = localStorage.getItem('auth_token');
@@ -34,46 +38,48 @@ export default function VehicleTable({ data, setData }) {
   const [editRow, setEditRow] = useState(null);
   const [deleteRow, setDeleteRow] = useState(null);
   const [driverListModalOpen, setDriverListModalOpen] = useState(false);
-  const [modalDeviceUid, setModalDeviceUid] = useState(null);
-  const [modalVehicleNumber, setModalVehicleNumber] = useState(null);
 
-  const [deviceUidMap, setDeviceUidMap] = useState({});
-  const driverIndexMapRef = useRef({});
+  //const [deviceUidMap, setDeviceUidMap] = useState({});
+  const driverIndexMapRef = useContext(DriverIndexMapContext);
 
   useEffect(() => {
-    setDeviceUidMap((prev) => {
-      const updated = { ...prev };
-      data.forEach((item) => {
-        if (item.deviceUid) {
-          updated[item.vehicleNumber] = item.deviceUid;
-        }
-      });
-      return updated;
-    });
-
     const result = data.filter((v) =>
       v.vehicleNumber.toLowerCase().includes(searchQuery.toLowerCase())
     );
     setFilteredVehicles(result);
   }, [data, searchQuery]);
 
+  const handleOpenDriverList = async (row) => {
+    const { deviceUid, vehicleNumber } = row;
+
+    try {
+      const driverList = await fetchDriversByDeviceUid(deviceUid, 100, 0);
+
+      if (driverList?.length) {
+        setDriverIndex(deviceUid, vehicleNumber, driverList, driverIndexMapRef);
+      }
+      console.log('📦 driverList:', driverList);
+
+      setSelectedRow(row);
+      setDriverListModalOpen(true);
+    } catch (error) {
+      alert('운전자 목록을 불러올 수 없습니다.');
+      console.error(error);
+    }
+  };
+
   const handleToggle = async (val, row) => {
     setSelectedRow(row);
-    const deviceUid = row.deviceUid || deviceUidMap[row.vehicleNumber];
+    const { deviceUid, vehicleNumber } = row;
 
     if (val) {
       const driverList = await handleRentVehicle(row, setData);
       if (driverList?.length) {
-        setDriverIndex(
-          deviceUid,
-          row.vehicleNumber,
-          driverList,
-          driverIndexMapRef
-        );
+        setDriverIndex(deviceUid, vehicleNumber, driverList, driverIndexMapRef);
       }
       setData((prev) =>
         prev.map((item) =>
-          item.vehicleNumber === row.vehicleNumber
+          item.vehicleNumber === vehicleNumber
             ? { ...item, isRented: true }
             : item
         )
@@ -87,9 +93,20 @@ export default function VehicleTable({ data, setData }) {
         setDrowsyModalOpen,
         1000,
         0,
-        setModalDeviceUid,
-        setModalVehicleNumber,
+        deviceUid,
+        vehicleNumber,
         driverIndexMapRef
+      );
+      setData((prev) =>
+        prev.map((item) =>
+          item.vehicleNumber === vehicleNumber
+            ? {
+                ...item,
+                isRented: false,
+                deviceUid: item.deviceUid || deviceUid,
+              }
+            : item
+        )
       );
     }
 
@@ -151,17 +168,7 @@ export default function VehicleTable({ data, setData }) {
           size="sm"
           variant="white"
           className="w-16"
-          onClick={() => {
-            const uid = row.deviceUid || deviceUidMap[row.vehicleNumber];
-            if (!uid) {
-              alert('장치 정보가 없어 운전자 조회가 불가능합니다.');
-              return;
-            }
-            setModalDeviceUid(uid);
-            setModalVehicleNumber(row.vehicleNumber);
-            setSelectedRow(row);
-            setDriverListModalOpen(true);
-          }}
+          onClick={() => handleOpenDriverList(row)}
         />
       ),
     },
@@ -173,12 +180,14 @@ export default function VehicleTable({ data, setData }) {
         label="수정"
         size="sm"
         variant="white"
+        disabled={row.isRented}
         onClick={() => setEditRow(row)}
       />
       <Button
         label="삭제"
         size="sm"
         variant="main"
+        disabled={row.isRented}
         onClick={() => setDeleteRow(row)}
       />
     </div>
@@ -251,14 +260,14 @@ export default function VehicleTable({ data, setData }) {
         />
       )}
 
-      {driverListModalOpen && modalDeviceUid && modalVehicleNumber && (
+      {driverListModalOpen && selectedRow && (
         <DriverListModal
           isOpen={true}
           onClose={() => {
             setDriverListModalOpen(false);
             setSelectedRow(null);
           }}
-          deviceUid={modalDeviceUid}
+          deviceUid={selectedRow.deviceUid}
           vehicle={selectedRow}
         />
       )}

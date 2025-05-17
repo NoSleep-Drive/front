@@ -9,6 +9,7 @@ import VehicleEditModal from '../components/VehicleEditModal';
 import VehicleDeleteModal from '../components/VehicleDeleteModal.jsx';
 import { getVehicles, deleteVehicle, updateVehicle } from '../api/vehicleApi';
 import { getRecentSleepData } from '../api/dashboardApi';
+import { downloadSleepVideo } from '@/api/sleepApi';
 
 import useDriverIndexMap from '@/hooks/useDriverIndexMap';
 
@@ -17,7 +18,6 @@ import {
   getSleepTodayCount,
   getAbnormalVehicleCount,
 } from '../api/dashboardApi';
-//import { mockData } from '@/mockData'; //TODO
 export default function Dashboard() {
   const token = localStorage.getItem('auth_token');
   const [selectedVehicle, setSelectedVehicle] = useState(null);
@@ -67,7 +67,7 @@ export default function Dashboard() {
         const index = driverIndexMapRef.current?.[uid]?.hashToIndex?.[hash];
 
         if (hash && index) {
-          map[hash] = index; // UI에서 `운전자 ${index}` 표기용
+          map[hash] = index;
         }
       });
 
@@ -96,32 +96,13 @@ export default function Dashboard() {
     setShowDeleteModal(true);
   };
 
-  const handleDownload = async (uid) => {
+  const handleDownload = async (idSleep) => {
     try {
-      const response = await fetch(`/api/sleep/${uid}/video/download`, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      await downloadSleepVideo(token, idSleep);
+    } catch (error) {
+      console.error('다운로드 실패:', error);
 
-      if (!response.ok) {
-        if (response.status === 401)
-          throw new Error('인증 정보가 유효하지 않습니다.');
-        if (response.status === 404)
-          throw new Error('해당 영상이 존재하지 않습니다.');
-        throw new Error('다운로드에 실패했습니다.');
-      }
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `sleep_${uid}.mp4`;
-      a.click();
-      window.URL.revokeObjectURL(url);
-    } catch (err) {
-      alert(err.message);
+      alert(error.message || '다운로드 중 오류가 발생했습니다.');
     }
   };
 
@@ -148,7 +129,7 @@ export default function Dashboard() {
       render: (_, row) => (
         <button
           type="button"
-          onClick={() => handleDownload(row.uid)}
+          onClick={() => handleDownload(row.idSleep)}
           className="text-cornflower-950 hover:bg-cornflower-100 hover:text-cornflower-600 inline-flex items-center justify-center rounded-xl p-2 transition-colors"
         >
           <Download size={18} />
