@@ -7,6 +7,8 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd());
   const API_BASE_URL = env.VITE_API_BASE_URL;
 
+  console.log('API_BASE_URL:', API_BASE_URL);
+
   return {
     plugins: [react(), tailwindcss(), tsconfigPaths()],
     server: {

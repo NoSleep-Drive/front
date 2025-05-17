@@ -30,6 +30,7 @@ export default function Pagination({ page, setPage, totalPages }) {
   return (
     <div className="mt-4 flex items-center justify-center gap-2">
       <button
+        type="button"
         onClick={handlePrev}
         disabled={page === 1}
         className={`text-cornflower-950 hover:bg-cornflower-100 hover:text-cornflower-600 inline-flex items-center justify-center rounded-xl p-2 transition-colors ${page === 1 ? 'cursor-not-allowed opacity-50' : ''}`}

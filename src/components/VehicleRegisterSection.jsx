@@ -1,24 +1,30 @@
-import React, { useState } from 'react';
+import { React, useState } from 'react';
 import InputField from '../components/InputField';
 import Button from '../components/Button';
 import PropTypes from 'prop-types';
-export default function VehicleRegisterSection({ data, setData }) {
+import { registerVehicle, getVehicles } from '../api/vehicleApi';
+
+export default function VehicleRegisterSection({ setData, token }) {
   const [vehicleNumber, setVehicleNumber] = useState('');
   const [deviceUid, setDeviceUid] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (!vehicleNumber || !deviceUid) return;
-
-    const newVehicle = {
-      vehicleNumber,
-      deviceUid,
-      createdDate: new Date().toISOString(),
-      isRented: false,
-    };
-
-    setData([...data, newVehicle]);
-    setVehicleNumber('');
-    setDeviceUid('');
+    setIsLoading(true);
+    try {
+      await registerVehicle(vehicleNumber, deviceUid, token);
+      const updated = await getVehicles(100, 0, token);
+      setData(updated);
+      setVehicleNumber('');
+      setDeviceUid('');
+      alert('🚗 차량 등록 완료');
+    } catch (error) {
+      console.error('🚨 차량 등록 실패:', error);
+      alert('차량 등록 실패');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -45,6 +51,8 @@ export default function VehicleRegisterSection({ data, setData }) {
             size="md"
             variant="main"
             onClick={handleRegister}
+            disabled={isLoading}
+            isLoading={isLoading}
           />
         </div>
       </div>
@@ -53,13 +61,6 @@ export default function VehicleRegisterSection({ data, setData }) {
 }
 
 VehicleRegisterSection.propTypes = {
-  data: PropTypes.arrayOf(
-    PropTypes.shape({
-      vehicleNumber: PropTypes.string.isRequired,
-      deviceUid: PropTypes.string.isRequired,
-      createdDate: PropTypes.string.isRequired,
-      isRented: PropTypes.bool.isRequired,
-    })
-  ).isRequired,
   setData: PropTypes.func.isRequired,
+  token: PropTypes.string.isRequired,
 };

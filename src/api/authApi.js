@@ -1,5 +1,4 @@
 import apiClient from './apiClient';
-
 export const signUpApi = async (formData) => {
   try {
     const response = await apiClient.post('/company/signup', {
