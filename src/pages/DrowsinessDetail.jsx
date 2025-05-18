@@ -36,7 +36,7 @@ export default function DrowsinessDetail({ driverIndexMapRef }) {
     };
 
     fetchSleepData();
-  }, [id, driverIndexMapRef]);
+  }, [id, driverIndexMapRef, token]);
 
   const handleDownload = async () => {
     try {
@@ -48,7 +48,7 @@ export default function DrowsinessDetail({ driverIndexMapRef }) {
   };
 
   if (sleepData === null) {
-    return <div>졸음 데이터를 불러오지 못했습니다.</div>;
+    return <div>로딩 중...</div>;
   }
   const [date, time] = sleepData.detectedTime?.split('T') || [];
 

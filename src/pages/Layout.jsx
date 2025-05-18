@@ -7,7 +7,7 @@ export default function Layout() {
   const location = useLocation();
   const isAuthPage =
     location.pathname === '/signup' || location.pathname === '/';
-  const [companyName, setCompanyName] = useState('');
+  const [companyName, setCompanyName] = useState('회사명 로딩 중...');
 
   useEffect(() => {
     const token = localStorage.getItem('auth_token');

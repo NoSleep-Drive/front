@@ -18,7 +18,6 @@ export const fetchDriversByDeviceUid = async (deviceUid, pageSize, pageIdx) => {
 
     return response.data.data;
   } catch (error) {
-    console.log('fetch-deviceUid:', deviceUid);
     console.error(
       '운전자 목록 불러오기에 오류 발생',
       error.response?.data?.message || error.message || '알 수 없는 오류'

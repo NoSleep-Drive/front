@@ -56,7 +56,7 @@ export const getSleepDetail = async (token, id) => {
 };
 
 export const getSleepVideoStreamUrl = (id) => {
-  return `/sleep/${id}/video/stream`;
+  return `${apiClient.defaults.baseURL}/sleep/${id}/video/stream`;
 };
 
 export const downloadSleepVideo = async (token, id) => {
@@ -105,7 +105,7 @@ export const downloadSleepVideosZip = async (token, ids = []) => {
         ...createAuthHeader(token),
       }
     );
-    return response;
+    return response.data;
   } catch (error) {
     handleApiError(error);
   }

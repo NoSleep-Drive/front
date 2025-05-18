@@ -57,3 +57,6 @@ export function getDriverIndexMap(deviceUid, driverIndexMapRef) {
   }
   return driverIndexMapRef.current?.[deviceUid]?.hashToIndex || {};
 }
+export function getDriverHashByIndex(deviceUid, index, driverIndexMapRef) {
+  return driverIndexMapRef.current?.[deviceUid]?.indexToHash?.[index] ?? null;
+}

@@ -64,8 +64,11 @@ export default function DrowsinessSearch() {
 
       const adjusted =
         endDate != null
-          ? new Date(endDate.setHours(23, 59, 59, 999))
+          ? new Date(new Date(endDate).setHours(23, 59, 59, 999))
+              .toISOString()
+              .split('T')[0]
           : undefined;
+
       const data = await getSleepRecords({
         token,
         vehicleNumber: vehicleNumber || undefined,

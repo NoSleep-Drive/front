@@ -77,7 +77,7 @@ const Header = ({ companyName, onLogout = () => {} }) => {
 };
 Header.propTypes = {
   activePage: PropTypes.string,
-  companyName: PropTypes.string,
+  companyName: PropTypes.string.isRequired,
   onLogout: PropTypes.func,
 };
 export default Header;
