@@ -10,9 +10,8 @@ import VehicleDeleteModal from '../components/VehicleDeleteModal.jsx';
 import { getVehicles, deleteVehicle, updateVehicle } from '../api/vehicleApi';
 import { getRecentSleepData } from '../api/dashboardApi';
 import { downloadSleepVideo } from '@/api/sleepApi';
-
 import useDriverIndexMap from '@/hooks/useDriverIndexMap';
-
+import { getDriverIndex } from '@/utils/driverUtils';
 import {
   getVehicleCount,
   getSleepTodayCount,
@@ -112,10 +111,12 @@ export default function Dashboard() {
       key: 'driverHash',
       label: '운전자',
       render: (value, row) => {
-        const uid = row.deviceUid;
-        const hash = row.driverHash;
-        const index = driverIndexMapRef.current?.[uid]?.hashToIndex?.[hash];
-        return index ? `운전자 ${index}` : hash;
+        const index = getDriverIndex(
+          row.deviceUid,
+          row.driverHash,
+          driverIndexMapRef
+        );
+        return index !== undefined ? `운전자 ${index + 1}` : '운전자 ?';
       },
     },
     {

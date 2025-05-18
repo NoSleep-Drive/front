@@ -11,7 +11,7 @@ export default function VehicleRegisterSection({ setData, token }) {
 
   const handleRegister = async () => {
     if (!vehicleNumber || !deviceUid) {
-      alert('차량 변호와 카메라 ID를 모두 입력해 주세요.');
+      alert('차량 번호와 카메라 ID를 모두 입력해 주세요.');
       return;
     }
     setIsLoading(true);

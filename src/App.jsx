@@ -4,7 +4,6 @@ import { Routes, Route } from 'react-router-dom';
 import '../index.css';
 
 import Dashboard from './pages/Dashboard';
-import DriverDrowsiness from './components/DrowsyStatsModal';
 import DrowsinessDetail from './pages/DrowsinessDetail';
 import DrowsinessSearch from './pages/DrowsinessSearch';
 import WelcomePage from './pages/WelcomePage';
@@ -21,7 +20,6 @@ function App() {
         <Route path="/" element={<Layout />}>
           <Route index element={<WelcomePage />} />
           <Route path="dashboard" element={<Dashboard />} />
-          <Route path="driver/:id/stats" element={<DriverDrowsiness />} />
           <Route path="drowsiness/search" element={<DrowsinessSearch />} />
           <Route path="drowsiness/:id" element={<DrowsinessDetail />} />
           <Route path="settings" element={<Settings />} />

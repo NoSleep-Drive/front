@@ -35,7 +35,7 @@ export default function DrowsyStatsModal({ isOpen, onConfirm, onClose, data }) {
         <h2 className="head1 mb-6 text-center">운전자 졸음 통계</h2>
         <div key={status.hash} className="mb-6">
           <div className="mb-2 flex items-center justify-between px-2">
-            <div className="caption-bold">운전자 {status.index}</div>
+            <div className="caption-bold">운전자 {status.index + 1}</div>
 
             <div className="caption">{vehicleNumber}</div>
           </div>

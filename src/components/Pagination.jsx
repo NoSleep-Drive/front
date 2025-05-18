@@ -9,35 +9,15 @@ export default function Pagination({ page, setPage, totalPages }) {
   const handleNext = () => setPage(Math.min(totalPages, page + 1));
 
   const getPageNumbers = () => {
-    const pages = [];
-    const maxVisible = 5;
-
-    if (totalPages <= maxVisible + 2) {
-      // 전체 페이지가 작으면 생략점 없이 전부 표시
-      for (let i = 1; i <= totalPages; i++) pages.push(i);
-    } else {
-      const half = Math.floor(maxVisible / 2);
-      let start = Math.max(2, page - half);
-      let end = Math.min(totalPages - 1, page + half);
-
-      if (page <= 3) {
-        start = 2;
-        end = 2 + maxVisible - 1;
-      } else if (page >= totalPages - 2) {
-        start = totalPages - maxVisible + 1;
-        end = totalPages - 1;
-      }
-
-      pages.push(1);
-      if (start > 2) pages.push('prev-ellipsis');
-      for (let i = start; i <= end; i++) {
-        pages.push(i);
-      }
-      if (end < totalPages - 1) pages.push('next-ellipsis');
-      pages.push(totalPages);
+    if (totalPages <= 5) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
     }
 
-    return pages;
+    const range = 2;
+    const start = Math.max(1, page - range);
+    const end = Math.min(totalPages, page + range);
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   };
 
   return (

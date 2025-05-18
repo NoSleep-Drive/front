@@ -43,6 +43,7 @@ export function useEditProfile() {
         const token = localStorage.getItem('auth_token');
         if (token) {
           const response = await getCompanyInformation(token);
+          console.log('응답 구조:', response);
           const { id, companyName, businessNumber } = response.data;
           dispatch({
             type: 'SET_COMPANY_INFO',
@@ -80,12 +81,16 @@ export function useEditProfile() {
         companyName: state.companyName,
         businessNumber: state.businessNumber,
       };
+      console.log('폼 제출 시 formData:', formData);
       const response = await updateCompany(token, formData);
+      console.log('저장 후 받아온 회사 정보:', response.data);
+
       const { message } = response;
       if (message === '회원 정보가 수정되었습니다.') {
         alert('회원 정보가 성공적으로 수정되었습니다.');
         dispatch({ type: 'SET_FIELD', field: 'password', value: '' });
         dispatch({ type: 'SET_FIELD', field: 'confirmPassword', value: '' });
+        //window.location.reload();
       }
     } catch (error) {
       alert(`회원 정보 수정 실패: ${error.message}`);

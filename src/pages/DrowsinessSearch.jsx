@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import InputField from '../components/InputField';
 import Button from '../components/Button';
 import { Search } from 'lucide-react';
@@ -11,6 +11,7 @@ import { getSleepRecords } from '@/api/sleepApi';
 import { DriverIndexMapContext } from '@/contexts/DriverIndexMapContext';
 
 export default function DrowsinessSearch() {
+  const token = localStorage.getItem('auth_token');
   const driverIndexMapRef = useContext(DriverIndexMapContext);
   {
     /*const mockSleepData = [
@@ -41,7 +42,6 @@ export default function DrowsinessSearch() {
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 5;
   const [filteredData, setFilteredData] = useState([]);
-  //const [filteredData, setFilteredData] = useState(mockSleepData);
 
   const handleVehicleInputChange = (name, value) => {
     if (name === 'vehicleNumber') setVehicleNumber(value);
@@ -62,10 +62,12 @@ export default function DrowsinessSearch() {
     try {
       const hash = getDriverHashByIndex(selectedDriverIndex, driverIndexMap);
 
-      const adjusted = new Date(endDate);
-      adjusted.setHours(23, 59, 59, 999);
-
+      const adjusted =
+        endDate != null
+          ? new Date(endDate.setHours(23, 59, 59, 999))
+          : undefined;
       const data = await getSleepRecords({
+        token,
         vehicleNumber: vehicleNumber || undefined,
         driverHash: hash || undefined,
         start_date: startDate?.toISOString().split('T')[0],
@@ -81,8 +83,7 @@ export default function DrowsinessSearch() {
         newMap[hash] = i + 1;
       });
       setDriverIndexMap(newMap);
-
-      setDriverIndexMap(newMap);
+      driverIndexMapRef.current = newMap;
       const grouped = {};
       data.forEach((item) => {
         const { id, vehicleNumber, deviceUid, detectedTime, driverHash } = item;
@@ -117,11 +118,9 @@ export default function DrowsinessSearch() {
     })();
   }, []);
 
-  const currentRows = useMemo(() => {
-    const indexOfLastRow = currentPage * rowsPerPage;
-    const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-    return filteredData.slice(indexOfFirstRow, indexOfLastRow);
-  }, [filteredData, currentPage, rowsPerPage]);
+  const indexOfLastRow = currentPage * rowsPerPage;
+  const indexOfFirstRow = indexOfLastRow - rowsPerPage;
+  const currentRows = filteredData.slice(indexOfFirstRow, indexOfLastRow);
 
   return (
     <div className="flex flex-col gap-10 px-4">

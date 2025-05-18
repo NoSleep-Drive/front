@@ -6,65 +6,30 @@ import PropTypes from 'prop-types';
 import axios from 'axios';
 import { getDriverIndexMap } from '../utils/driverUtils.js';
 
-const preprocessDataWithDriverIndex = (originalData, driverIndexMapRef) => {
-  return originalData.map((row) => {
-    const deviceUid = row.deviceUid;
-    const indexMap = getDriverIndexMap(deviceUid, driverIndexMapRef) ?? {};
-
-    return {
-      ...row,
-      drowsinessDetails: (row.drowsinessDetails || []).map((detail) => ({
-        ...detail,
-        driverIndex: indexMap?.[detail.driverHash] || null,
-      })),
-    };
-  });
-};
 export default function DrowsinessAccordionTable({ data, driverIndexMapRef }) {
   const [expandedRow, setExpandedRow] = useState(null);
-  const navigate = useNavigate();
   const [isDownloading, setIsDownloading] = useState(false);
+  const navigate = useNavigate();
+
+  const processedData = useMemo(() => {
+    return data.map((row) => {
+      const deviceUid = row.deviceUid;
+      const indexMap = getDriverIndexMap(deviceUid, driverIndexMapRef) ?? {};
+
+      return {
+        ...row,
+        drowsinessDetails: (row.drowsinessDetails || []).map((detail) => ({
+          ...detail,
+          driverIndex: indexMap?.[detail.driverHash] ?? null,
+          detectedTime: detail.detectedTime,
+        })),
+      };
+    });
+  }, [data, driverIndexMapRef.current]);
+
   const toggleRow = (vehicleNumber) => {
     setExpandedRow((prev) => (prev === vehicleNumber ? null : vehicleNumber));
   };
-
-  const columns = [
-    {
-      key: 'vehicleNumber',
-      label: '차량 번호',
-      render: (value, row) => (
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => toggleRow(row.vehicleNumber)}
-            className="hover:bg-cornflower-100 text-cornflower-950 rounded-md p-2 text-2xl transition-colors hover:text-blue-600"
-          >
-            {expandedRow === row.vehicleNumber ? '▾' : '▸'}
-          </button>
-          <span className="align-middle leading-normal">{value}</span>
-        </div>
-      ),
-    },
-    { key: 'detectDate', label: '감지 날짜' },
-    {
-      key: 'download',
-      label: '일괄 다운로드',
-      render: (value, row) => {
-        const ids = row.drowsinessDetails?.map((d) => d.id) || [];
-        return (
-          <button
-            type="button"
-            onClick={() => handleBulkDownload(ids)}
-            className={`text-cornflower-950 hover:bg-cornflower-100 hover:text-cornflower-600 inline-flex items-center justify-center rounded-xl p-2 transition-colors ${
-              isDownloading ? 'cursor-not-allowed opacity-50' : ''
-            }`}
-          >
-            <Download size={18} />
-          </button>
-        );
-      },
-    },
-  ];
 
   const handleBulkDownload = async (ids) => {
     if (!ids || ids.length === 0) {
@@ -114,15 +79,58 @@ export default function DrowsinessAccordionTable({ data, driverIndexMapRef }) {
       setIsDownloading(false);
     }
   };
-  const processedData = useMemo(() => {
-    return preprocessDataWithDriverIndex(data, driverIndexMapRef);
-  }, [data, driverIndexMapRef.current]);
+  const columns = [
+    {
+      key: 'vehicleNumber',
+      label: '차량 번호',
+      render: (value, row) => (
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => toggleRow(row.vehicleNumber)}
+            className="hover:bg-cornflower-100 text-cornflower-950 rounded-md p-2 text-2xl transition-colors hover:text-blue-600"
+          >
+            {expandedRow === row.vehicleNumber ? '▾' : '▸'}
+          </button>
+          <span className="align-middle leading-normal">{value}</span>
+        </div>
+      ),
+    },
+    {
+      key: 'drowsinessCount',
+      label: '감지 횟수',
+      render: (value, row) => (
+        <span>{row.drowsinessDetails?.length ?? 0}회</span>
+      ),
+    },
+    {
+      key: 'download',
+      label: '일괄 다운로드',
+      render: (value, row) => {
+        const ids = row.drowsinessDetails?.map((d) => d.id) || [];
+        return (
+          <button
+            type="button"
+            onClick={() => handleBulkDownload(ids)}
+            className={`text-cornflower-950 hover:bg-cornflower-100 hover:text-cornflower-600 inline-flex items-center justify-center rounded-xl p-2 transition-colors ${
+              isDownloading ? 'cursor-not-allowed opacity-50' : ''
+            }`}
+          >
+            <Download size={18} />
+          </button>
+        );
+      },
+    },
+  ];
+
   return (
     <BaseTable
       columns={columns}
       data={processedData}
-      expandableRow={(row) =>
-        expandedRow === row.vehicleNumber ? (
+      expandableRow={(row) => {
+        if (expandedRow !== row.vehicleNumber) return null;
+
+        return (
           <tr className="bg-gray-100">
             <td colSpan={columns.length} className="px-8 py-3">
               {row.drowsinessDetails.length === 0 ? (
@@ -131,31 +139,43 @@ export default function DrowsinessAccordionTable({ data, driverIndexMapRef }) {
                 </div>
               ) : (
                 <div className="flex flex-col gap-2">
-                  {row.drowsinessDetails.map((detail, idx) => (
-                    <div
-                      key={idx}
-                      className="flex w-fit items-start gap-6 rounded border border-gray-200 bg-white px-4 py-1.5 text-[15px]"
-                    >
-                      <span className="text-cornflower-950 max-w-[180px] min-w-[160px]">
-                        {detail.timestamp.replace('T', ' ').slice(0, 19)}
-                      </span>
-                      <span>운전자 {detail.driverIndex}</span>
+                  {row.drowsinessDetails.map((detail, idx) => {
+                    console.log('🔍 detail:', detail); // ✅ 로그 추가
 
-                      <button
-                        type="button"
-                        onClick={() => navigate(`/drowsiness/${detail.id}`)}
-                        className="text-cornflower-500 whitespace-nowrap hover:underline"
+                    const formattedTime =
+                      typeof detail.detectedTime === 'string'
+                        ? detail.detectedTime.replace('T', ' ').slice(0, 19)
+                        : 'N/A';
+
+                    return (
+                      <div
+                        key={idx}
+                        className="flex w-fit items-start gap-6 rounded border border-gray-200 bg-white px-4 py-1.5 text-[15px]"
                       >
-                        자세히 보기
-                      </button>
-                    </div>
-                  ))}
+                        <span className="text-cornflower-950 max-w-[180px] min-w-[160px]">
+                          {formattedTime}
+                        </span>
+                        <span>
+                          {detail.driverIndex != null
+                            ? `운전자 ${detail.driverIndex + 1}`
+                            : '운전자 -'}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => navigate(`/drowsiness/${detail.id}`)}
+                          className="text-cornflower-500 whitespace-nowrap hover:underline"
+                        >
+                          자세히 보기
+                        </button>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </td>
           </tr>
-        ) : null
-      }
+        );
+      }}
     />
   );
 }
@@ -169,7 +189,7 @@ DrowsinessAccordionTable.propTypes = {
       deviceUid: PropTypes.string.isRequired,
       drowsinessDetails: PropTypes.arrayOf(
         PropTypes.shape({
-          timestamp: PropTypes.string.isRequired,
+          detectedTime: PropTypes.string.isRequired,
           id: PropTypes.number.isRequired,
           driverHash: PropTypes.string.isRequired,
         })

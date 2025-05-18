@@ -87,14 +87,11 @@ export default function VehicleTable({ data, setData }) {
     } else {
       await handleReturnVehicle(
         row,
-        data,
         setData,
         setDrowsyModalData,
         setDrowsyModalOpen,
         1000,
         0,
-        deviceUid,
-        vehicleNumber,
         driverIndexMapRef
       );
       setData((prev) =>
@@ -102,7 +99,6 @@ export default function VehicleTable({ data, setData }) {
           item.vehicleNumber === vehicleNumber
             ? {
                 ...item,
-                isRented: false,
                 deviceUid: item.deviceUid || deviceUid,
               }
             : item

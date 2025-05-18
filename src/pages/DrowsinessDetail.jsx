@@ -6,17 +6,21 @@ import { getDriverIndex } from '../utils/driverUtils';
 import PropTypes from 'prop-types';
 import { getSleepDetail, downloadSleepVideo } from '../api/sleepApi';
 export default function DrowsinessDetail({ driverIndexMapRef }) {
-  const token = localStorage.getItem('auth_token');
-
   const { id } = useParams();
+  const token = localStorage.getItem('auth_token');
+  console.log('sleep id:', id);
   const navigate = useNavigate();
   const [sleepData, setSleepData] = useState(null);
   const [driverIndex, setDriverIndex] = useState(null);
 
   useEffect(() => {
     const fetchSleepData = async () => {
+      if (!token) {
+        alert('로그인이 필요합니다.');
+        navigate('/');
+        return;
+      }
       try {
-        const token = localStorage.getItem('auth_token');
         const data = await getSleepDetail(id, token);
         setSleepData(data);
 
@@ -43,7 +47,9 @@ export default function DrowsinessDetail({ driverIndexMapRef }) {
     }
   };
 
-  if (sleepData === null) return <div>로딩 중...</div>;
+  if (sleepData === null) {
+    return <div>졸음 데이터를 불러오지 못했습니다.</div>;
+  }
   const [date, time] = sleepData.detectedTime?.split('T') || [];
 
   return (
@@ -66,7 +72,9 @@ export default function DrowsinessDetail({ driverIndexMapRef }) {
             <span>차량 번호: {sleepData.vehicleNumber}</span>
             <span>
               운전자:{' '}
-              {driverIndex ? `운전자 ${driverIndex}` : sleepData.driverHash}
+              {driverIndex != null
+                ? `운전자 ${driverIndex + 1}`
+                : sleepData.driverHash}
             </span>
             <span>감지 날짜: {date}</span>
             <span>감지 시각: {time?.slice(0, 8)}</span>

@@ -7,12 +7,14 @@ const handleApiError = (error) => {
   customError.status = error.response ? error.response.status : 500;
   throw customError;
 };
-
-const createAuthHeader = (token) => ({
-  headers: {
-    Authorization: `Bearer ${token}`,
-  },
-});
+const createAuthHeader = (token = localStorage.getItem('auth_token')) => {
+  if (!token) return {};
+  return {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+};
 
 export const getSleepRecords = async ({
   token,
@@ -67,9 +69,7 @@ export const downloadSleepVideo = async (token, id) => {
       alert('다운로드 가능한 영상이 없습니다.');
       return;
     }
-    const blob = new Blob([response.data], {
-      type: 'application/octet-stream',
-    });
+    const blob = response.data;
 
     const contentDisposition = response.headers['content-disposition'];
     const filenameMatch = contentDisposition?.match(/filename="(.+)"/);
@@ -83,7 +83,7 @@ export const downloadSleepVideo = async (token, id) => {
     document.body.removeChild(link);
     URL.revokeObjectURL(link.href);
   } catch (error) {
-    if (error.status === 404) {
+    if (error.response?.status === 404) {
       alert('해당 영상이 존재하지 않습니다.');
     }
     handleApiError(error);

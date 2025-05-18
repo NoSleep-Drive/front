@@ -1,5 +1,3 @@
-// [API 연동 예정] companyName 받아오기
-
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
@@ -20,10 +18,7 @@ NavItem.propTypes = {
   isActive: PropTypes.bool,
 };
 
-const Header = ({
-  companyName = 'ㅇㅇㅇ 업체', // TODO: 로그인 후 회사명 받아오기
-  onLogout = () => {},
-}) => {
+const Header = ({ companyName, onLogout = () => {} }) => {
   const navigate = useNavigate();
   const location = useLocation();
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { createPortal } from 'react-dom';
 import BaseTable from './BaseTable';
@@ -6,6 +6,8 @@ import Pagination from './Pagination';
 import { fetchDriversByDeviceUid } from '@/api/driverApi';
 import Button from './Button';
 import useDriverIndexMap from '@/hooks/useDriverIndexMap';
+import { getDriverIndex } from '@/utils/driverUtils';
+
 const DriverListModal = ({ isOpen, onClose, deviceUid, vehicle }) => {
   const driverIndexMapRef = useDriverIndexMap();
   const [drivers, setDrivers] = useState([]);
@@ -13,11 +15,7 @@ const DriverListModal = ({ isOpen, onClose, deviceUid, vehicle }) => {
   const [totalPages, setTotalPages] = useState(1);
   const pageSize = 5;
 
-  useEffect(() => {
-    if (isOpen && deviceUid) fetchDrivers();
-  }, [isOpen, deviceUid, pageIdx]);
-
-  const fetchDrivers = async () => {
+  const fetchDrivers = useCallback(async () => {
     try {
       const result = await fetchDriversByDeviceUid(
         deviceUid,
@@ -25,11 +23,16 @@ const DriverListModal = ({ isOpen, onClose, deviceUid, vehicle }) => {
         pageIdx
       );
       setDrivers(result);
-      setTotalPages(result.length < pageSize ? pageIdx + 1 : pageIdx + 2);
+      const isFullPage = result.length === pageSize;
+      const totalPages = isFullPage ? pageIdx + 2 : pageIdx + 1;
+      setTotalPages(totalPages);
     } catch (err) {
       console.error('운전자 목록 조회 실패:', err);
     }
-  };
+  }, [deviceUid, pageSize, pageIdx]);
+  useEffect(() => {
+    if (isOpen && deviceUid) fetchDrivers();
+  }, [isOpen, deviceUid, pageIdx, fetchDrivers]);
 
   const columns = [
     {
@@ -38,8 +41,11 @@ const DriverListModal = ({ isOpen, onClose, deviceUid, vehicle }) => {
       render: (_, row) => {
         if (!row || !row.driverHash) return '운전자 ?';
 
-        const index =
-          driverIndexMapRef.current?.[deviceUid]?.hashToIndex?.[row.driverHash];
+        const index = getDriverIndex(
+          deviceUid,
+          row.driverHash,
+          driverIndexMapRef
+        );
         return index !== undefined ? `운전자 ${index + 1}` : '운전자 ?';
       },
     },
@@ -52,7 +58,7 @@ const DriverListModal = ({ isOpen, onClose, deviceUid, vehicle }) => {
     {
       key: 'endTime',
       label: '반납 시간',
-      render: (value) => (value ? new Date(value).toLocaleString() : '진행 중'),
+      render: (value) => (value ? new Date(value).toLocaleString() : '대여 중'),
     },
   ];
 
