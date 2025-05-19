@@ -9,11 +9,16 @@ import useDriverIndexMap from '@/hooks/useDriverIndexMap';
 import { getDriverIndex } from '@/utils/driverUtils';
 
 const DriverListModal = ({ isOpen, onClose, deviceUid, vehicle }) => {
-  const driverIndexMapRef = useDriverIndexMap();
+  const { driverIndexMapRef } = useDriverIndexMap();
   const [drivers, setDrivers] = useState([]);
   const [pageIdx, setPageIdx] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const pageSize = 5;
+  console.log(
+    '[DriverListModal] driverIndexMapRef:',
+    driverIndexMapRef.current
+  );
+  console.log('[DriverListModal] 찾는 deviceUid:', deviceUid);
 
   const fetchDrivers = useCallback(async () => {
     try {

@@ -24,12 +24,12 @@ export default function Dashboard() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [recentVehicles, setRecentVehicles] = useState([]);
   const [recentSleepData, setRecentSleepData] = useState([]);
-  const [, setDriverIndexMap] = useState({});
   const [summaryData, setSummaryData] = useState({
     totalVehicles: 0,
     sleepDetectedToday: 0,
     abnormalVehicles: 0,
   });
+  const { driverIndexMapRef, deviceUidMapRef } = useDriverIndexMap();
   useEffect(() => {
     fetchRecentVehicles();
     fetchRecentSleep();
@@ -53,24 +53,11 @@ export default function Dashboard() {
       console.error('대시보드 요약 정보 불러오기 실패:', err);
     }
   };
-  const { driverIndexMapRef } = useDriverIndexMap();
 
   const fetchRecentSleep = async () => {
     try {
       const data = await getRecentSleepData(token);
       setRecentSleepData(data);
-      const map = {};
-      data.forEach((item) => {
-        const uid = item.deviceUid;
-        const hash = item.driverHash;
-        const index = driverIndexMapRef.current?.[uid]?.hashToIndex?.[hash];
-
-        if (hash && index) {
-          map[hash] = index;
-        }
-      });
-
-      setDriverIndexMap(map);
     } catch (err) {
       console.error(' 졸음 데이터 불러오기 실패:', err);
     }
@@ -116,7 +103,7 @@ export default function Dashboard() {
           row.driverHash,
           driverIndexMapRef
         );
-        return index !== undefined ? `운전자 ${index + 1}` : '운전자 ?';
+        return index !== undefined ? `운전자 ${index + 1}` : '운전자 -';
       },
     },
     {
@@ -210,6 +197,10 @@ export default function Dashboard() {
           onConfirm={(newNumber) => {
             updateVehicle(selectedVehicle.deviceUid, newNumber, token)
               .then(() => {
+                const uid = selectedVehicle.deviceUid;
+                if (deviceUidMapRef.current[uid]) {
+                  deviceUidMapRef.current[uid] = newNumber;
+                }
                 alert('수정 완료');
                 fetchRecentVehicles();
                 setShowEditModal(false);

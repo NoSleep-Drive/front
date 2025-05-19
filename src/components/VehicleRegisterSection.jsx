@@ -3,8 +3,11 @@ import InputField from '../components/InputField';
 import Button from '../components/Button';
 import PropTypes from 'prop-types';
 import { registerVehicle, getVehicles } from '../api/vehicleApi';
+import useDriverIndexMap from '@/hooks/useDriverIndexMap';
 
 export default function VehicleRegisterSection({ setData, token }) {
+  const { deviceUidMapRef } = useDriverIndexMap();
+
   const [vehicleNumber, setVehicleNumber] = useState('');
   const [deviceUid, setDeviceUid] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -17,6 +20,8 @@ export default function VehicleRegisterSection({ setData, token }) {
     setIsLoading(true);
     try {
       await registerVehicle(vehicleNumber, deviceUid, token);
+      deviceUidMapRef.current[vehicleNumber] = deviceUid;
+
       const updated = await getVehicles(100, 0, token);
       setData(updated);
       setVehicleNumber('');

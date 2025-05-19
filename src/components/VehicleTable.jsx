@@ -1,5 +1,5 @@
 // VehicleTable.jsx
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Switch } from '@/components/ui/switch';
 import Button from './Button.jsx';
@@ -13,12 +13,11 @@ import VehicleDeleteModal from './VehicleDeleteModal.jsx';
 import DriverListModal from './DriverListModal.jsx';
 import { updateVehicle, deleteVehicle } from '@/api/vehicleApi';
 import { fetchDriversByDeviceUid } from '@/api/driverApi';
-
+import useDriverIndexMap from '@/hooks/useDriverIndexMap.js';
 import {
   handleRentVehicle,
   handleReturnVehicle,
 } from '@/utils/vehicleHandlers';
-import { DriverIndexMapContext } from '@/contexts/DriverIndexMapContext';
 
 import { setDriverIndex } from '@/utils/driverUtils';
 export default function VehicleTable({ data, setData }) {
@@ -38,9 +37,7 @@ export default function VehicleTable({ data, setData }) {
   const [editRow, setEditRow] = useState(null);
   const [deleteRow, setDeleteRow] = useState(null);
   const [driverListModalOpen, setDriverListModalOpen] = useState(false);
-
-  //const [deviceUidMap, setDeviceUidMap] = useState({});
-  const driverIndexMapRef = useContext(DriverIndexMapContext);
+  const { driverIndexMapRef, deviceUidMapRef } = useDriverIndexMap();
 
   useEffect(() => {
     const result = data.filter((v) =>
@@ -57,6 +54,9 @@ export default function VehicleTable({ data, setData }) {
 
       if (driverList?.length) {
         setDriverIndex(deviceUid, vehicleNumber, driverList, driverIndexMapRef);
+        console.log('[setDriverIndex] 등록:', {
+          deviceUid,
+        });
       }
       console.log('📦 driverList:', driverList);
 
@@ -112,6 +112,13 @@ export default function VehicleTable({ data, setData }) {
   const handleEditConfirm = async (newNumber) => {
     try {
       await updateVehicle(editRow.deviceUid, newNumber, token);
+      const oldNumber = editRow.vehicleNumber;
+      const uid = deviceUidMapRef.current[oldNumber];
+      if (uid) {
+        delete deviceUidMapRef.current[oldNumber];
+        deviceUidMapRef.current[newNumber] = uid;
+      }
+
       setData((prev) =>
         prev.map((item) =>
           item.vehicleNumber === editRow.vehicleNumber
@@ -196,10 +203,11 @@ export default function VehicleTable({ data, setData }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-4">
-        <h2 className="head2">등록된 차량 목록</h2>
+      <h2 className="head2 items-center">등록된 차량 목록</h2>
+      <div className="mx-auto flex max-w-6xl justify-end gap-2">
         <div className="flex w-[300px] items-center gap-2">
           <InputField
+            className="!w-48"
             placeholder="차량 번호 검색"
             value={search}
             name="search"
@@ -217,7 +225,6 @@ export default function VehicleTable({ data, setData }) {
           />
         </div>
       </div>
-
       <BaseTable columns={columns} data={paginated} rowActions={rowActions} />
 
       <Pagination

@@ -36,9 +36,11 @@ export function getDriverIndex(deviceUid, driverHash, driverIndexMapRef) {
   );
 }
 
-export function getDeviceUidByVehicle(vehicleNumber, deviceUidMap) {
-  return deviceUidMap[vehicleNumber] || null;
-}
+export const getDeviceUidByVehicle = (vehicleNumber, map) => {
+  if (!vehicleNumber || !map) return undefined;
+  return map[vehicleNumber];
+};
+
 export function getDriverHashesByVehicle(dataList, vehicleNumber) {
   return [
     ...new Set(

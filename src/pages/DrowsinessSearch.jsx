@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import InputField from '../components/InputField';
 import Button from '../components/Button';
 import { Search } from 'lucide-react';
@@ -8,31 +8,16 @@ import { ko } from 'date-fns/locale';
 import DrowsinessAccordionTable from '@/components/DrowsinessAccordionTable';
 import Pagination from '@/components/Pagination';
 import { getSleepRecords } from '@/api/sleepApi';
-import { DriverIndexMapContext } from '@/contexts/DriverIndexMapContext';
-
+import { getVehicles } from '@/api/vehicleApi';
+import useDriverIndexMap from '@/hooks/useDriverIndexMap';
+import {
+  getDeviceUidByVehicle,
+  createDriverIndexMeta,
+} from '@/utils/driverUtils';
 export default function DrowsinessSearch() {
   const token = localStorage.getItem('auth_token');
-  const driverIndexMapRef = useContext(DriverIndexMapContext);
-  {
-    /*const mockSleepData = [
-    {
-      uid: 101,
-      vehicleNumber: '12가1234',
-      deviceUid: 'rasp-0001', // 차량 연결
-      detectedTime: '2025-05-16T14:33:00',
-      driverHash: 'driver-aaa-111',
-      videoPath: '/videos/sleep_101.mp4',
-    },
-    {
-      uid: 102,
-      vehicleNumber: '34나5678',
-      deviceUid: 'rasp-0002',
-      detectedTime: '2025-05-16T15:10:00',
-      driverHash: 'driver-bbb-222',
-      videoPath: '/videos/sleep_102.mp4',
-    },
-  ];*/
-  }
+  const { driverIndexMapRef, deviceUidMapRef } = useDriverIndexMap();
+
   const [selectedDriverIndex, setSelectedDriverIndex] = useState(null);
   const [driverIndexMap, setDriverIndexMap] = useState({});
   const [startDate, setStartDate] = useState(null);
@@ -60,7 +45,15 @@ export default function DrowsinessSearch() {
     setDateError('');
 
     try {
-      const hash = getDriverHashByIndex(selectedDriverIndex, driverIndexMap);
+      const deviceUid = getDeviceUidByVehicle(
+        vehicleNumber,
+        deviceUidMapRef.current
+      );
+      const hash = getDriverHashByIndex(
+        deviceUid,
+        selectedDriverIndex,
+        driverIndexMap
+      );
 
       const adjusted =
         endDate != null
@@ -86,7 +79,10 @@ export default function DrowsinessSearch() {
         newMap[hash] = i + 1;
       });
       setDriverIndexMap(newMap);
-      driverIndexMapRef.current = newMap;
+      if (deviceUid && data.length > 0) {
+        const meta = createDriverIndexMeta(data, vehicleNumber); // hashToIndex + vehicleNumber
+        driverIndexMapRef.current[deviceUid] = meta;
+      }
       const grouped = {};
       data.forEach((item) => {
         const { id, vehicleNumber, deviceUid, detectedTime, driverHash } = item;
@@ -116,9 +112,22 @@ export default function DrowsinessSearch() {
     }
   };
   useEffect(() => {
-    (async () => {
-      await handleSearch();
-    })();
+    const initDeviceUidMap = async () => {
+      try {
+        const vehicleList = await getVehicles(100, 0, token);
+        const map = {};
+        vehicleList.forEach(({ vehicleNumber, deviceUid }) => {
+          map[vehicleNumber] = deviceUid;
+        });
+        deviceUidMapRef.current = map;
+
+        await handleSearch();
+      } catch (err) {
+        console.error('UID 매핑 초기화 실패:', err);
+      }
+    };
+
+    initDeviceUidMap();
   }, []);
 
   const indexOfLastRow = currentPage * rowsPerPage;
@@ -214,10 +223,7 @@ export default function DrowsinessSearch() {
         )}
       </div>
 
-      <DrowsinessAccordionTable
-        data={currentRows}
-        driverIndexMapRef={driverIndexMapRef}
-      />
+      <DrowsinessAccordionTable data={currentRows} />
 
       <Pagination
         page={currentPage}

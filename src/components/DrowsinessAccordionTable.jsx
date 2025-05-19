@@ -4,9 +4,10 @@ import { Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import axios from 'axios';
-import { getDriverIndexMap } from '../utils/driverUtils.js';
-
-export default function DrowsinessAccordionTable({ data, driverIndexMapRef }) {
+import useDriverIndexMap from '@/hooks/useDriverIndexMap';
+import { getDriverIndexMap } from '@/utils/driverUtils';
+export default function DrowsinessAccordionTable({ data }) {
+  const { driverIndexMapRef } = useDriverIndexMap();
   const [expandedRow, setExpandedRow] = useState(null);
   const [isDownloading, setIsDownloading] = useState(false);
   const navigate = useNavigate();
@@ -196,7 +197,4 @@ DrowsinessAccordionTable.propTypes = {
       ),
     })
   ).isRequired,
-  driverIndexMapRef: PropTypes.shape({
-    current: PropTypes.object.isRequired,
-  }).isRequired,
 };
