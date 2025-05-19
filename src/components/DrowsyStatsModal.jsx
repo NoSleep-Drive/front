@@ -36,7 +36,6 @@ export default function DrowsyStatsModal({ isOpen, onConfirm, onClose, data }) {
         <div key={status.hash} className="mb-6">
           <div className="mb-2 flex items-center justify-between px-2">
             <div className="caption-bold">
-              운전자{' '}
               {status.index !== undefined
                 ? `운전자 ${status.index + 1}`
                 : '운전자 ?'}
