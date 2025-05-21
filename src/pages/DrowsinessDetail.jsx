@@ -36,8 +36,6 @@ export default function DrowsinessDetail() {
           deviceUidMapRef,
           driverIndexMapRef
         );
-        console.log('[DEBUG] driverIndex 상태값:', driverIndex);
-        console.log('[DEBUG] driverIndex 상태값:', data.vehicleNumber);
 
         setDriverIndex(index);
         const url = await getSleepVideoStreamUrl(id, token);

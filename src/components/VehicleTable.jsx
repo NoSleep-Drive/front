@@ -67,45 +67,32 @@ export default function VehicleTable({ data, setData }) {
 
   const handleToggle = async (val, row) => {
     setSelectedRow(row);
-    const { deviceUid, vehicleNumber } = row;
 
-    if (val) {
-      const driverList = await handleRentVehicle(row, setData);
-      if (driverList?.length) {
-        setDriverIndex(deviceUid, vehicleNumber, driverList, driverIndexMapRef);
-        saveDriverMapsToStorage(driverIndexMapRef, deviceUidMapRef);
-        console.log(driverList);
+    try {
+      if (val) {
+        await handleRentVehicle(
+          row,
+          setData,
+          driverIndexMapRef,
+          deviceUidMapRef
+        );
+      } else {
+        await handleReturnVehicle(
+          row,
+          setData,
+          setDrowsyModalData,
+          setDrowsyModalOpen,
+          20,
+          0,
+          driverIndexMapRef
+        );
       }
-      setData((prev) =>
-        prev.map((item) =>
-          item.vehicleNumber === vehicleNumber
-            ? { ...item, isRented: true }
-            : item
-        )
-      );
-    } else {
-      await handleReturnVehicle(
-        row,
-        setData,
-        setDrowsyModalData,
-        setDrowsyModalOpen,
-        20,
-        0,
-        driverIndexMapRef
-      );
-      setData((prev) =>
-        prev.map((item) =>
-          item.vehicleNumber === vehicleNumber
-            ? {
-                ...item,
-                deviceUid: item.deviceUid || deviceUid,
-              }
-            : item
-        )
-      );
+    } catch (e) {
+      console.error('렌트/반납 실패: ', e);
+      alert('렌트 처리 중 오류가 발생했습니다.');
+    } finally {
+      setSelectedRow(null);
     }
-
-    setSelectedRow(null);
   };
 
   const handleEditConfirm = async (newNumber) => {
@@ -174,6 +161,7 @@ export default function VehicleTable({ data, setData }) {
           size="sm"
           variant="white"
           className="w-16"
+          disabled={driverListModalOpen}
           onClick={() => handleOpenDriverList(row)}
         />
       ),

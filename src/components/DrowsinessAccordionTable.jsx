@@ -17,6 +17,7 @@ export default function DrowsinessAccordionTable({ data }) {
   };
 
   const handleBulkDownload = async (ids) => {
+    if (isDownloading) return;
     if (!ids || ids.length === 0) {
       alert('다운로드할 영상이 없습니다.');
       return;
@@ -74,6 +75,8 @@ export default function DrowsinessAccordionTable({ data }) {
             type="button"
             onClick={() => toggleRow(row.vehicleNumber)}
             className="hover:bg-cornflower-100 text-cornflower-950 rounded-md p-2 text-2xl transition-colors hover:text-blue-600"
+            disabled={isDownloading}
+            aria-busy={isDownloading}
           >
             {expandedRow === row.vehicleNumber ? '▾' : '▸'}
           </button>
@@ -126,8 +129,8 @@ export default function DrowsinessAccordionTable({ data }) {
                     console.log('🔍 detail:', detail);
 
                     const formattedTime =
-                      typeof detail.timestamp === 'string'
-                        ? detail.timestamp.replace('T', ' ').slice(0, 19)
+                      typeof detail.detectedTime === 'string'
+                        ? detail.detectedTime.replace('T', ' ').slice(0, 19)
                         : 'N/A';
 
                     return (

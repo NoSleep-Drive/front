@@ -7,7 +7,6 @@ export default function VehicleManagement() {
   const [vehicles, setVehicles] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-
   useEffect(() => {
     const fetchVehicles = async () => {
       setIsLoading(true);

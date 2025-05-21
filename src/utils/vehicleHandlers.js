@@ -1,5 +1,12 @@
 import axios from 'axios';
-export async function handleRentVehicle(row, setData) {
+import { setDriverIndex } from './driverUtils';
+import { saveDriverMapsToStorage } from './storageUtils';
+export async function handleRentVehicle(
+  row,
+  setData,
+  driverIndexMapRef,
+  deviceUidMapRef
+) {
   const token = localStorage.getItem('auth_token');
 
   try {
@@ -26,13 +33,24 @@ export async function handleRentVehicle(row, setData) {
         Authorization: `Bearer ${token}`,
       },
     });
-    return res.data?.data || [];
+    const driverList = res.data?.data || [];
+    if (driverList.length) {
+      setDriverIndex(
+        deviceUid,
+        row.vehicleNumber,
+        driverList,
+        driverIndexMapRef
+      );
+      saveDriverMapsToStorage(driverIndexMapRef, deviceUidMapRef);
+    }
+    return driverList;
   } catch (error) {
     if (error.response?.status === 409) {
       console.warn('🚫 이미 렌트된 차량입니다.');
     } else {
       console.error('렌트 시작 실패:', error);
     }
+    throw error;
   }
 }
 
@@ -41,7 +59,7 @@ export async function handleReturnVehicle(
   setData,
   setDrowsyModalData,
   setDrowsyModalOpen,
-  sleepLimit = 1000,
+  sleepLimit = 100,
   sleepPage = 0,
   driverIndexMapRef
 ) {
@@ -83,5 +101,6 @@ export async function handleReturnVehicle(
   } catch (error) {
     console.error('반납 처리 실패:', error);
     alert('반납 처리 중 문제가 발생했습니다.');
+    throw error;
   }
 }

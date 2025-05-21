@@ -29,7 +29,7 @@ export default function VehicleRegisterSection({ setData, token }) {
       alert('차량 등록 완료!');
     } catch (error) {
       console.error('🚨 차량 등록 실패:', error);
-      alert('차량 등록 실패');
+      alert('차량 등록 실패', error);
     } finally {
       setIsLoading(false);
     }

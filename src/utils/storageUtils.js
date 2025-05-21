@@ -16,9 +16,6 @@ export function loadDriverMapsFromStorage(driverIndexMapRef, deviceUidMapRef) {
     if (storedDeviceMap) {
       deviceUidMapRef.current = JSON.parse(storedDeviceMap);
     }
-
-    console.log('📦 driverIndexMap 복원됨:', driverIndexMapRef.current);
-    console.log('📦 deviceUidMap 복원됨:', deviceUidMapRef.current);
   } catch (err) {
     console.error('❌ driver/device map 복원 실패:', err);
   }

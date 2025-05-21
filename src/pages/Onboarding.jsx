@@ -15,8 +15,6 @@ export default function AuthOnboarding() {
     e.preventDefault();
     setError(null);
 
-    console.log('로그인 시도', { id, password });
-
     try {
       const response = await loginApi({ id: id, password });
 

@@ -89,14 +89,6 @@ export const groupAndIndexSleepData = (
     const deviceUid = deviceUidMapRef.current[vehicleNumber];
     const driverIndex =
       driverIndexMapRef.current?.[deviceUid]?.hashToIndex?.[driverHash] ?? null;
-    console.log('🧩 SLEEP RECORD:', {
-      idSleep,
-      vehicleNumber,
-      detectedTime,
-      deviceUid,
-      driverHash,
-      driverIndex,
-    });
 
     if (!grouped[vehicleNumber]) {
       grouped[vehicleNumber] = {
@@ -131,8 +123,6 @@ export const getDriverListByVehicleNumber = (
 ) => {
   const deviceUid = deviceUidMapRef.current[vehicleNumber];
   const map = driverIndexMapRef.current?.[deviceUid]?.hashToIndex || {};
-  console.log('deviceUid:', deviceUid);
-  console.log('driverIndexMap:', driverIndexMapRef.current?.[deviceUid]);
 
   return Object.entries(map).map(([hash, index]) => ({
     driverHash: hash,

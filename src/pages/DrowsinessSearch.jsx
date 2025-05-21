@@ -32,14 +32,6 @@ export default function DrowsinessSearch() {
   const [vehicleNumber, setVehicleNumber] = useState('');
 
   const handleSearch = async () => {
-    console.log(
-      '🔎 Search 진입 시점 deviceUidMapRef:',
-      deviceUidMapRef.current
-    );
-    console.log(
-      '🔎 Search 진입 시점 driverIndexMapRef:',
-      driverIndexMapRef.current
-    );
     if (startDate && endDate && startDate > endDate) {
       setDateError('검색 시작일은 종료일보다 앞선 날짜여야 합니다.');
       return;
