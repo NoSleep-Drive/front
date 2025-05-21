@@ -9,22 +9,15 @@ export default function Pagination({ page, setPage, totalPages }) {
   const handleNext = () => setPage(Math.min(totalPages, page + 1));
 
   const getPageNumbers = () => {
-    const pages = [];
-    const maxVisible = 5;
-    let startPage = Math.max(1, page - 2);
-    let endPage = Math.min(totalPages, startPage + maxVisible - 1);
-
-    if (endPage - startPage < maxVisible - 1) {
-      startPage = Math.max(1, endPage - maxVisible + 1);
+    if (totalPages <= 5) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
     }
 
-    if (startPage > 1) pages.push('prev-ellipsis');
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i);
-    }
-    if (endPage < totalPages) pages.push('next-ellipsis');
+    const range = 2;
+    const start = Math.max(1, page - range);
+    const end = Math.min(totalPages, page + range);
 
-    return pages;
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   };
 
   return (
@@ -37,6 +30,7 @@ export default function Pagination({ page, setPage, totalPages }) {
       >
         <ChevronLeft size={18} />
       </button>
+
       {getPageNumbers().map((p, index) => {
         if (p === 'prev-ellipsis' || p === 'next-ellipsis') {
           return (
@@ -45,6 +39,7 @@ export default function Pagination({ page, setPage, totalPages }) {
             </span>
           );
         }
+
         return (
           <button
             type="button"
@@ -60,6 +55,7 @@ export default function Pagination({ page, setPage, totalPages }) {
           </button>
         );
       })}
+
       <button
         type="button"
         onClick={handleNext}

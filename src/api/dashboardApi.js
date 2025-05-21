@@ -1,25 +1,21 @@
 import apiClient from './apiClient';
 
-export const getVehicleCount = async () => {
+export const getVehicleCount = async (token) => {
   try {
     const res = await apiClient.get('/vehicles/count', {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     });
     return res.data.data;
   } catch (error) {
-    console.error('차량 수 조회 오류', error);
+    console.error('전체 차량 수 조회 오류', error);
     throw error;
   }
 };
 
-export const getAbnormalVehicleCount = async () => {
+export const getAbnormalVehicleCount = async (token) => {
   try {
     const res = await apiClient.get('/vehicles/abnormal/count', {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     });
     return res.data.data;
   } catch (error) {
@@ -28,12 +24,10 @@ export const getAbnormalVehicleCount = async () => {
   }
 };
 
-export const getSleepTodayCount = async () => {
+export const getSleepTodayCount = async (token) => {
   try {
     const res = await apiClient.get('/sleep/today/count', {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     });
     return res.data.data;
   } catch (error) {
@@ -42,12 +36,10 @@ export const getSleepTodayCount = async () => {
   }
 };
 
-export const getRecentSleepData = async () => {
+export const getRecentSleepData = async (token) => {
   try {
     const res = await apiClient.get('/sleep/recent?pageSize=5', {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     });
     return res.data.data;
   } catch (error) {

@@ -1,22 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { createPortal } from 'react-dom';
 import BaseTable from './BaseTable';
 import Pagination from './Pagination';
 import { fetchDriversByDeviceUid } from '@/api/driverApi';
 import Button from './Button';
+import useDriverIndexMap from '@/hooks/useDriverIndexMap';
+import { getDriverIndex } from '@/utils/driverUtils';
 
 const DriverListModal = ({ isOpen, onClose, deviceUid, vehicle }) => {
+  const { driverIndexMapRef } = useDriverIndexMap();
   const [drivers, setDrivers] = useState([]);
   const [pageIdx, setPageIdx] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const pageSize = 5;
 
-  useEffect(() => {
-    if (isOpen && deviceUid) fetchDrivers();
-  }, [isOpen, deviceUid, pageIdx]);
-
-  const fetchDrivers = async () => {
+  const fetchDrivers = useCallback(async () => {
     try {
       const result = await fetchDriversByDeviceUid(
         deviceUid,
@@ -24,27 +23,42 @@ const DriverListModal = ({ isOpen, onClose, deviceUid, vehicle }) => {
         pageIdx
       );
       setDrivers(result);
-      setTotalPages(result.length < pageSize ? pageIdx + 1 : pageIdx + 2);
+      const isFullPage = result.length === pageSize;
+      const totalPages = isFullPage ? pageIdx + 2 : pageIdx + 1;
+      setTotalPages(totalPages);
     } catch (err) {
       console.error('운전자 목록 조회 실패:', err);
     }
-  };
+  }, [deviceUid, pageSize, pageIdx]);
+  useEffect(() => {
+    if (isOpen && deviceUid) fetchDrivers();
+  }, [isOpen, deviceUid, pageIdx, fetchDrivers]);
 
   const columns = [
     {
-      key: 'index',
+      key: 'driverHash',
       label: '운전자',
-      render: (_, __, idx) => `운전자 ${idx + 1 + pageIdx * pageSize}`,
+      render: (_, row) => {
+        if (!row || !row.driverHash) return '운전자 ?';
+
+        const index = getDriverIndex(
+          deviceUid,
+          row.driverHash,
+          driverIndexMapRef
+        );
+        return index !== undefined ? `운전자 ${index + 1}` : '운전자 ?';
+      },
     },
+
     {
       key: 'startTime',
-      label: '대여 시작 시간',
+      label: '대여 시작 시각',
       render: (value) => new Date(value).toLocaleString(),
     },
     {
       key: 'endTime',
-      label: '반납 시간',
-      render: (value) => (value ? new Date(value).toLocaleString() : '진행 중'),
+      label: '반납 완료 시각',
+      render: (value) => (value ? new Date(value).toLocaleString() : '대여 중'),
     },
   ];
 
@@ -71,7 +85,7 @@ const DriverListModal = ({ isOpen, onClose, deviceUid, vehicle }) => {
           <Button
             size="sm"
             className="h-10 w-16"
-            label="확인"
+            label="닫기"
             onClick={onClose}
           >
             닫기

@@ -45,6 +45,7 @@ const DateInputField = ({
         locale={ko}
         disabled={disabled}
         className={inputClass}
+        isClearable
       />
       {error && (
         <p className="pt-1 text-sm font-normal text-red-500">{error}</p>

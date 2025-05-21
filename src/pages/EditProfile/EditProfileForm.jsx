@@ -63,7 +63,7 @@ function EditProfileForm({
         label="사업자 등록 번호"
         name="businessNumber"
         type="text"
-        placeholder="-없이 13자리 숫자"
+        placeholder="-없이 10자리 숫자"
         value={isLoading ? '불러오는 중...' : state.businessNumber || ''}
         onChange={(name, value) => handleChange(name, value)}
         onClickButton={() => alert('아이디 중복 확인 기능 연결 예정')}
