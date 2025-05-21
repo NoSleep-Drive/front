@@ -32,7 +32,21 @@ const BaseTable = ({ columns, data, rowActions, expandableRow }) => {
                   {columns.map((col) => (
                     <td key={col.key} className="px-4 py-3 text-center">
                       {col.render
-                        ? col.render(row[col.key], row)
+                        ? (() => {
+                            try {
+                              return col.render(row[col.key], row);
+                            } catch (e) {
+                              console.error(
+                                '🚨 render 실패:',
+                                e,
+                                '컬럼:',
+                                col.key,
+                                'row:',
+                                row
+                              );
+                              return '오류';
+                            }
+                          })()
                         : row[col.key]}
                     </td>
                   ))}

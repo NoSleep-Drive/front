@@ -1,5 +1,3 @@
-// [API 연동 예정] companyName 받아오기
-
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
@@ -20,10 +18,7 @@ NavItem.propTypes = {
   isActive: PropTypes.bool,
 };
 
-const Header = ({
-  companyName = 'ㅇㅇㅇ 업체', // TODO: 로그인 후 회사명 받아오기
-  onLogout = () => {},
-}) => {
+const Header = ({ companyName, onLogout = () => {} }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -46,7 +41,6 @@ const Header = ({
   return (
     <header className="bg-cornflower-400 text-normal font-pretendard flex h-20 items-center justify-between px-10 text-xl text-white sm:text-2xl">
       {' '}
-      {/* 로고, 네비 */}
       <div className="flex items-center gap-6">
         <div className="flex items-center gap-6 px-4 py-2">
           <img src="/logo.svg" alt="로고" className="h-10 w-auto" />
@@ -70,9 +64,8 @@ const Header = ({
           />
         </nav>
       </div>
-      {/* 회사명, 로그아웃 */}
       <div className="flex items-center gap-6">
-        <Link to="/settings" className="hover:underline">
+        <Link to="/edit" className="hover:underline">
           {companyName}
         </Link>
         <button onClick={handleLogout} className="hover:underline">
@@ -84,7 +77,7 @@ const Header = ({
 };
 Header.propTypes = {
   activePage: PropTypes.string,
-  companyName: PropTypes.string,
+  companyName: PropTypes.string.isRequired,
   onLogout: PropTypes.func,
 };
 export default Header;

@@ -1,38 +1,132 @@
-export const getDriverHashesByVehicle = (sleepRecords, vehicleNumber) => {
-  const set = new Set();
-  sleepRecords.forEach((item) => {
-    if (item.vehicleNumber === vehicleNumber && item.driverHash) {
-      set.add(item.driverHash);
-    }
-  });
-  return Array.from(set);
-};
-
-export const getDriverIndex = (hashList, targetHash) => {
-  const index = hashList.indexOf(targetHash);
-  return index !== -1 ? index + 1 : null;
-};
-
-export const getDriverIndexMap = (hashList) => {
-  return hashList.reduce((acc, hash, i) => {
-    acc[hash] = i + 1;
-    return acc;
-  }, {});
-};
-export const getDriverIndexMapFromDriverList = (drivers = []) => {
+export const createDriverIndexMeta = (drivers = [], vehicleNumber = '') => {
   const sorted = drivers
     .filter((d) => d.driverHash && d.startTime)
-    .sort((a, b) => new Date(a.startTime) - new Date(b.startTime)); // 렌트 시간 순 정렬
+    .sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
 
-  return sorted.reduce((acc, driver, i) => {
-    acc[driver.driverHash] = i + 1;
+  const hashToIndex = sorted.reduce((acc, driver, i) => {
+    acc[driver.driverHash] = i;
     return acc;
   }, {});
+
+  return {
+    vehicleNumber,
+    hashToIndex,
+  };
+};
+export function setDriverIndex(
+  deviceUid,
+  vehicleNumber,
+  driverList,
+  driverIndexMapRef
+) {
+  const hashToIndex = {};
+  driverList.forEach((driver, idx) => {
+    hashToIndex[driver.driverHash] = idx;
+  });
+
+  driverIndexMapRef.current[deviceUid] = {
+    vehicleNumber,
+    hashToIndex,
+  };
+}
+
+export function getDriverIndex(deviceUid, driverHash, driverIndexMapRef) {
+  return (
+    driverIndexMapRef.current?.[deviceUid]?.hashToIndex?.[driverHash] ?? null
+  );
+}
+
+export const getDeviceUidByVehicle = (vehicleNumber, map) => {
+  if (!vehicleNumber || !map) return undefined;
+  return map[vehicleNumber];
 };
 
-export const getDriverHashByIndex = (indexMap, targetIndex) => {
+export function getDriverHashesByVehicle(dataList, vehicleNumber) {
+  return [
+    ...new Set(
+      dataList
+        .filter(
+          (item) => item.vehicleNumber === vehicleNumber && item.driverHash
+        )
+        .map((item) => item.driverHash)
+    ),
+  ];
+}
+
+export function getDriverIndexMap(deviceUid, driverIndexMapRef) {
+  if (!deviceUid || !driverIndexMapRef) {
+    return {};
+  }
+  return driverIndexMapRef.current?.[deviceUid]?.hashToIndex || {};
+}
+export function getDriverHashByIndex(deviceUid, index, driverIndexMapRef) {
+  const map = driverIndexMapRef.current?.[deviceUid]?.hashToIndex;
+  if (!map) return null;
+  return Object.entries(map).find(([, i]) => i === index)?.[0] ?? null;
+}
+export const getDriverIndexByVehicle = (
+  vehicleNumber,
+  driverHash,
+  deviceUidMapRef,
+  driverIndexMapRef
+) => {
+  const deviceUid = deviceUidMapRef.current[vehicleNumber];
   return (
-    Object.entries(indexMap).find(([, index]) => index === targetIndex)?.[0] ??
-    null
+    driverIndexMapRef.current?.[deviceUid]?.hashToIndex?.[driverHash] ?? '-'
   );
+};
+
+export const groupAndIndexSleepData = (
+  data,
+  deviceUidMapRef,
+  driverIndexMapRef
+) => {
+  const grouped = {};
+
+  data.forEach((item) => {
+    const { idSleep, vehicleNumber, detectedTime, driverHash } = item;
+
+    const deviceUid = deviceUidMapRef.current[vehicleNumber];
+    const driverIndex =
+      driverIndexMapRef.current?.[deviceUid]?.hashToIndex?.[driverHash] ?? null;
+
+    if (!grouped[vehicleNumber]) {
+      grouped[vehicleNumber] = {
+        vehicleNumber,
+        deviceUid,
+        drowsinessCount: 0,
+        drowsinessDetails: [],
+      };
+    }
+
+    grouped[vehicleNumber].drowsinessCount += 1;
+
+    grouped[vehicleNumber].drowsinessDetails.push({
+      idSleep,
+      timestamp: detectedTime,
+      driverHash,
+      driverIndex,
+    });
+  });
+  Object.values(grouped).forEach((group) => {
+    group.drowsinessDetails.sort(
+      (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
+    );
+  });
+  return Object.values(grouped);
+};
+
+export const getDriverListByVehicleNumber = (
+  vehicleNumber,
+  deviceUidMapRef,
+  driverIndexMapRef
+) => {
+  const deviceUid = deviceUidMapRef.current[vehicleNumber];
+  const map = driverIndexMapRef.current?.[deviceUid]?.hashToIndex || {};
+
+  return Object.entries(map).map(([hash, index]) => ({
+    driverHash: hash,
+    index,
+    label: `운전자 ${index + 1}`,
+  }));
 };

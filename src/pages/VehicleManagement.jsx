@@ -2,13 +2,11 @@ import { React, useEffect, useState } from 'react';
 import VehicleTable from '../components/VehicleTable';
 import VehicleRegisterSection from '../components/VehicleRegisterSection';
 import { getVehicles } from '../api/vehicleApi';
-
 export default function VehicleManagement() {
   const token = localStorage.getItem('auth_token');
   const [vehicles, setVehicles] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-
   useEffect(() => {
     const fetchVehicles = async () => {
       setIsLoading(true);

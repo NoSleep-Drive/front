@@ -18,13 +18,8 @@ export default function LoginForm() {
     e.preventDefault();
     setError(null);
 
-    console.log('로그인 시도', { id, password });
-
     try {
       const response = await loginApi({ id: id, password });
-
-      console.log('로그인 API 응답:', response);
-
       if (response.message === '로그인 성공.') {
         const { token } = response;
         localStorage.setItem('auth_token', token);

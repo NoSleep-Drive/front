@@ -14,7 +14,7 @@ const VehicleCard = ({
       <h3 className="text-cornflower-950 text-[24px] font-semibold">
         {vehicleNumber}
       </h3>
-      <p className="body">카메라 ID: {deviceUid}</p>
+      <p className="body">기기 ID: {deviceUid}</p>
       <p className="body">등록일: {createdDate.toLocaleDateString()}</p>
 
       <div className="mt-2 flex justify-center gap-2">

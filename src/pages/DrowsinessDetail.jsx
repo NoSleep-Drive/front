@@ -1,90 +1,72 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
 import { Download, ChevronLeft } from 'lucide-react';
 import Button from '../components/Button';
-import { getDriverHashesByVehicle, getDriverIndex } from '../utils/driverUtils'; // 👈 추가
-
+import { getDriverIndexByVehicle } from '../utils/driverUtils';
+import {
+  getSleepDetail,
+  downloadSleepVideo,
+  getSleepVideoStreamUrl,
+} from '../api/sleepApi';
+import useDriverIndexMap from '@/hooks/useDriverIndexMap';
+import SleepdataInfo from '@/components/SleepdataInfo';
 export default function DrowsinessDetail() {
+  const { deviceUidMapRef, driverIndexMapRef } = useDriverIndexMap();
+
   const { id } = useParams();
   const navigate = useNavigate();
   const [sleepData, setSleepData] = useState(null);
   const [driverIndex, setDriverIndex] = useState(null);
+  const [videoUrl, setVideoUrl] = useState(null);
+
   useEffect(() => {
     const fetchSleepData = async () => {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        alert('로그인이 필요합니다.');
+        navigate('/');
+        return;
+      }
       try {
-        const response = await axios.get(`/api/sleep/${id}`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-          },
-        });
-        const sleep = response.data;
-        setSleepData(sleep);
-
-        const sleepListRes = await axios.get('/api/sleep', {
-          params: {
-            vehicleNumber: sleep.vehicleNumber,
-            pageSize: 1000,
-            pageIdx: 0,
-          },
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-          },
-        });
-
-        const hashList = getDriverHashesByVehicle(
-          sleepListRes.data.data,
-          sleep.vehicleNumber
+        const data = await getSleepDetail(id, token);
+        setSleepData(data);
+        const index = getDriverIndexByVehicle(
+          data.vehicleNumber,
+          data.driverHash,
+          deviceUidMapRef,
+          driverIndexMapRef
         );
 
-        const index = getDriverIndex(hashList, sleep.driverHash);
         setDriverIndex(index);
+        const url = await getSleepVideoStreamUrl(id, token);
+        if (url) setVideoUrl(url);
       } catch (error) {
         console.error('졸음 데이터 조회 실패:', error);
       }
     };
+
     fetchSleepData();
-  }, [id]);
+
+    return () => {
+      if (videoUrl) URL.revokeObjectURL(videoUrl);
+    };
+  }, [id, driverIndexMapRef, navigate]);
+
   const handleDownload = async () => {
+    const token = localStorage.getItem('auth_token');
+
     try {
-      const response = await axios.get(`/api/sleep/${id}/video/download`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('auth_auth_token')}`,
-        },
-        responseType: 'blob',
-      });
-
-      const blob = new Blob([response.data], {
-        type: 'application/octet-stream',
-      });
-      const contentDisposition = response.headers['content-disposition'];
-      const filenameMatch = contentDisposition?.match(/filename="(.+)"/);
-      const filename = filenameMatch ? filenameMatch[1] : 'sleep_video.mp4';
-
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(link.href);
+      await downloadSleepVideo(id, token);
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        const status = error.response?.status;
-        if (status === 401) {
-          alert('인증 정보가 유효하지 않습니다.');
-        } else if (status === 404) {
-          alert('해당 영상이 존재하지 않습니다.');
-        } else {
-          alert('다운로드 중 오류가 발생했습니다.');
-        }
-      } else {
-        alert('알 수 없는 오류가 발생했습니다.');
-      }
+      console.error('비디오 다운로드 실패:', error);
+      alert(error);
     }
   };
 
-  if (sleepData === null) return <div>로딩 중...</div>;
+  if (sleepData === null) {
+    return <div>로딩 중...</div>;
+  }
+  const [date, time] = sleepData.detectedTime?.split('T') || [];
 
   return (
     <div>
@@ -103,13 +85,13 @@ export default function DrowsinessDetail() {
         <h1 className="head1 mb-2">졸음 데이터 상세 조회</h1>
         <div className="mb-4 flex w-full max-w-4xl justify-between">
           <div className="flex flex-wrap items-center gap-4">
-            <span>차량 번호: {sleepData.carNumber}</span>
-            <span>
-              운전자:{' '}
-              {driverIndex ? `운전자 ${driverIndex}` : sleepData.driverHash}
-            </span>
-            <span>감지 날짜: {sleepData.date}</span>
-            <span>감지 시각: {sleepData.time}</span>
+            <SleepdataInfo
+              vehicleNumber={sleepData.vehicleNumber}
+              driverIndex={driverIndex}
+              driverHash={sleepData.driverHash}
+              date={date}
+              time={time}
+            />
           </div>
           <Button
             label="다운로드"
@@ -121,8 +103,11 @@ export default function DrowsinessDetail() {
         </div>
         <div className="w-full max-w-4xl justify-center overflow-hidden rounded bg-black">
           <video controls className="w-full object-contain">
-            <source src={sleepData.videoUrl} type="video/mp4" />
-            지원되지 않는 브라우저입니다.
+            {videoUrl ? (
+              <source src={videoUrl} type="video/mp4" />
+            ) : (
+              <>영상을 불러오는 중...</>
+            )}
           </video>
         </div>
       </div>

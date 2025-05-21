@@ -84,7 +84,7 @@ export default function SignUp() {
             label="아이디"
             name="id"
             type="text"
-            placeholder="영어, 숫자 조합 4~16자리"
+            placeholder="영어, 숫자 조합 8~16자리"
             value={formData.id}
             onChange={handleChange}
             required
