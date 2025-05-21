@@ -20,6 +20,7 @@ import {
 } from '@/utils/vehicleHandlers';
 
 import { setDriverIndex } from '@/utils/driverUtils';
+import { saveDriverMapsToStorage } from '@/utils/storageUtils.js';
 export default function VehicleTable({ data, setData }) {
   const token = localStorage.getItem('auth_token');
 
@@ -50,15 +51,11 @@ export default function VehicleTable({ data, setData }) {
     const { deviceUid, vehicleNumber } = row;
 
     try {
-      const driverList = await fetchDriversByDeviceUid(deviceUid, 100, 0);
+      const driverList = await fetchDriversByDeviceUid(deviceUid, 20, 0);
 
       if (driverList?.length) {
         setDriverIndex(deviceUid, vehicleNumber, driverList, driverIndexMapRef);
-        console.log('[setDriverIndex] 등록:', {
-          deviceUid,
-        });
       }
-      console.log('📦 driverList:', driverList);
 
       setSelectedRow(row);
       setDriverListModalOpen(true);
@@ -76,6 +73,8 @@ export default function VehicleTable({ data, setData }) {
       const driverList = await handleRentVehicle(row, setData);
       if (driverList?.length) {
         setDriverIndex(deviceUid, vehicleNumber, driverList, driverIndexMapRef);
+        saveDriverMapsToStorage(driverIndexMapRef, deviceUidMapRef);
+        console.log(driverList);
       }
       setData((prev) =>
         prev.map((item) =>
@@ -90,7 +89,7 @@ export default function VehicleTable({ data, setData }) {
         setData,
         setDrowsyModalData,
         setDrowsyModalOpen,
-        1000,
+        20,
         0,
         driverIndexMapRef
       );
@@ -111,12 +110,16 @@ export default function VehicleTable({ data, setData }) {
 
   const handleEditConfirm = async (newNumber) => {
     try {
-      await updateVehicle(editRow.deviceUid, newNumber, token);
       const oldNumber = editRow.vehicleNumber;
       const uid = deviceUidMapRef.current[oldNumber];
-      if (uid) {
-        delete deviceUidMapRef.current[oldNumber];
+      await updateVehicle(editRow.deviceUid, newNumber, token);
+      if (uid && newNumber) {
         deviceUidMapRef.current[newNumber] = uid;
+        if (oldNumber !== newNumber) {
+          delete deviceUidMapRef.current[oldNumber];
+          driverIndexMapRef.current[uid].vehicleNumber = newNumber;
+        }
+        saveDriverMapsToStorage(driverIndexMapRef, deviceUidMapRef);
       }
 
       setData((prev) =>
@@ -146,7 +149,7 @@ export default function VehicleTable({ data, setData }) {
 
   const columns = [
     { key: 'vehicleNumber', label: '차량 번호' },
-    { key: 'deviceUid', label: '카메라 ID' },
+    { key: 'deviceUid', label: '기기 ID' },
     {
       key: 'createdDate',
       label: '등록일',

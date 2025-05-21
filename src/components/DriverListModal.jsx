@@ -14,11 +14,6 @@ const DriverListModal = ({ isOpen, onClose, deviceUid, vehicle }) => {
   const [pageIdx, setPageIdx] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const pageSize = 5;
-  console.log(
-    '[DriverListModal] driverIndexMapRef:',
-    driverIndexMapRef.current
-  );
-  console.log('[DriverListModal] 찾는 deviceUid:', deviceUid);
 
   const fetchDrivers = useCallback(async () => {
     try {
@@ -57,12 +52,12 @@ const DriverListModal = ({ isOpen, onClose, deviceUid, vehicle }) => {
 
     {
       key: 'startTime',
-      label: '대여 시작 시간',
+      label: '대여 시작 시각',
       render: (value) => new Date(value).toLocaleString(),
     },
     {
       key: 'endTime',
-      label: '반납 시간',
+      label: '반납 완료 시각',
       render: (value) => (value ? new Date(value).toLocaleString() : '대여 중'),
     },
   ];

@@ -50,7 +50,6 @@ export default function AuthOnboarding() {
             <h2 className="text-2xl font-bold text-blue-600">NoSleep Drive</h2>
           </div>
 
-          {/* 로그인 폼 */}
           <form className="space-y-4" onSubmit={handleLogin}>
             <CustomAuthInput
               label=""

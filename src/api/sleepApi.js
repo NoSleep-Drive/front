@@ -20,8 +20,8 @@ export const getSleepRecords = async ({
   token,
   vehicleNumber,
   driverHash,
-  start_date,
-  end_date,
+  startDate,
+  endDate,
   pageSize,
   pageIdx,
 }) => {
@@ -30,8 +30,8 @@ export const getSleepRecords = async ({
       params: {
         vehicleNumber,
         driverHash,
-        start_date,
-        end_date,
+        startDate,
+        endDate,
         pageSize,
         pageIdx,
       },
@@ -43,7 +43,7 @@ export const getSleepRecords = async ({
   }
 };
 
-export const getSleepDetail = async (token, id) => {
+export const getSleepDetail = async (id, token) => {
   try {
     const response = await apiClient.get(
       `/sleep/${id}`,
@@ -55,11 +55,30 @@ export const getSleepDetail = async (token, id) => {
   }
 };
 
-export const getSleepVideoStreamUrl = (id) => {
-  return `${apiClient.defaults.baseURL}/sleep/${id}/video/stream`;
+export const getSleepVideoStreamUrl = async (id, token) => {
+  try {
+    const response = await apiClient.get(`/sleep/${id}/video/stream`, {
+      responseType: 'blob',
+      ...createAuthHeader(token),
+    });
+
+    if (response.data.size === 0) {
+      throw new Error('스트리밍 가능한 영상이 없습니다.');
+    }
+
+    const blob = response.data;
+    const blobUrl = URL.createObjectURL(blob);
+    return blobUrl;
+  } catch (error) {
+    if (error.response?.status === 404) {
+      alert('해당 영상이 존재하지 않습니다.');
+    }
+    handleApiError(error);
+    return null;
+  }
 };
 
-export const downloadSleepVideo = async (token, id) => {
+export const downloadSleepVideo = async (id, token) => {
   try {
     const response = await apiClient.get(`/sleep/${id}/video/download`, {
       responseType: 'blob',
@@ -69,19 +88,19 @@ export const downloadSleepVideo = async (token, id) => {
       alert('다운로드 가능한 영상이 없습니다.');
       return;
     }
-    const blob = response.data;
-
-    const contentDisposition = response.headers['content-disposition'];
-    const filenameMatch = contentDisposition?.match(/filename="(.+)"/);
-    const filename = filenameMatch ? filenameMatch[1] : `sleep_video_${id}.mp4`;
-
+    const disposition = response.headers['content-disposition'];
+    let filename = `sleep_${id}.mp4`;
+    if (disposition && disposition.includes('filename=')) {
+      filename = disposition.split('filename=')[1].replace(/"/g, '');
+    }
+    const url = window.URL.createObjectURL(new Blob([response.data]));
     const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = filename;
+    link.href = url;
+    link.setAttribute('download', filename);
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(link.href);
+    link.remove();
+    window.URL.revokeObjectURL(url);
   } catch (error) {
     if (error.response?.status === 404) {
       alert('해당 영상이 존재하지 않습니다.');

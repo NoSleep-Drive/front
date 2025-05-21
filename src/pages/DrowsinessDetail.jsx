@@ -2,19 +2,26 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Download, ChevronLeft } from 'lucide-react';
 import Button from '../components/Button';
-import { getDriverIndex } from '../utils/driverUtils';
-import PropTypes from 'prop-types';
-import { getSleepDetail, downloadSleepVideo } from '../api/sleepApi';
-export default function DrowsinessDetail({ driverIndexMapRef }) {
+import { getDriverIndexByVehicle } from '../utils/driverUtils';
+import {
+  getSleepDetail,
+  downloadSleepVideo,
+  getSleepVideoStreamUrl,
+} from '../api/sleepApi';
+import useDriverIndexMap from '@/hooks/useDriverIndexMap';
+import SleepdataInfo from '@/components/SleepdataInfo';
+export default function DrowsinessDetail() {
+  const { deviceUidMapRef, driverIndexMapRef } = useDriverIndexMap();
+
   const { id } = useParams();
-  const token = localStorage.getItem('auth_token');
-  console.log('sleep id:', id);
   const navigate = useNavigate();
   const [sleepData, setSleepData] = useState(null);
   const [driverIndex, setDriverIndex] = useState(null);
+  const [videoUrl, setVideoUrl] = useState(null);
 
   useEffect(() => {
     const fetchSleepData = async () => {
+      const token = localStorage.getItem('auth_token');
       if (!token) {
         alert('로그인이 필요합니다.');
         navigate('/');
@@ -23,24 +30,35 @@ export default function DrowsinessDetail({ driverIndexMapRef }) {
       try {
         const data = await getSleepDetail(id, token);
         setSleepData(data);
-
-        const index = getDriverIndex(
-          data.deviceUid,
+        const index = getDriverIndexByVehicle(
+          data.vehicleNumber,
           data.driverHash,
+          deviceUidMapRef,
           driverIndexMapRef
         );
+        console.log('[DEBUG] driverIndex 상태값:', driverIndex);
+        console.log('[DEBUG] driverIndex 상태값:', data.vehicleNumber);
+
         setDriverIndex(index);
+        const url = await getSleepVideoStreamUrl(id, token);
+        if (url) setVideoUrl(url);
       } catch (error) {
         console.error('졸음 데이터 조회 실패:', error);
       }
     };
 
     fetchSleepData();
-  }, [id, driverIndexMapRef, token]);
+
+    return () => {
+      if (videoUrl) URL.revokeObjectURL(videoUrl);
+    };
+  }, [id, driverIndexMapRef, navigate]);
 
   const handleDownload = async () => {
+    const token = localStorage.getItem('auth_token');
+
     try {
-      await downloadSleepVideo(token, id);
+      await downloadSleepVideo(id, token);
     } catch (error) {
       console.error('비디오 다운로드 실패:', error);
       alert(error);
@@ -69,15 +87,13 @@ export default function DrowsinessDetail({ driverIndexMapRef }) {
         <h1 className="head1 mb-2">졸음 데이터 상세 조회</h1>
         <div className="mb-4 flex w-full max-w-4xl justify-between">
           <div className="flex flex-wrap items-center gap-4">
-            <span>차량 번호: {sleepData.vehicleNumber}</span>
-            <span>
-              운전자:{' '}
-              {driverIndex != null
-                ? `운전자 ${driverIndex + 1}`
-                : sleepData.driverHash}
-            </span>
-            <span>감지 날짜: {date}</span>
-            <span>감지 시각: {time?.slice(0, 8)}</span>
+            <SleepdataInfo
+              vehicleNumber={sleepData.vehicleNumber}
+              driverIndex={driverIndex}
+              driverHash={sleepData.driverHash}
+              date={date}
+              time={time}
+            />
           </div>
           <Button
             label="다운로드"
@@ -89,20 +105,14 @@ export default function DrowsinessDetail({ driverIndexMapRef }) {
         </div>
         <div className="w-full max-w-4xl justify-center overflow-hidden rounded bg-black">
           <video controls className="w-full object-contain">
-            <source
-              src={`/api/sleep/${sleepData.id}/video/stream`}
-              type="video/mp4"
-            />
-            지원되지 않는 브라우저입니다.
+            {videoUrl ? (
+              <source src={videoUrl} type="video/mp4" />
+            ) : (
+              <>영상을 불러오는 중...</>
+            )}
           </video>
         </div>
       </div>
     </div>
   );
 }
-
-DrowsinessDetail.propTypes = {
-  driverIndexMapRef: PropTypes.shape({
-    current: PropTypes.object.isRequired,
-  }).isRequired,
-};

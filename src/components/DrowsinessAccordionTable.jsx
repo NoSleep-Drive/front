@@ -1,32 +1,16 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import BaseTable from './BaseTable';
 import { Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import axios from 'axios';
-import useDriverIndexMap from '@/hooks/useDriverIndexMap';
-import { getDriverIndexMap } from '@/utils/driverUtils';
+
 export default function DrowsinessAccordionTable({ data }) {
-  const { driverIndexMapRef } = useDriverIndexMap();
   const [expandedRow, setExpandedRow] = useState(null);
   const [isDownloading, setIsDownloading] = useState(false);
   const navigate = useNavigate();
 
-  const processedData = useMemo(() => {
-    return data.map((row) => {
-      const deviceUid = row.deviceUid;
-      const indexMap = getDriverIndexMap(deviceUid, driverIndexMapRef) ?? {};
-
-      return {
-        ...row,
-        drowsinessDetails: (row.drowsinessDetails || []).map((detail) => ({
-          ...detail,
-          driverIndex: indexMap?.[detail.driverHash] ?? null,
-          detectedTime: detail.detectedTime,
-        })),
-      };
-    });
-  }, [data, driverIndexMapRef.current]);
+  const processedData = data;
 
   const toggleRow = (vehicleNumber) => {
     setExpandedRow((prev) => (prev === vehicleNumber ? null : vehicleNumber));
@@ -100,15 +84,13 @@ export default function DrowsinessAccordionTable({ data }) {
     {
       key: 'drowsinessCount',
       label: '감지 횟수',
-      render: (value, row) => (
-        <span>{row.drowsinessDetails?.length ?? 0}회</span>
-      ),
+      render: (value, row) => <span>{row.drowsinessCount}회</span>,
     },
     {
       key: 'download',
       label: '일괄 다운로드',
       render: (value, row) => {
-        const ids = row.drowsinessDetails?.map((d) => d.id) || [];
+        const ids = row.drowsinessDetails?.map((d) => d.idSleep) || [];
         return (
           <button
             type="button"
@@ -141,11 +123,11 @@ export default function DrowsinessAccordionTable({ data }) {
               ) : (
                 <div className="flex flex-col gap-2">
                   {row.drowsinessDetails.map((detail, idx) => {
-                    console.log('🔍 detail:', detail); // ✅ 로그 추가
+                    console.log('🔍 detail:', detail);
 
                     const formattedTime =
-                      typeof detail.detectedTime === 'string'
-                        ? detail.detectedTime.replace('T', ' ').slice(0, 19)
+                      typeof detail.timestamp === 'string'
+                        ? detail.timestamp.replace('T', ' ').slice(0, 19)
                         : 'N/A';
 
                     return (
@@ -163,7 +145,9 @@ export default function DrowsinessAccordionTable({ data }) {
                         </span>
                         <button
                           type="button"
-                          onClick={() => navigate(`/drowsiness/${detail.id}`)}
+                          onClick={() =>
+                            navigate(`/drowsiness/${detail.idSleep}`)
+                          }
                           className="text-cornflower-500 whitespace-nowrap hover:underline"
                         >
                           자세히 보기
@@ -191,7 +175,7 @@ DrowsinessAccordionTable.propTypes = {
       drowsinessDetails: PropTypes.arrayOf(
         PropTypes.shape({
           detectedTime: PropTypes.string.isRequired,
-          id: PropTypes.number.isRequired,
+          idSleep: PropTypes.number.isRequired,
           driverHash: PropTypes.string.isRequired,
         })
       ),

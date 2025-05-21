@@ -1,12 +1,12 @@
-import { React, useState } from 'react';
+import React, { useState } from 'react';
 import InputField from '../components/InputField';
 import Button from '../components/Button';
 import PropTypes from 'prop-types';
 import { registerVehicle, getVehicles } from '../api/vehicleApi';
 import useDriverIndexMap from '@/hooks/useDriverIndexMap';
-
+import { saveDriverMapsToStorage } from '@/utils/storageUtils';
 export default function VehicleRegisterSection({ setData, token }) {
-  const { deviceUidMapRef } = useDriverIndexMap();
+  const { driverIndexMapRef, deviceUidMapRef } = useDriverIndexMap();
 
   const [vehicleNumber, setVehicleNumber] = useState('');
   const [deviceUid, setDeviceUid] = useState('');
@@ -14,15 +14,15 @@ export default function VehicleRegisterSection({ setData, token }) {
 
   const handleRegister = async () => {
     if (!vehicleNumber || !deviceUid) {
-      alert('차량 번호와 카메라 ID를 모두 입력해 주세요.');
+      alert('차량 번호와 기기 ID를 모두 입력해 주세요.');
       return;
     }
     setIsLoading(true);
     try {
       await registerVehicle(vehicleNumber, deviceUid, token);
       deviceUidMapRef.current[vehicleNumber] = deviceUid;
-
-      const updated = await getVehicles(100, 0, token);
+      saveDriverMapsToStorage(driverIndexMapRef, deviceUidMapRef);
+      const updated = await getVehicles(20, 0, token);
       setData(updated);
       setVehicleNumber('');
       setDeviceUid('');
@@ -47,9 +47,9 @@ export default function VehicleRegisterSection({ setData, token }) {
           onChange={(name, value) => setVehicleNumber(value)}
         />
         <InputField
-          label="카메라 ID"
+          label="기기 ID"
           name="deviceUid"
-          placeholder="카메라 ID를 입력하세요."
+          placeholder="기기 ID를 입력하세요."
           value={deviceUid}
           onChange={(name, value) => setDeviceUid(value)}
         />

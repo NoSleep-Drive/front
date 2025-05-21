@@ -30,7 +30,7 @@ export default function Layout() {
       <main
         className={`flex-1 ${isAuthPage ? 'bg-white p-0' : 'bg-gray-100 p-6'}`}
       >
-        <Outlet />
+        <Outlet context={{ companyName, setCompanyName }} />
       </main>
     </div>
   );

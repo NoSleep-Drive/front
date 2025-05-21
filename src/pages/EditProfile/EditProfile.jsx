@@ -1,7 +1,7 @@
 import React from 'react';
 import EditProfileForm from './EditProfileForm';
 import { useEditProfile } from './useEditProfile';
-
+import { useOutletContext } from 'react-router';
 export default function EditProfile() {
   const {
     state,
@@ -11,6 +11,7 @@ export default function EditProfile() {
     handleSubmit,
     handleDelete,
   } = useEditProfile();
+  const { setCompanyName } = useOutletContext();
   return (
     <section className="flex min-h-screen items-center justify-center">
       <div className="w-full max-w-lg rounded-xl bg-white p-8">
@@ -25,7 +26,7 @@ export default function EditProfile() {
             isLoading={isLoading}
             isDeleting={isDeleting}
             handleChange={handleChange}
-            handleSubmit={handleSubmit}
+            handleSubmit={(e) => handleSubmit(e, setCompanyName)}
             handleDelete={handleDelete}
           />
         )}

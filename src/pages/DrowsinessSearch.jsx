@@ -1,43 +1,45 @@
 import React, { useState, useEffect } from 'react';
-import InputField from '../components/InputField';
-import Button from '../components/Button';
-import { Search } from 'lucide-react';
-import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import { ko } from 'date-fns/locale';
 import DrowsinessAccordionTable from '@/components/DrowsinessAccordionTable';
 import Pagination from '@/components/Pagination';
 import { getSleepRecords } from '@/api/sleepApi';
-import { getVehicles } from '@/api/vehicleApi';
 import useDriverIndexMap from '@/hooks/useDriverIndexMap';
 import {
   getDeviceUidByVehicle,
-  createDriverIndexMeta,
+  groupAndIndexSleepData,
+  getDriverListByVehicleNumber,
+  getDriverHashByIndex,
 } from '@/utils/driverUtils';
+import SearchControls from '@/components/SearchControls';
+
 export default function DrowsinessSearch() {
+  useEffect(() => {
+    handleSearch();
+  }, []);
+
   const token = localStorage.getItem('auth_token');
   const { driverIndexMapRef, deviceUidMapRef } = useDriverIndexMap();
 
   const [selectedDriverIndex, setSelectedDriverIndex] = useState(null);
-  const [driverIndexMap, setDriverIndexMap] = useState({});
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
-  const [vehicleNumber, setVehicleNumber] = useState('');
   const [dateError, setDateError] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 5;
   const [filteredData, setFilteredData] = useState([]);
+  const [driverList, setDriverList] = useState([]);
 
-  const handleVehicleInputChange = (name, value) => {
-    if (name === 'vehicleNumber') setVehicleNumber(value);
-  };
-
-  const getDriverHashByIndex = (index, indexMap) => {
-    if (index == null) return undefined;
-    return Object.entries(indexMap).find(([, i]) => i === index)?.[0];
-  };
+  const [vehicleNumber, setVehicleNumber] = useState('');
 
   const handleSearch = async () => {
+    console.log(
+      '🔎 Search 진입 시점 deviceUidMapRef:',
+      deviceUidMapRef.current
+    );
+    console.log(
+      '🔎 Search 진입 시점 driverIndexMapRef:',
+      driverIndexMapRef.current
+    );
     if (startDate && endDate && startDate > endDate) {
       setDateError('검색 시작일은 종료일보다 앞선 날짜여야 합니다.');
       return;
@@ -49,15 +51,21 @@ export default function DrowsinessSearch() {
         vehicleNumber,
         deviceUidMapRef.current
       );
-      const hash = getDriverHashByIndex(
-        deviceUid,
-        selectedDriverIndex,
-        driverIndexMap
-      );
-
+      let hash = null;
+      if (
+        selectedDriverIndex !== null &&
+        deviceUid &&
+        driverIndexMapRef.current?.[deviceUid]
+      ) {
+        hash = getDriverHashByIndex(
+          deviceUid,
+          selectedDriverIndex,
+          driverIndexMapRef
+        );
+      }
       const adjusted =
         endDate != null
-          ? new Date(new Date(endDate).setHours(23, 59, 59, 999))
+          ? new Date(new Date(endDate).setDate(new Date(endDate).getDate() + 1))
               .toISOString()
               .split('T')[0]
           : undefined;
@@ -66,44 +74,25 @@ export default function DrowsinessSearch() {
         token,
         vehicleNumber: vehicleNumber || undefined,
         driverHash: hash || undefined,
-        start_date: startDate?.toISOString().split('T')[0],
-        end_date: adjusted,
-        pageSize: 1000,
+        startDate: startDate?.toISOString().split('T')[0],
+        endDate: adjusted,
+        pageSize: 20,
         pageIdx: 0,
       });
-
-      data.sort((a, b) => new Date(b.detectedTime) - new Date(a.detectedTime));
-      const hashSet = new Set(data.map((item) => item.driverHash));
-      const newMap = {};
-      Array.from(hashSet).forEach((hash, i) => {
-        newMap[hash] = i + 1;
-      });
-      setDriverIndexMap(newMap);
-      if (deviceUid && data.length > 0) {
-        const meta = createDriverIndexMeta(data, vehicleNumber); // hashToIndex + vehicleNumber
-        driverIndexMapRef.current[deviceUid] = meta;
+      if (data.length > 0) {
+        const list = getDriverListByVehicleNumber(
+          vehicleNumber,
+          deviceUidMapRef,
+          driverIndexMapRef
+        );
+        setDriverList(list);
       }
-      const grouped = {};
-      data.forEach((item) => {
-        const { id, vehicleNumber, deviceUid, detectedTime, driverHash } = item;
 
-        if (!grouped[vehicleNumber]) {
-          grouped[vehicleNumber] = {
-            vehicleNumber,
-            deviceUid,
-            detectDate: detectedTime.split('T')[0],
-            drowsinessDetails: [],
-          };
-        }
-
-        grouped[vehicleNumber].drowsinessDetails.push({
-          id,
-          timestamp: detectedTime,
-          driverHash,
-        });
-      });
-
-      const groupedList = Object.values(grouped);
+      const groupedList = groupAndIndexSleepData(
+        data,
+        deviceUidMapRef,
+        driverIndexMapRef
+      );
       setFilteredData(groupedList);
       setCurrentPage(1);
     } catch (error) {
@@ -111,24 +100,6 @@ export default function DrowsinessSearch() {
       alert('데이터 조회 중 오류가 발생했습니다.');
     }
   };
-  useEffect(() => {
-    const initDeviceUidMap = async () => {
-      try {
-        const vehicleList = await getVehicles(100, 0, token);
-        const map = {};
-        vehicleList.forEach(({ vehicleNumber, deviceUid }) => {
-          map[vehicleNumber] = deviceUid;
-        });
-        deviceUidMapRef.current = map;
-
-        await handleSearch();
-      } catch (err) {
-        console.error('UID 매핑 초기화 실패:', err);
-      }
-    };
-
-    initDeviceUidMap();
-  }, []);
 
   const indexOfLastRow = currentPage * rowsPerPage;
   const indexOfFirstRow = indexOfLastRow - rowsPerPage;
@@ -140,80 +111,19 @@ export default function DrowsinessSearch() {
 
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-4">
         <div className="flex flex-col items-end gap-4 md:flex-row">
-          <div className="flex-[2]">
-            <InputField
-              label="차량 번호"
-              placeholder="차량 번호를 입력하세요."
-              value={vehicleNumber}
-              name="vehicleNumber"
-              onChange={handleVehicleInputChange}
-              className="w-full"
-            />
-          </div>
-          <div className="w-[180px]">
-            <label htmlFor="driverIndex" className="caption-bold">
-              운전자
-            </label>
-            <select
-              id="driverIndex"
-              name="driverIndex"
-              value={selectedDriverIndex || ''}
-              onChange={(e) =>
-                setSelectedDriverIndex(Number(e.target.value) || null)
-              }
-              className="border-cornflower-400 text-cornflower-950 focus:border-cornflower-500 font-pretendard min-h-[53px] w-full rounded-xl border bg-white px-4 text-[18px] leading-[53px] font-normal transition focus:outline-none"
-            >
-              <option value="">전체</option>
-              {Object.entries(driverIndexMap).map(([hash, index]) => (
-                <option key={hash} value={index}>
-                  운전자 {index}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="flex flex-col">
-            <label htmlFor="startDate" className="caption-bold">
-              검색 시작일
-            </label>
-            <DatePicker
-              id="startDate"
-              selected={startDate}
-              locale={ko}
-              dateFormat="yyyy년 MM월 dd일"
-              onChange={(date) => setStartDate(date)}
-              placeholderText="시작일 선택"
-              className="font-pretendard text-cornflower-950 placeholder-cornflower-400 border-cornflower-400 focus:border-cornflower-500 focus:placeholder-cornflower-950 h-[53px] w-[180px] rounded-xl border bg-white px-4 text-[16px] font-normal transition focus:outline-none"
-            />
-          </div>
-          <span className="mt-[29px] flex h-[53px] items-center justify-center text-xl">
-            ~
-          </span>
-          <div className="flex flex-col">
-            <label htmlFor="endDate" className="caption-bold">
-              검색 종료일
-            </label>
-            <DatePicker
-              id="endDate"
-              selected={endDate}
-              locale={ko}
-              dateFormat="yyyy년 MM월 dd일"
-              onChange={(date) => setEndDate(date)}
-              placeholderText="종료일 선택"
-              className="font-pretendard text-cornflower-950 placeholder-cornflower-400 border-cornflower-400 focus:border-cornflower-500 focus:placeholder-cornflower-950 h-[53px] w-[180px] rounded-xl border bg-white px-4 text-[16px] font-normal transition focus:outline-none"
-            />
-          </div>
-          <div className="pt-6">
-            <Button
-              label="검색"
-              size="md"
-              variant="main"
-              icon={<Search size={20} />}
-              iconPosition="left"
-              className="h-[53px] w-24"
-              onClick={handleSearch}
-            />
-          </div>
+          <SearchControls
+            vehicleNumber={vehicleNumber}
+            setVehicleNumber={setVehicleNumber}
+            selectedDriverIndex={selectedDriverIndex}
+            setSelectedDriverIndex={setSelectedDriverIndex}
+            startDate={startDate}
+            setStartDate={setStartDate}
+            endDate={endDate}
+            setEndDate={setEndDate}
+            onSearch={handleSearch}
+            dateError={dateError}
+            driverList={driverList}
+          />
         </div>
 
         {dateError && (

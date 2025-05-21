@@ -1,14 +1,17 @@
 import { React, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Download, ChevronRight, Car, EyeClosed, VideoOff } from 'lucide-react';
+import { Download, ChevronRight } from 'lucide-react';
 
-import SummaryCard from '../components/SummaryCard';
-import VehicleCard from '../components/VehicleCard';
-import BaseTable from '../components/BaseTable';
-import VehicleEditModal from '../components/VehicleEditModal';
-import VehicleDeleteModal from '../components/VehicleDeleteModal.jsx';
-import { getVehicles, deleteVehicle, updateVehicle } from '../api/vehicleApi';
-import { getRecentSleepData } from '../api/dashboardApi';
+import VehicleCard from '../../components/VehicleCard';
+import BaseTable from '../../components/BaseTable';
+import VehicleEditModal from '../../components/VehicleEditModal';
+import VehicleDeleteModal from '../../components/VehicleDeleteModal.jsx';
+import {
+  getVehicles,
+  deleteVehicle,
+  updateVehicle,
+} from '../../api/vehicleApi';
+import { getRecentSleepData } from '../../api/dashboardApi';
 import { downloadSleepVideo } from '@/api/sleepApi';
 import useDriverIndexMap from '@/hooks/useDriverIndexMap';
 import { getDriverIndex } from '@/utils/driverUtils';
@@ -16,7 +19,9 @@ import {
   getVehicleCount,
   getSleepTodayCount,
   getAbnormalVehicleCount,
-} from '../api/dashboardApi';
+} from '../../api/dashboardApi';
+import { saveDriverMapsToStorage } from '@/utils/storageUtils';
+import DashboardSummary from './DashboardSummary';
 export default function Dashboard() {
   const token = localStorage.getItem('auth_token');
   const [selectedVehicle, setSelectedVehicle] = useState(null);
@@ -59,14 +64,19 @@ export default function Dashboard() {
       const data = await getRecentSleepData(token);
       setRecentSleepData(data);
     } catch (err) {
-      console.error(' 졸음 데이터 불러오기 실패:', err);
+      console.error('졸음 데이터 불러오기 실패:', err);
     }
   };
 
   const fetchRecentVehicles = async () => {
     try {
-      const data = await getVehicles(3, 0, token);
-      setRecentVehicles(data);
+      const countData = await getVehicleCount(token);
+      const total = countData.totalVehicles;
+      const allVehicles = await getVehicles(total, 0, token);
+      const sorted = allVehicles
+        .sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate))
+        .slice(0, 3);
+      setRecentVehicles(sorted);
     } catch (err) {
       console.error('차량 조회 실패:', err);
       alert('차량 정보를 불러오는 데 실패했습니다.');
@@ -84,7 +94,7 @@ export default function Dashboard() {
 
   const handleDownload = async (idSleep) => {
     try {
-      await downloadSleepVideo(token, idSleep);
+      await downloadSleepVideo(idSleep, token);
     } catch (error) {
       console.error('다운로드 실패:', error);
 
@@ -98,8 +108,9 @@ export default function Dashboard() {
       key: 'driverHash',
       label: '운전자',
       render: (value, row) => {
+        const deviceUid = deviceUidMapRef.current?.[row.vehicleNumber];
         const index = getDriverIndex(
-          row.deviceUid,
+          deviceUid,
           row.driverHash,
           driverIndexMapRef
         );
@@ -117,7 +128,7 @@ export default function Dashboard() {
       render: (_, row) => (
         <button
           type="button"
-          onClick={() => handleDownload(row.idSleep)}
+          onClick={() => handleDownload(row.idSleep)} //
           className="text-cornflower-950 hover:bg-cornflower-100 hover:text-cornflower-600 inline-flex items-center justify-center rounded-xl p-2 transition-colors"
         >
           <Download size={18} />
@@ -127,26 +138,7 @@ export default function Dashboard() {
   ];
   return (
     <div className="flex flex-col gap-10 px-4">
-      <section>
-        <h2 className="head1 mb-4">대시보드 요약</h2>
-        <div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
-          <SummaryCard
-            label="총 등록 차량 수"
-            count={summaryData.totalVehicles}
-            icon={<Car size={24} />}
-          />
-          <SummaryCard
-            label="오늘 졸음 감지 횟수"
-            count={summaryData.sleepDetectedToday}
-            icon={<EyeClosed size={24} />}
-          />
-          <SummaryCard
-            label="이상 카메라 수"
-            count={summaryData.abnormalVehicles}
-            icon={<VideoOff size={24} />}
-          />
-        </div>
-      </section>
+      <DashboardSummary data={summaryData} />
 
       <section>
         <div className="mb-6 flex items-center gap-2">
@@ -195,11 +187,17 @@ export default function Dashboard() {
           originalVehicle={selectedVehicle}
           onClose={() => setShowEditModal(false)}
           onConfirm={(newNumber) => {
-            updateVehicle(selectedVehicle.deviceUid, newNumber, token)
+            const oldNumber = selectedVehicle.vehicleNumber;
+            const uid = selectedVehicle.deviceUid;
+            updateVehicle(uid, newNumber, token)
               .then(() => {
-                const uid = selectedVehicle.deviceUid;
-                if (deviceUidMapRef.current[uid]) {
-                  deviceUidMapRef.current[uid] = newNumber;
+                if (uid && newNumber) {
+                  deviceUidMapRef.current[newNumber] = uid;
+                  if (oldNumber !== newNumber) {
+                    delete deviceUidMapRef.current[oldNumber];
+                    driverIndexMapRef.current[uid].vehicleNumber = newNumber;
+                  }
+                  saveDriverMapsToStorage(driverIndexMapRef, deviceUidMapRef);
                 }
                 alert('수정 완료');
                 fetchRecentVehicles();

@@ -1,9 +1,10 @@
-import { React, useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { loadDriverMapsFromStorage } from './utils/storageUtils';
 import Layout from './pages/Layout';
 import { Routes, Route } from 'react-router-dom';
 import '../index.css';
 
-import Dashboard from './pages/Dashboard';
+import Dashboard from './pages/Dashboard/Dashboard';
 import DrowsinessDetail from './pages/DrowsinessDetail';
 import DrowsinessSearch from './pages/DrowsinessSearch';
 import WelcomePage from './pages/WelcomePage';
@@ -15,6 +16,9 @@ function App() {
   const driverIndexMapRef = useRef({});
   const deviceUidMapRef = useRef({});
   const setDriverIndexMap = useState({})[1];
+  useEffect(() => {
+    loadDriverMapsFromStorage(driverIndexMapRef, deviceUidMapRef);
+  }, []);
   return (
     <DriverIndexMapContext.Provider
       value={{
