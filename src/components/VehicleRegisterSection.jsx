@@ -22,14 +22,14 @@ export default function VehicleRegisterSection({ setData, token }) {
       await registerVehicle(vehicleNumber, deviceUid, token);
       deviceUidMapRef.current[vehicleNumber] = deviceUid;
       saveDriverMapsToStorage(driverIndexMapRef, deviceUidMapRef);
-      const updated = await getVehicles(20, 0, token);
+      const updated = await getVehicles(30, 0, token);
       setData(updated);
       setVehicleNumber('');
       setDeviceUid('');
       alert('차량 등록 완료!');
     } catch (error) {
       console.error('🚨 차량 등록 실패:', error);
-      alert('차량 등록 실패', error);
+      alert('차량 등록 실패');
     } finally {
       setIsLoading(false);
     }

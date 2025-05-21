@@ -39,7 +39,7 @@ export const getSleepRecords = async ({
     });
     return response.data.data || [];
   } catch (error) {
-    throw handleApiError(error);
+    handleApiError(error);
   }
 };
 
@@ -51,7 +51,7 @@ export const getSleepDetail = async (id, token) => {
     );
     return response.data.data;
   } catch (error) {
-    throw handleApiError(error);
+    handleApiError(error);
   }
 };
 
@@ -73,7 +73,7 @@ export const getSleepVideoStreamUrl = async (id, token) => {
     if (error.response?.status === 404) {
       alert('해당 영상이 존재하지 않습니다.');
     }
-    throw handleApiError(error);
+    handleApiError(error);
   }
 };
 
@@ -104,7 +104,7 @@ export const downloadSleepVideo = async (id, token) => {
     if (error.response?.status === 404) {
       alert('해당 영상이 존재하지 않습니다.');
     }
-    throw handleApiError(error);
+    handleApiError(error);
   }
 };
 
@@ -125,6 +125,6 @@ export const downloadSleepVideosZip = async (token, ids = []) => {
     );
     return response.data;
   } catch (error) {
-    throw handleApiError(error);
+    handleApiError(error);
   }
 };

@@ -126,8 +126,6 @@ export default function DrowsinessAccordionTable({ data }) {
               ) : (
                 <div className="flex flex-col gap-2">
                   {row.drowsinessDetails.map((detail, idx) => {
-                    console.log('🔍 detail:', detail);
-
                     const formattedTime =
                       typeof detail.detectedTime === 'string'
                         ? detail.detectedTime.replace('T', ' ').slice(0, 19)

@@ -30,6 +30,12 @@ export default function DrowsinessSearch() {
   const [driverList, setDriverList] = useState([]);
 
   const [vehicleNumber, setVehicleNumber] = useState('');
+  const formatDateLocal = (date) => {
+    if (!date) return undefined;
+    const offset = date.getTimezoneOffset(); // 분
+    const localDate = new Date(date.getTime() - offset * 60 * 1000);
+    return localDate.toISOString().split('T')[0];
+  };
 
   const handleSearch = async () => {
     if (startDate && endDate && startDate > endDate) {
@@ -55,19 +61,13 @@ export default function DrowsinessSearch() {
           driverIndexMapRef
         );
       }
-      const adjusted =
-        endDate != null
-          ? new Date(new Date(endDate).setDate(new Date(endDate).getDate() + 1))
-              .toISOString()
-              .split('T')[0]
-          : undefined;
 
       const data = await getSleepRecords({
         token,
         vehicleNumber: vehicleNumber || undefined,
         driverHash: hash || undefined,
-        startDate: startDate?.toISOString().split('T')[0],
-        endDate: adjusted,
+        startDate: formatDateLocal(startDate),
+        endDate: formatDateLocal(endDate),
         pageSize: 20,
         pageIdx: 0,
       });
