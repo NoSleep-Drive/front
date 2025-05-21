@@ -37,7 +37,8 @@ const Header = ({
   const activePage = getActivePage();
 
   const handleLogout = () => {
-    //TODO: log out 시 동작- 토큰 삭제
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('id');
     onLogout();
     navigate('/');
   };
