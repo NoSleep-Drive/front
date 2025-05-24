@@ -3,8 +3,8 @@ import PropTypes from 'prop-types';
 import { createPortal } from 'react-dom';
 import BaseTable from './BaseTable';
 import Pagination from './Pagination';
-import { fetchDriversByDeviceUid } from '@/api/driverApi';
 import Button from './Button';
+import { fetchDriversByDeviceUid } from '@/api/driverApi';
 import useDriverIndexMap from '@/hooks/useDriverIndexMap';
 import { getDriverIndex } from '@/utils/driverUtils';
 

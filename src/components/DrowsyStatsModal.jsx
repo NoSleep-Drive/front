@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { createPortal } from 'react-dom';
-import { calculateDriverSleepStats } from '../utils/calculateDriverSleepStats.js';
+import { calculateDriverSleepStats } from '@/utils/calculateDriverSleepStats.js';
 export default function DrowsyStatsModal({ isOpen, onConfirm, onClose, data }) {
   if (!isOpen) return null;
   const { sleepList, driverIndexMap, vehicleNumber } = data;

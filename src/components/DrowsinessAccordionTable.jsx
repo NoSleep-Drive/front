@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import BaseTable from './BaseTable';
 import { Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import axios from 'axios';
+import BaseTable from './BaseTable';
 
 export default function DrowsinessAccordionTable({ data }) {
   const [expandedRow, setExpandedRow] = useState(null);

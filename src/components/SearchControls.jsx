@@ -1,10 +1,10 @@
-import React from 'react';
-import InputField from '@/components/InputField';
-import Button from '@/components/Button';
 import { Search as SearchIcon } from 'lucide-react';
 import DatePicker from 'react-datepicker';
 import { ko } from 'date-fns/locale';
 import PropTypes from 'prop-types';
+import React from 'react';
+import InputField from '@/components/InputField';
+import Button from '@/components/Button';
 export default function SearchControls({
   vehicleNumber,
   setVehicleNumber,

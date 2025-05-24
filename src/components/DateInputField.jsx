@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import DatePicker from 'react-datepicker';
 import clsx from 'clsx';
 import { ko } from 'date-fns/locale';
-
 import 'react-datepicker/dist/react-datepicker.css';
 
 const DateInputField = ({

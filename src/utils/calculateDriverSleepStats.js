@@ -9,7 +9,7 @@ export function calculateDriverSleepStats(sleepList, driverHash) {
   const hourCount = {};
   sleepList.forEach((item) => {
     if (item.driverHash !== driverHash) return;
-    const hour = new Date(item.detectedTime).getHours();
+    const hour = new Date(item.detectedTime).getUTCHours();
     hourCount[hour] = (hourCount[hour] || 0) + 1;
   });
 

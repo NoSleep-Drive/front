@@ -1,6 +1,6 @@
 import React from 'react';
-import LoginForm from '../components/LoginForm';
-import OnboardingCard from '../components/OnboardingCard';
+import LoginForm from '@/components/LoginForm';
+import OnboardingCard from '@/components/OnboardingCard';
 
 export default function WelcomePage() {
   return (
