@@ -16,6 +16,12 @@ export const fetchDriversByDeviceUid = async (deviceUid, pageSize, pageIdx) => {
 
     return response.data.data;
   } catch (error) {
+    console.error('fetchDriversByDeviceUid 호출 실패:', {
+      deviceUid,
+      pageSize,
+      pageIdx,
+      error,
+    });
     handleApiError(error);
   }
 };

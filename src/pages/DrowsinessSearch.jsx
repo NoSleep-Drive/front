@@ -91,6 +91,7 @@ export default function DrowsinessSearch() {
       if (error.response?.status === 401) {
         alert('로그인이 필요합니다.');
         navigate('/');
+        return;
       }
       console.error('졸음 데이터 조회 실패:', error);
       alert('데이터 조회 중 오류가 발생했습니다.');

@@ -41,7 +41,7 @@ export function useEditProfile() {
     const fetchCompanyInfo = async () => {
       try {
         const response = await getCompanyInformation();
-        const { id, companyName, businessNumber } = response.data;
+        const { id, companyName, businessNumber } = response;
         dispatch({
           type: 'SET_COMPANY_INFO',
           payload: { id, companyName, businessNumber },
@@ -76,7 +76,7 @@ export function useEditProfile() {
         businessNumber: state.businessNumber,
       };
       const response = await updateCompany(formData);
-      setCompanyName(response.data.companyName);
+      setCompanyName(response.companyName);
       const { message } = response;
 
       if (message === '회원 정보가 수정되었습니다.') {

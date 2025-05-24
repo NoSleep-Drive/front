@@ -103,7 +103,7 @@ export const groupAndIndexSleepData = (
 
     grouped[vehicleNumber].drowsinessDetails.push({
       idSleep,
-      timestamp: detectedTime,
+      detectedTime,
       driverHash,
       driverIndex,
     });
