@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Download, ChevronLeft } from 'lucide-react';
-import Button from '../components/Button';
-import { getDriverIndexByVehicle } from '../utils/driverUtils';
+import Button from '@/components/Button';
+import { getDriverIndexByVehicle } from '@/utils/driverUtils';
 import {
   getSleepDetail,
   downloadSleepVideo,
   getSleepVideoStreamUrl,
-} from '../api/sleepApi';
+} from '@/api/sleepApi';
 import useDriverIndexMap from '@/hooks/useDriverIndexMap';
 import SleepdataInfo from '@/components/SleepdataInfo';
 export default function DrowsinessDetail() {
@@ -21,14 +21,8 @@ export default function DrowsinessDetail() {
 
   useEffect(() => {
     const fetchSleepData = async () => {
-      const token = localStorage.getItem('auth_token');
-      if (!token) {
-        alert('로그인이 필요합니다.');
-        navigate('/');
-        return;
-      }
       try {
-        const data = await getSleepDetail(id, token);
+        const data = await getSleepDetail(id);
         setSleepData(data);
         const index = getDriverIndexByVehicle(
           data.vehicleNumber,
@@ -38,10 +32,16 @@ export default function DrowsinessDetail() {
         );
 
         setDriverIndex(index);
-        const url = await getSleepVideoStreamUrl(id, token);
+        const url = await getSleepVideoStreamUrl(id);
         if (url) setVideoUrl(url);
       } catch (error) {
-        console.error('졸음 데이터 조회 실패:', error);
+        if (error.response?.status === 401) {
+          alert('로그인이 필요합니다.');
+          navigate('/');
+        } else {
+          console.error('졸음 데이터 조회 실패:', error);
+          alert('졸음 데이터 조회 실패');
+        }
       }
     };
 
@@ -53,13 +53,16 @@ export default function DrowsinessDetail() {
   }, [id, driverIndexMapRef, navigate]);
 
   const handleDownload = async () => {
-    const token = localStorage.getItem('auth_token');
-
     try {
-      await downloadSleepVideo(id, token);
+      await downloadSleepVideo(id);
     } catch (error) {
-      console.error('비디오 다운로드 실패:', error);
-      alert(error);
+      if (error.response?.status === 401) {
+        alert('로그인이 필요합니다.');
+        navigate('/');
+      } else {
+        console.error('비디오 다운로드 실패:', error);
+        alert(error.message || '다운로드 중 오류가 발생했습니다.');
+      }
     }
   };
 

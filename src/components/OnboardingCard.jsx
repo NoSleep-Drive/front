@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import Lottie from 'lottie-react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-import carsafety from '../assets/carsafety.json';
-import monitor from '../assets/monitor.json';
-import growth from '../assets/growth.json';
+import carsafety from '@/assets/carsafety.json';
+import monitor from '@/assets/monitor.json';
+import growth from '@/assets/growth.json';
 
 export default function OnboardingCard() {
   const cards = [

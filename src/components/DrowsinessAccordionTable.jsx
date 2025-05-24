@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import BaseTable from './BaseTable';
 import { Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import axios from 'axios';
+import BaseTable from './BaseTable';
 
 export default function DrowsinessAccordionTable({ data }) {
   const [expandedRow, setExpandedRow] = useState(null);
@@ -127,8 +127,8 @@ export default function DrowsinessAccordionTable({ data }) {
                 <div className="flex flex-col gap-2">
                   {row.drowsinessDetails.map((detail, idx) => {
                     const formattedTime =
-                      typeof detail.detectedTime === 'string'
-                        ? detail.detectedTime.replace('T', ' ').slice(0, 19)
+                      typeof detail.timestamp === 'string'
+                        ? detail.timestamp.replace('T', ' ').slice(0, 19)
                         : 'N/A';
 
                     return (

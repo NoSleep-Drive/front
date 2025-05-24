@@ -1,7 +1,7 @@
 import React from 'react';
 import { Car, EyeClosed, VideoOff } from 'lucide-react';
-import SummaryCard from '@/components/SummaryCard';
 import PropTypes from 'prop-types';
+import SummaryCard from '@/components/SummaryCard';
 export default function DashboardSummary({ data }) {
   return (
     <section>

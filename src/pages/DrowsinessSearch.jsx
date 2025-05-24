@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import 'react-datepicker/dist/react-datepicker.css';
 import DrowsinessAccordionTable from '@/components/DrowsinessAccordionTable';
 import Pagination from '@/components/Pagination';
@@ -16,8 +17,8 @@ export default function DrowsinessSearch() {
   useEffect(() => {
     handleSearch();
   }, []);
+  const navigate = useNavigate();
 
-  const token = localStorage.getItem('auth_token');
   const { driverIndexMapRef, deviceUidMapRef } = useDriverIndexMap();
 
   const [selectedDriverIndex, setSelectedDriverIndex] = useState(null);
@@ -63,7 +64,6 @@ export default function DrowsinessSearch() {
       }
 
       const data = await getSleepRecords({
-        token,
         vehicleNumber: vehicleNumber || undefined,
         driverHash: hash || undefined,
         startDate: formatDateLocal(startDate),
@@ -88,6 +88,10 @@ export default function DrowsinessSearch() {
       setFilteredData(groupedList);
       setCurrentPage(1);
     } catch (error) {
+      if (error.response?.status === 401) {
+        alert('로그인이 필요합니다.');
+        navigate('/');
+      }
       console.error('졸음 데이터 조회 실패:', error);
       alert('데이터 조회 중 오류가 발생했습니다.');
     }

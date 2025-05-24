@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import InputField from '../components/InputField';
-import CheckboxField from '../components/CheckboxField';
-import { validate } from '../utils/formValidation';
-import { signUpApi } from '../api/authApi';
 import { useNavigate } from 'react-router-dom';
+import InputField from '@/components/InputField';
+import CheckboxField from '@/components/CheckboxField';
+import { validate } from '@/utils/formValidation';
+import { signUpApi } from '@/api/authApi';
 import Button from '@/components/Button';
 export default function SignUp() {
   const navigate = useNavigate();

@@ -1,7 +1,7 @@
 import React from 'react';
+import { useOutletContext } from 'react-router';
 import EditProfileForm from './EditProfileForm';
 import { useEditProfile } from './useEditProfile';
-import { useOutletContext } from 'react-router';
 export default function EditProfile() {
   const {
     state,

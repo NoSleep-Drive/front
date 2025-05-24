@@ -1,7 +1,6 @@
 // VehicleTable.jsx
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Switch } from '@/components/ui/switch';
 import Button from './Button.jsx';
 import { Search } from 'lucide-react';
 import InputField from './InputField.jsx';
@@ -12,18 +11,16 @@ import VehicleEditModal from './VehicleEditModal.jsx';
 import VehicleDeleteModal from './VehicleDeleteModal.jsx';
 import DriverListModal from './DriverListModal.jsx';
 import { updateVehicle, deleteVehicle } from '@/api/vehicleApi';
+import { Switch } from '@/components/ui/switch';
 import { fetchDriversByDeviceUid } from '@/api/driverApi';
 import useDriverIndexMap from '@/hooks/useDriverIndexMap.js';
 import {
   handleRentVehicle,
   handleReturnVehicle,
 } from '@/utils/vehicleHandlers';
-
 import { setDriverIndex } from '@/utils/driverUtils';
 import { saveDriverMapsToStorage } from '@/utils/storageUtils.js';
 export default function VehicleTable({ data, setData }) {
-  const token = localStorage.getItem('auth_token');
-
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 5;
 
@@ -89,7 +86,7 @@ export default function VehicleTable({ data, setData }) {
       }
     } catch (e) {
       console.error('렌트/반납 실패: ', e);
-      alert('렌트 처리 중 오류가 발생했습니다.');
+      alert(e?.message || '렌트 처리 중 오류가 발생했습니다.');
     } finally {
       setSelectedRow(null);
     }
@@ -99,7 +96,7 @@ export default function VehicleTable({ data, setData }) {
     try {
       const oldNumber = editRow.vehicleNumber;
       const uid = deviceUidMapRef.current[oldNumber];
-      await updateVehicle(editRow.deviceUid, newNumber, token);
+      await updateVehicle(editRow.deviceUid, newNumber);
       if (uid && newNumber) {
         deviceUidMapRef.current[newNumber] = uid;
         if (oldNumber !== newNumber) {
@@ -124,7 +121,7 @@ export default function VehicleTable({ data, setData }) {
 
   const handleDeleteConfirm = async () => {
     try {
-      await deleteVehicle(deleteRow.deviceUid, token);
+      await deleteVehicle(deleteRow.deviceUid);
       setData((prev) =>
         prev.filter((item) => item.vehicleNumber !== deleteRow.vehicleNumber)
       );

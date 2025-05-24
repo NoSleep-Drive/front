@@ -1,10 +1,10 @@
 import { useState, useReducer, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   getCompanyInformation,
   updateCompany,
   deleteCompany,
-} from '../../api/companyApi';
-import { useNavigate } from 'react-router-dom';
+} from '@/api/companyApi';
 
 const initialState = {
   id: '',
@@ -40,15 +40,12 @@ export function useEditProfile() {
   useEffect(() => {
     const fetchCompanyInfo = async () => {
       try {
-        const token = localStorage.getItem('auth_token');
-        if (token) {
-          const response = await getCompanyInformation(token);
-          const { id, companyName, businessNumber } = response.data;
-          dispatch({
-            type: 'SET_COMPANY_INFO',
-            payload: { id, companyName, businessNumber },
-          });
-        }
+        const response = await getCompanyInformation();
+        const { id, companyName, businessNumber } = response.data;
+        dispatch({
+          type: 'SET_COMPANY_INFO',
+          payload: { id, companyName, businessNumber },
+        });
       } catch (error) {
         dispatch({
           type: 'SET_FIELD',
@@ -71,8 +68,6 @@ export function useEditProfile() {
 
   const handleSubmit = async (e, setCompanyName) => {
     e.preventDefault();
-    const token = localStorage.getItem('auth_token');
-    if (!token) return;
     try {
       setIsLoading(true);
       const formData = {
@@ -80,7 +75,7 @@ export function useEditProfile() {
         companyName: state.companyName,
         businessNumber: state.businessNumber,
       };
-      const response = await updateCompany(token, formData);
+      const response = await updateCompany(formData);
       setCompanyName(response.data.companyName);
       const { message } = response;
 
@@ -107,16 +102,13 @@ export function useEditProfile() {
     if (!window.confirm('정말 탈퇴하시겠습니까?')) return;
     try {
       setIsDeleting(true);
-      const token = localStorage.getItem('auth_token');
-      if (token) {
-        const response = await deleteCompany(token);
-        const { message } = response;
-        if (message === '회원 탈퇴가 완료되었습니다.') {
-          alert('성공적으로 탈퇴되었습니다.');
-          localStorage.removeItem('auth_token');
-          localStorage.removeItem('id');
-          navigate('/');
-        }
+      const response = await deleteCompany();
+      const { message } = response;
+      if (message === '회원 탈퇴가 완료되었습니다.') {
+        alert('성공적으로 탈퇴되었습니다.');
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('id');
+        navigate('/');
       }
     } catch (error) {
       alert(`회원 탈퇴 실패: ${error.message}`);

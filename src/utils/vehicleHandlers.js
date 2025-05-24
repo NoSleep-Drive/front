@@ -7,14 +7,8 @@ export async function handleRentVehicle(
   driverIndexMapRef,
   deviceUidMapRef
 ) {
-  const token = localStorage.getItem('auth_token');
-
   try {
-    await axios.post(`/api/vehicles/${row.vehicleNumber}/rent`, null, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    await axios.post(`/api/vehicles/${row.vehicleNumber}/rent`, null, {});
     setData((prev) =>
       prev.map((item) =>
         item.vehicleNumber === row.vehicleNumber
@@ -28,11 +22,7 @@ export async function handleRentVehicle(
       return [];
     }
 
-    const res = await axios.get(`/api/vehicles/${deviceUid}/drivers`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const res = await axios.get(`/api/vehicles/${deviceUid}/drivers`);
     const driverList = res.data?.data || [];
     if (driverList.length) {
       setDriverIndex(
@@ -63,14 +53,8 @@ export async function handleReturnVehicle(
   sleepPage = 0,
   driverIndexMapRef
 ) {
-  const token = localStorage.getItem('auth_token');
-
   try {
-    await axios.post(`/api/vehicles/${row.vehicleNumber}/return`, null, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    await axios.post(`/api/vehicles/${row.vehicleNumber}/return`);
 
     setData((prev) =>
       prev.map((item) =>
@@ -80,9 +64,6 @@ export async function handleReturnVehicle(
       )
     );
     const res = await axios.get(`/api/sleep`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
       params: {
         pageSize: sleepLimit,
         pageIdx: sleepPage,

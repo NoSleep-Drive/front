@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import InputField from '../../components/InputField';
-import Button from '../../components/Button';
+import InputField from '@/components/InputField';
+import Button from '@/components/Button';
 
 function EditProfileForm({
   state,
