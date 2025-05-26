@@ -6,7 +6,7 @@ export const getCompanyInformation = async () => {
     const response = await apiClient.get('/company/me');
     return response.data;
   } catch (error) {
-    throw handleApiError(error);
+    handleApiError(error);
   }
 };
 

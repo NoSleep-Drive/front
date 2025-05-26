@@ -25,7 +25,7 @@ export default function AuthOnboarding() {
         const { token } = response;
         localStorage.setItem('auth_token', token);
         localStorage.setItem('id', id);
-        window.location.href('/');
+        window.location.href = '/';
       }
     } catch (err) {
       console.error('로그인 오류:', err);
