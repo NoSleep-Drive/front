@@ -10,8 +10,14 @@ export default function Layout() {
   const [companyName, setCompanyName] = useState('');
 
   useEffect(() => {
+    const token = localStorage.getItem('auth_token');
+    if (!token) {
+      console.warn('토큰 없음, 회사 정보 요청 건너뜀');
+      return;
+    }
     (async () => {
       try {
+        console.log('회사 정보 요청 시작');
         const result = await getCompanyInformation();
         setCompanyName(result.companyName);
       } catch (err) {

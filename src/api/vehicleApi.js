@@ -46,10 +46,7 @@ export const updateVehicle = async (deviceUid, newNumber) => {
 
 export const rentVehicle = async (vehicleNumber) => {
   try {
-    const response = await apiClient.post(
-      `/vehicles/${vehicleNumber}/rent`,
-      null
-    );
+    const response = await apiClient.post(`/vehicles/${vehicleNumber}/rent`);
     return response.data;
   } catch (error) {
     handleApiError(error);
@@ -58,10 +55,7 @@ export const rentVehicle = async (vehicleNumber) => {
 
 export const returnVehicle = async (vehicleNumber) => {
   try {
-    const response = await apiClient.post(
-      `/vehicles/${vehicleNumber}/return`,
-      null
-    );
+    const response = await apiClient.post(`/vehicles/${vehicleNumber}/return`);
     return response.data;
   } catch (error) {
     handleApiError(error);

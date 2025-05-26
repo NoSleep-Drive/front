@@ -8,7 +8,12 @@ const apiClient = axios.create({
 });
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem('auth_token');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
+  //console.log(`Bearer ${token}`);
+  const excludedEndpoints = ['/company/login', '/company/signup'];
+  const isExcluded = excludedEndpoints.some((url) => config.url.includes(url));
+  if (!isExcluded && token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
   return config;
 });
 export default apiClient;

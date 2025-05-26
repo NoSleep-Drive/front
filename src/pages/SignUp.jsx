@@ -89,9 +89,6 @@ export default function SignUp() {
             onChange={handleChange}
             required
             error={errors.id}
-            withButton
-            buttonLabel="중복 확인"
-            onClickButton={() => alert('아이디 중복 확인 기능 연결 예정')}
           />
 
           <InputField
@@ -137,11 +134,6 @@ export default function SignUp() {
                 onChange={handleChange}
                 required
                 error={errors.businessNumber}
-                withButton
-                buttonLabel="중복 확인"
-                onClickButton={() =>
-                  alert('사업자 번호 중복 확인 기능 연결 예정')
-                }
               />
             </div>
           </div>

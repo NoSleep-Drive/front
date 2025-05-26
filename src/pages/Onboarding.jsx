@@ -18,13 +18,14 @@ export default function AuthOnboarding() {
     try {
       const response = await loginApi({ id: id, password });
 
-      console.log('로그인 API 응답:', response);
+      console.log('로그인 응답:', response);
+      console.log('저장할 토큰:', response.token);
 
       if (response.message === '로그인 성공.') {
         const { token } = response;
         localStorage.setItem('auth_token', token);
         localStorage.setItem('id', id);
-        navigate('/');
+        window.location.href('/');
       }
     } catch (err) {
       console.error('로그인 오류:', err);
