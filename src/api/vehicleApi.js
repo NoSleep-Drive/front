@@ -1,87 +1,62 @@
 import apiClient from './apiClient';
-const handleApiError = (error) => {
-  const errorMessage = error.response
-    ? error.response.data.message
-    : error.message;
-  const customError = new Error(errorMessage);
-  customError.status = error.response ? error.response.status : 500;
-  throw customError;
-};
+import { handleApiError } from './handleApiError';
 
-export const getVehicles = async (pageSize, pageIdx, token) => {
+export const getVehicles = async (pageSize, pageIdx) => {
   try {
-    const res = await apiClient.get('/vehicles', {
+    const response = await apiClient.get('/vehicles', {
       params: { pageSize, pageIdx },
-      headers: { Authorization: `Bearer ${token}` },
     });
-    return res.data.data;
+    return response.data.data;
   } catch (error) {
     handleApiError(error);
   }
 };
 
-export const registerVehicle = async (vehicleNumber, deviceUid, token) => {
+export const registerVehicle = async (vehicleNumber, deviceUid) => {
   try {
-    const res = await apiClient.post(
-      '/vehicles',
-      { vehicleNumber, deviceUid },
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
-    return res.data;
-  } catch (error) {
-    handleApiError(error);
-  }
-};
-
-export const deleteVehicle = async (deviceUid, token) => {
-  try {
-    const res = await apiClient.delete(`/vehicles/${deviceUid}`, {
-      headers: { Authorization: `Bearer ${token}` },
+    const response = await apiClient.post('/vehicles', {
+      vehicleNumber,
+      deviceUid,
     });
-    return res.data;
+    return response.data;
   } catch (error) {
     handleApiError(error);
   }
 };
 
-export const updateVehicle = async (deviceUid, newNumber, token) => {
+export const deleteVehicle = async (deviceUid) => {
   try {
-    const res = await apiClient.patch(
-      `/vehicles/${deviceUid}`,
-      { vehicleNumber: newNumber },
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
-    return res.data;
+    const response = await apiClient.delete(`/vehicles/${deviceUid}`, {});
+    return response.data;
   } catch (error) {
     handleApiError(error);
   }
 };
 
-export const rentVehicle = async (vehicleNumber, token) => {
+export const updateVehicle = async (deviceUid, newNumber) => {
   try {
-    const res = await apiClient.post(`/vehicles/${vehicleNumber}/rent`, null, {
-      headers: { Authorization: `Bearer ${token}` },
+    const response = await apiClient.patch(`/vehicles/${deviceUid}`, {
+      vehicleNumber: newNumber,
     });
-    return res.data;
+    return response.data;
   } catch (error) {
     handleApiError(error);
   }
 };
 
-export const returnVehicle = async (vehicleNumber, token) => {
+export const rentVehicle = async (vehicleNumber) => {
   try {
-    const res = await apiClient.post(
-      `/vehicles/${vehicleNumber}/return`,
-      null,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
-    return res.data;
+    const response = await apiClient.post(`/vehicles/${vehicleNumber}/rent`);
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+  }
+};
+
+export const returnVehicle = async (vehicleNumber) => {
+  try {
+    const response = await apiClient.post(`/vehicles/${vehicleNumber}/return`);
+    return response.data;
   } catch (error) {
     handleApiError(error);
   }

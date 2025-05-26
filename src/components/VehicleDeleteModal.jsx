@@ -8,7 +8,6 @@ export default function VehicleDeleteModal({
   onClose,
   onConfirm,
   vehicleNumber,
-  token,
 }) {
   if (!isOpen) return null;
 
@@ -24,7 +23,7 @@ export default function VehicleDeleteModal({
           <Button
             label="삭제"
             variant="main"
-            onClick={() => onConfirm(vehicleNumber, token)}
+            onClick={() => onConfirm(vehicleNumber)}
           />
         </div>
       </div>
@@ -38,5 +37,4 @@ VehicleDeleteModal.propTypes = {
   onClose: PropTypes.func.isRequired,
   onConfirm: PropTypes.func.isRequired,
   vehicleNumber: PropTypes.string.isRequired,
-  token: PropTypes.string.isRequired,
 };

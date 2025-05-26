@@ -1,17 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { loadDriverMapsFromStorage } from './utils/storageUtils';
-import Layout from './pages/Layout';
 import { Routes, Route } from 'react-router-dom';
+import Layout from '@/pages/Layout';
 import '../index.css';
 
-import Dashboard from './pages/Dashboard/Dashboard';
-import DrowsinessDetail from './pages/DrowsinessDetail';
-import DrowsinessSearch from './pages/DrowsinessSearch';
-import WelcomePage from './pages/WelcomePage';
-import SignUp from './pages/SignUp';
-import EditProfile from './pages/EditProfile/EditProfile';
-import VehicleManagement from './pages/VehicleManagement';
-import { DriverIndexMapContext } from './contexts/DriverIndexMapContext';
+import Dashboard from '@/pages/Dashboard/Dashboard';
+import DrowsinessDetail from '@/pages/DrowsinessDetail';
+import DrowsinessSearch from '@/pages/DrowsinessSearch';
+import WelcomePage from '@/pages/WelcomePage';
+import SignUp from '@/pages/SignUp';
+import EditProfile from '@/pages/EditProfile/EditProfile';
+import VehicleManagement from '@/pages/VehicleManagement';
+import { DriverIndexMapContext } from '@/contexts/DriverIndexMapContext';
 function App() {
   const driverIndexMapRef = useRef({});
   const deviceUidMapRef = useRef({});

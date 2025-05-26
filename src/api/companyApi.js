@@ -1,51 +1,27 @@
 import apiClient from './apiClient';
+import { handleApiError } from './handleApiError';
 
-const createAuthHeader = (token) => ({
-  headers: {
-    Authorization: `Bearer ${token}`,
-  },
-});
-
-const handleApiError = (error) => {
-  const errorMessage = error.response
-    ? error.response.data.message
-    : error.message;
-  const customError = new Error(errorMessage);
-  customError.status = error.response ? error.response.status : 500;
-  throw customError;
-};
-
-export const getCompanyInformation = async (token) => {
+export const getCompanyInformation = async () => {
   try {
-    const response = await apiClient.get(
-      '/company/me',
-      createAuthHeader(token)
-    );
+    const response = await apiClient.get('/company/me');
     return response.data;
   } catch (error) {
     handleApiError(error);
   }
 };
 
-export const updateCompany = async (token, formData) => {
+export const updateCompany = async (formData) => {
   try {
-    const response = await apiClient.patch(
-      '/company/me',
-      formData,
-      createAuthHeader(token)
-    );
+    const response = await apiClient.patch('/company/me', formData);
     return response.data;
   } catch (error) {
     handleApiError(error);
   }
 };
 
-export const deleteCompany = async (token) => {
+export const deleteCompany = async () => {
   try {
-    const response = await apiClient.delete(
-      '/company/me',
-      createAuthHeader(token)
-    );
+    const response = await apiClient.delete('/company/me');
     return response.data;
   } catch (error) {
     handleApiError(error);

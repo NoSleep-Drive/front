@@ -73,8 +73,8 @@ BaseTable.propTypes = {
     })
   ).isRequired,
   data: PropTypes.array.isRequired,
-  rowActions: PropTypes.func, // 수정/삭제 버튼
-  expandableRow: PropTypes.func, // 아코디언 확장용
+  rowActions: PropTypes.func,
+  expandableRow: PropTypes.func,
 };
 
 export default BaseTable;

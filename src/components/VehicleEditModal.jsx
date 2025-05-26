@@ -9,7 +9,6 @@ export default function VehicleEditModal({
   onClose,
   onConfirm,
   originalVehicle,
-  token,
 }) {
   const [vehicleNumber, setVehicleNumber] = useState('');
 
@@ -42,7 +41,7 @@ export default function VehicleEditModal({
             label="저장"
             variant="main"
             disabled={vehicleNumber === originalVehicle?.vehicleNumber}
-            onClick={() => onConfirm(vehicleNumber, token)}
+            onClick={() => onConfirm(vehicleNumber)}
           />
         </div>
       </div>
@@ -58,5 +57,4 @@ VehicleEditModal.propTypes = {
   originalVehicle: PropTypes.shape({
     vehicleNumber: PropTypes.string.isRequired,
   }),
-  token: PropTypes.string.isRequired,
 };

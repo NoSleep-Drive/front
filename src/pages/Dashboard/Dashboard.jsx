@@ -2,16 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Download, ChevronRight } from 'lucide-react';
 
-import VehicleCard from '../../components/VehicleCard';
-import BaseTable from '../../components/BaseTable';
-import VehicleEditModal from '../../components/VehicleEditModal';
-import VehicleDeleteModal from '../../components/VehicleDeleteModal.jsx';
-import {
-  getVehicles,
-  deleteVehicle,
-  updateVehicle,
-} from '../../api/vehicleApi';
-import { getRecentSleepData } from '../../api/dashboardApi';
+import VehicleCard from '@/components/VehicleCard';
+import BaseTable from '@/components/BaseTable';
+import VehicleEditModal from '@/components/VehicleEditModal';
+import VehicleDeleteModal from '@/components/VehicleDeleteModal.jsx';
+import { getVehicles, deleteVehicle, updateVehicle } from '@/api/vehicleApi';
+import { getRecentSleepData } from '@/api/dashboardApi';
 import { downloadSleepVideo } from '@/api/sleepApi';
 import useDriverIndexMap from '@/hooks/useDriverIndexMap';
 import { getDriverIndex } from '@/utils/driverUtils';
@@ -19,11 +15,10 @@ import {
   getVehicleCount,
   getSleepTodayCount,
   getAbnormalVehicleCount,
-} from '../../api/dashboardApi';
+} from '@/api/dashboardApi';
 import { saveDriverMapsToStorage } from '@/utils/storageUtils';
 import DashboardSummary from './DashboardSummary';
 export default function Dashboard() {
-  const token = localStorage.getItem('auth_token');
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -39,14 +34,14 @@ export default function Dashboard() {
     fetchRecentVehicles();
     fetchRecentSleep();
     fetchSummaryData();
-  }, [token]);
+  }, []);
 
   const fetchSummaryData = async () => {
     try {
       const [vehicle, sleep, abnormal] = await Promise.all([
-        getVehicleCount(token),
-        getSleepTodayCount(token),
-        getAbnormalVehicleCount(token),
+        getVehicleCount(),
+        getSleepTodayCount(),
+        getAbnormalVehicleCount(),
       ]);
 
       setSummaryData({
@@ -61,7 +56,7 @@ export default function Dashboard() {
 
   const fetchRecentSleep = async () => {
     try {
-      const data = await getRecentSleepData(token);
+      const data = await getRecentSleepData();
       setRecentSleepData(data);
     } catch (err) {
       console.error('졸음 데이터 불러오기 실패:', err);
@@ -70,9 +65,9 @@ export default function Dashboard() {
 
   const fetchRecentVehicles = async () => {
     try {
-      const countData = await getVehicleCount(token);
+      const countData = await getVehicleCount();
       const total = countData.totalVehicles;
-      const allVehicles = await getVehicles(total, 0, token);
+      const allVehicles = await getVehicles(total, 0);
       const sorted = allVehicles
         .sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate))
         .slice(0, 3);
@@ -94,7 +89,7 @@ export default function Dashboard() {
 
   const handleDownload = async (idSleep) => {
     try {
-      await downloadSleepVideo(idSleep, token);
+      await downloadSleepVideo(idSleep);
     } catch (error) {
       console.error('다운로드 실패:', error);
 
@@ -183,13 +178,12 @@ export default function Dashboard() {
       {showEditModal && selectedVehicle && (
         <VehicleEditModal
           isOpen={true}
-          token={token}
           originalVehicle={selectedVehicle}
           onClose={() => setShowEditModal(false)}
           onConfirm={(newNumber) => {
             const oldNumber = selectedVehicle.vehicleNumber;
             const uid = selectedVehicle.deviceUid;
-            updateVehicle(uid, newNumber, token)
+            updateVehicle(uid, newNumber)
               .then(() => {
                 if (uid && newNumber) {
                   deviceUidMapRef.current[newNumber] = uid;
@@ -214,11 +208,10 @@ export default function Dashboard() {
       {showDeleteModal && selectedVehicle && (
         <VehicleDeleteModal
           isOpen={true}
-          token={token}
           vehicleNumber={selectedVehicle.vehicleNumber}
           onClose={() => setShowDeleteModal(false)}
           onConfirm={() => {
-            deleteVehicle(selectedVehicle.deviceUid, token)
+            deleteVehicle(selectedVehicle.deviceUid)
               .then(() => {
                 alert('삭제 완료');
                 fetchRecentVehicles();

@@ -1,23 +1,7 @@
 import apiClient from './apiClient';
-const handleApiError = (error) => {
-  const errorMessage = error.response
-    ? error.response.data.message
-    : error.message;
-  const customError = new Error(errorMessage);
-  customError.status = error.response ? error.response.status : 500;
-  throw customError;
-};
-const createAuthHeader = (token = localStorage.getItem('auth_token')) => {
-  if (!token) return {};
-  return {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  };
-};
+import { handleApiError } from './handleApiError';
 
 export const getSleepRecords = async ({
-  token,
   vehicleNumber,
   driverHash,
   startDate,
@@ -35,7 +19,6 @@ export const getSleepRecords = async ({
         pageSize,
         pageIdx,
       },
-      ...createAuthHeader(token),
     });
     return response.data.data || [];
   } catch (error) {
@@ -43,23 +26,19 @@ export const getSleepRecords = async ({
   }
 };
 
-export const getSleepDetail = async (id, token) => {
+export const getSleepDetail = async (id) => {
   try {
-    const response = await apiClient.get(
-      `/sleep/${id}`,
-      createAuthHeader(token)
-    );
+    const response = await apiClient.get(`/sleep/${id}`);
     return response.data.data;
   } catch (error) {
     handleApiError(error);
   }
 };
 
-export const getSleepVideoStreamUrl = async (id, token) => {
+export const getSleepVideoStreamUrl = async (id) => {
   try {
     const response = await apiClient.get(`/sleep/${id}/video/stream`, {
       responseType: 'blob',
-      ...createAuthHeader(token),
     });
 
     if (response.data.size === 0) {
@@ -77,11 +56,10 @@ export const getSleepVideoStreamUrl = async (id, token) => {
   }
 };
 
-export const downloadSleepVideo = async (id, token) => {
+export const downloadSleepVideo = async (id) => {
   try {
     const response = await apiClient.get(`/sleep/${id}/video/download`, {
       responseType: 'blob',
-      ...createAuthHeader(token),
     });
     if (response.data.size === 0) {
       alert('다운로드 가능한 영상이 없습니다.');
@@ -108,7 +86,7 @@ export const downloadSleepVideo = async (id, token) => {
   }
 };
 
-export const downloadSleepVideosZip = async (token, ids = []) => {
+export const downloadSleepVideosZip = async (ids = []) => {
   try {
     if (!ids || ids.length === 0) {
       alert('다운로드할 영상이 없습니다.');
@@ -120,7 +98,6 @@ export const downloadSleepVideosZip = async (token, ids = []) => {
       { ids },
       {
         responseType: 'blob',
-        ...createAuthHeader(token),
       }
     );
     return response.data;

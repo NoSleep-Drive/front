@@ -1,24 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-import Header from '../components/Header';
-import { getCompanyInformation } from '../api/companyApi';
+import Header from '@/components/Header';
+import { getCompanyInformation } from '@/api/companyApi';
 
 export default function Layout() {
   const location = useLocation();
   const isAuthPage =
     location.pathname === '/signup' || location.pathname === '/';
-  const [companyName, setCompanyName] = useState('회사명 로딩 중...');
+  const [companyName, setCompanyName] = useState('');
 
   useEffect(() => {
     const token = localStorage.getItem('auth_token');
-    if (!token) return;
-
+    if (!token) {
+      console.warn('토큰 없음, 회사 정보 요청 건너뜀');
+      return;
+    }
     (async () => {
       try {
-        const result = await getCompanyInformation(token);
-        setCompanyName(result.data.companyName);
+        console.log('회사 정보 요청 시작');
+        const result = await getCompanyInformation();
+        setCompanyName(result.companyName);
       } catch (err) {
         console.error('회사 정보 불러오기 실패:', err.message);
+        setCompanyName('');
       }
     })();
   }, []);
