@@ -17,9 +17,8 @@ export default function Layout() {
     }
     (async () => {
       try {
-        console.log('회사 정보 요청 시작');
         const result = await getCompanyInformation();
-        setCompanyName(result.companyName);
+        setCompanyName(result?.companyName);
       } catch (err) {
         console.error('회사 정보 불러오기 실패:', err.message);
         setCompanyName('');

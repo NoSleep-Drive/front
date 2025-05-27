@@ -100,8 +100,32 @@ export const downloadSleepVideosZip = async (ids = []) => {
         responseType: 'blob',
       }
     );
+    const blob = response.data;
+    const contentDisposition = response.headers['content-disposition'];
+    const filenameMatch = contentDisposition?.match(/filename="(.+)"/);
+    const filename = filenameMatch ? filenameMatch[1] : 'sleepVideos.zip';
+
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(link.href);
+
     return response.data;
   } catch (error) {
-    handleApiError(error);
+    if (error) {
+      const status = error.response?.status;
+      if (status === 401) {
+        alert('인증 정보가 유효하지 않습니다.');
+      } else if (status === 404) {
+        alert('일부 영상이 존재하지 않아 다운로드할 수 없습니다.');
+      } else {
+        alert('일괄 다운로드 중 오류가 발생했습니다.');
+      }
+    } else {
+      alert('알 수 없는 오류가 발생했습니다.');
+    }
   }
 };

@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import axios from 'axios';
 import BaseTable from './BaseTable';
+import { downloadSleepVideosZip } from '@/api/sleepApi';
 
 export default function DrowsinessAccordionTable({ data }) {
   const [expandedRow, setExpandedRow] = useState(null);
@@ -18,49 +18,9 @@ export default function DrowsinessAccordionTable({ data }) {
 
   const handleBulkDownload = async (ids) => {
     if (isDownloading) return;
-    if (!ids || ids.length === 0) {
-      alert('다운로드할 영상이 없습니다.');
-      return;
-    }
-
     try {
       setIsDownloading(true);
-      const response = await axios.post(
-        '/api/sleep/videos/download',
-        { ids },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-          },
-          responseType: 'blob',
-        }
-      );
-
-      const blob = response.data;
-      const contentDisposition = response.headers['content-disposition'];
-      const filenameMatch = contentDisposition?.match(/filename="(.+)"/);
-      const filename = filenameMatch ? filenameMatch[1] : 'videos.zip';
-
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(link.href);
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        const status = error.response?.status;
-        if (status === 401) {
-          alert('인증 정보가 유효하지 않습니다.');
-        } else if (status === 404) {
-          alert('일부 영상이 존재하지 않아 다운로드할 수 없습니다.');
-        } else {
-          alert('일괄 다운로드 중 오류가 발생했습니다.');
-        }
-      } else {
-        alert('알 수 없는 오류가 발생했습니다.');
-      }
+      await downloadSleepVideosZip(ids);
     } finally {
       setIsDownloading(false);
     }
