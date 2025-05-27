@@ -1,4 +1,4 @@
-import axios from 'axios';
+import apiClient from '@/api/apiClient';
 import { setDriverIndex } from './driverUtils';
 import { saveDriverMapsToStorage } from './storageUtils';
 export async function handleRentVehicle(
@@ -8,7 +8,7 @@ export async function handleRentVehicle(
   deviceUidMapRef
 ) {
   try {
-    await axios.post(`/api/vehicles/${row.vehicleNumber}/rent`, null, {});
+    await apiClient.post(`/vehicles/${row.vehicleNumber}/rent`, null, {});
     setData((prev) =>
       prev.map((item) =>
         item.vehicleNumber === row.vehicleNumber
@@ -22,7 +22,7 @@ export async function handleRentVehicle(
       return [];
     }
 
-    const res = await axios.get(`/api/vehicles/${deviceUid}/drivers`);
+    const res = await apiClient.get(`/vehicles/${deviceUid}/drivers`);
     const driverList = res.data?.data || [];
     if (driverList.length) {
       setDriverIndex(
@@ -54,7 +54,7 @@ export async function handleReturnVehicle(
   driverIndexMapRef
 ) {
   try {
-    await axios.post(`/api/vehicles/${row.vehicleNumber}/return`);
+    await apiClient.post(`/vehicles/${row.vehicleNumber}/return`);
 
     setData((prev) =>
       prev.map((item) =>
@@ -63,7 +63,7 @@ export async function handleReturnVehicle(
           : item
       )
     );
-    const res = await axios.get(`/api/sleep`, {
+    const res = await apiClient.get(`/sleep`, {
       params: {
         pageSize: sleepLimit,
         pageIdx: sleepPage,
