@@ -10,6 +10,9 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react(), tailwindcss(), tsconfigPaths()],
     server: {
+      host: true,
+      allowedHosts: ['nosleepdrive.site'],
+      port: 5173,
       proxy: {
         '/api': {
           target: API_BASE_URL,
