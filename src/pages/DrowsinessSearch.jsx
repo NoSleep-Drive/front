@@ -33,7 +33,7 @@ export default function DrowsinessSearch() {
   const [vehicleNumber, setVehicleNumber] = useState('');
   const formatDateLocal = (date) => {
     if (!date) return undefined;
-    const offset = date.getTimezoneOffset(); // 분
+    const offset = date.getTimezoneOffset();
     const localDate = new Date(date.getTime() - offset * 60 * 1000);
     return localDate.toISOString().split('T')[0];
   };

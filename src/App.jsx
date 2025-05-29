@@ -28,12 +28,12 @@ function App() {
       }}
     >
       <Routes>
-        <Route path="/" element={<Layout />}>
+        <Route path="/signup" element={<SignUp />} />
+        <Route element={<Layout />}>
           <Route index element={<WelcomePage />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="drowsiness/search" element={<DrowsinessSearch />} />
           <Route path="drowsiness/:id" element={<DrowsinessDetail />} />
-          <Route path="signup" element={<SignUp />} />
           <Route path="edit" element={<EditProfile />} />
           <Route path="vehicles" element={<VehicleManagement />} />
         </Route>
