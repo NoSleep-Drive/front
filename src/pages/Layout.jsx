@@ -7,8 +7,9 @@ export default function Layout() {
   const location = useLocation();
   const isAuthPage =
     location.pathname === '/signup' || location.pathname === '/';
-  const [companyName, setCompanyName] = useState('');
-
+  const [companyName, setCompanyName] = useState(
+    localStorage.getItem('companyName') || '회사 명'
+  );
   useEffect(() => {
     const token = localStorage.getItem('auth_token');
     if (!token) {
@@ -19,6 +20,7 @@ export default function Layout() {
       try {
         const result = await getCompanyInformation();
         setCompanyName(result?.companyName);
+        localStorage.setItem('companyName', result?.companyName);
       } catch (err) {
         console.error('회사 정보 불러오기 실패:', err.message);
         setCompanyName('');

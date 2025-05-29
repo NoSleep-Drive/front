@@ -11,6 +11,7 @@ import { getRecentSleepData } from '@/api/dashboardApi';
 import { downloadSleepVideo } from '@/api/sleepApi';
 import useDriverIndexMap from '@/hooks/useDriverIndexMap';
 import { getDriverIndex } from '@/utils/driverUtils';
+import { getCompanyInformation } from '@/api/companyApi';
 import {
   getVehicleCount,
   getSleepTodayCount,
@@ -18,6 +19,8 @@ import {
 } from '@/api/dashboardApi';
 import { saveDriverMapsToStorage } from '@/utils/storageUtils';
 import DashboardSummary from './DashboardSummary';
+import { recoverMappingsIfEmpty } from '@/utils/mappingUtils';
+
 export default function Dashboard() {
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -31,6 +34,8 @@ export default function Dashboard() {
   });
   const { driverIndexMapRef, deviceUidMapRef } = useDriverIndexMap();
   useEffect(() => {
+    recoverMappingsIfEmpty(driverIndexMapRef, deviceUidMapRef);
+    getCompanyInformation();
     fetchRecentVehicles();
     fetchRecentSleep();
     fetchSummaryData();
@@ -115,7 +120,7 @@ export default function Dashboard() {
     {
       key: 'detectedTime',
       label: '감지 날짜',
-      render: (value) => new Date(value).toLocaleDateString(),
+      render: (value) => value?.slice(0, 10),
     },
     {
       key: 'download',

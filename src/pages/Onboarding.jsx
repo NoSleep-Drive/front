@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Carousel } from '@/components/ui/carousel';
 import { loginApi } from '@/api/authApi';
+import { getCompanyInformation } from '@/api/companyApi';
 import CustomAuthInput from '@/components/CustomAuthInput';
 import Button from '@/components/Button';
-
 export default function AuthOnboarding() {
   const [id, setId] = useState('');
   const [password, setPassword] = useState('');
@@ -22,7 +22,16 @@ export default function AuthOnboarding() {
         const { token } = response;
         localStorage.setItem('auth_token', token);
         localStorage.setItem('id', id);
-        window.location.href = '/';
+        try {
+          const companyInfo = await getCompanyInformation();
+          if (companyInfo?.companyName) {
+            localStorage.setItem('companyName', companyInfo.companyName);
+          }
+        } catch (error) {
+          console.error('회사 정보 불러오기 실패', error);
+        }
+
+        navigate('/dashboard');
       }
     } catch (err) {
       console.error('로그인 오류:', err);
