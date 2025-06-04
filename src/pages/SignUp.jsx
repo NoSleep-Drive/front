@@ -129,7 +129,7 @@ export default function SignUp() {
                 label="사업자 등록 번호"
                 name="businessNumber"
                 type="text"
-                placeholder="-없이 13자리 숫자"
+                placeholder="-없이 10자리 숫자"
                 value={formData.businessNumber}
                 onChange={handleChange}
                 required

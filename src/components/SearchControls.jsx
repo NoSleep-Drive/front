@@ -41,9 +41,10 @@ export default function SearchControls({
             id="driverIndex"
             name="driverIndex"
             value={selectedDriverIndex ?? ''}
-            onChange={(e) =>
-              setSelectedDriverIndex(Number(e.target.value) || null)
-            }
+            onChange={(e) => {
+              const value = e.target.value;
+              setSelectedDriverIndex(value === '' ? null : Number(value));
+            }}
             className="border-cornflower-400 text-cornflower-950 focus:border-cornflower-500 font-pretendard min-h-[53px] w-full rounded-xl border bg-white pr-10 pl-4 text-[18px] leading-[53px] font-normal transition focus:outline-none"
           >
             <option value="">전체</option>
