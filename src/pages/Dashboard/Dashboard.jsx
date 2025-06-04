@@ -72,6 +72,10 @@ export default function Dashboard() {
     try {
       const countData = await getVehicleCount();
       const total = countData.totalVehicles;
+      if (total === 0) {
+        setRecentVehicles([]);
+        return;
+      }
       const allVehicles = await getVehicles(total, 0);
       const sorted = allVehicles
         .sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate))
