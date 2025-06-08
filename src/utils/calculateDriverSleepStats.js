@@ -2,10 +2,6 @@ export function calculateDriverSleepStats(sleepList, driverHash) {
   if (!sleepList || !driverHash) {
     return { totalCount: 0, peakTime: '없음' };
   }
-  const totalCount = sleepList.filter(
-    (item) => item.driverHash === driverHash
-  ).length;
-
   const hourCount = {};
   sleepList.forEach((item) => {
     if (item.driverHash !== driverHash) return;
@@ -19,8 +15,5 @@ export function calculateDriverSleepStats(sleepList, driverHash) {
       ? Object.entries(hourCount).reduce((a, b) => (b[1] > a[1] ? b : a))[0]
       : null;
 
-  return {
-    totalCount,
-    peakTime: peakHour !== null ? `${peakHour}시` : '없음',
-  };
+  return peakHour !== null ? `${peakHour}시` : '없음';
 }

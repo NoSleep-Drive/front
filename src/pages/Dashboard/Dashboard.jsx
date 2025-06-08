@@ -11,7 +11,6 @@ import { getRecentSleepData } from '@/api/dashboardApi';
 import { downloadSleepVideo } from '@/api/sleepApi';
 import useDriverIndexMap from '@/hooks/useDriverIndexMap';
 import { getDriverIndex } from '@/utils/driverUtils';
-import { getCompanyInformation } from '@/api/companyApi';
 import {
   getVehicleCount,
   getSleepTodayCount,
@@ -35,7 +34,6 @@ export default function Dashboard() {
   const { driverIndexMapRef, deviceUidMapRef } = useDriverIndexMap();
   useEffect(() => {
     recoverMappingsIfEmpty(driverIndexMapRef, deviceUidMapRef);
-    getCompanyInformation();
     fetchRecentVehicles();
     fetchRecentSleep();
     fetchSummaryData();

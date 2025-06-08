@@ -89,19 +89,17 @@ export const groupAndIndexSleepData = (
     const deviceUid = deviceUidMapRef.current[vehicleNumber];
     const driverIndex =
       driverIndexMapRef.current?.[deviceUid]?.hashToIndex?.[driverHash] ?? null;
-
-    if (!grouped[vehicleNumber]) {
-      grouped[vehicleNumber] = {
+    const key = `${vehicleNumber}::${driverHash}`;
+    if (!grouped[key]) {
+      grouped[key] = {
         vehicleNumber,
         deviceUid,
-        drowsinessCount: 0,
+        driverHash,
+        driverIndex,
         drowsinessDetails: [],
       };
     }
-
-    grouped[vehicleNumber].drowsinessCount += 1;
-
-    grouped[vehicleNumber].drowsinessDetails.push({
+    grouped[key].drowsinessDetails.push({
       idSleep,
       detectedTime,
       driverHash,
@@ -110,7 +108,7 @@ export const groupAndIndexSleepData = (
   });
   Object.values(grouped).forEach((group) => {
     group.drowsinessDetails.sort(
-      (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
+      (a, b) => new Date(b.detectedTime) - new Date(a.detectedTime)
     );
   });
   return Object.values(grouped);

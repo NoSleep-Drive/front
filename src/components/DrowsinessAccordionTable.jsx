@@ -44,10 +44,26 @@ export default function DrowsinessAccordionTable({ data }) {
         </div>
       ),
     },
+
+    {
+      key: 'driverIndex',
+      label: '운전자',
+      render: (value, row) => {
+        const driverIndex = row.drowsinessDetails?.[0]?.driverIndex;
+        return (
+          <span>
+            {driverIndex != null ? `운전자 ${driverIndex + 1}` : '운전자 -'}
+          </span>
+        );
+      },
+    },
     {
       key: 'drowsinessCount',
       label: '감지 횟수',
-      render: (value, row) => <span>{row.drowsinessCount}회</span>,
+      render: (value, row) => {
+        const count = row.drowsinessCount;
+        return <span>{count != null ? `${count}회` : '-'}</span>;
+      },
     },
     {
       key: 'download',
@@ -99,11 +115,7 @@ export default function DrowsinessAccordionTable({ data }) {
                         <span className="text-cornflower-950 max-w-[180px] min-w-[160px]">
                           {formattedTime}
                         </span>
-                        <span>
-                          {detail.driverIndex != null
-                            ? `운전자 ${detail.driverIndex + 1}`
-                            : '운전자 -'}
-                        </span>
+
                         <button
                           type="button"
                           onClick={() =>
@@ -133,6 +145,7 @@ DrowsinessAccordionTable.propTypes = {
       driver: PropTypes.string,
       detectDate: PropTypes.string.isRequired,
       deviceUid: PropTypes.string.isRequired,
+      drowsinessCount: PropTypes.number,
       drowsinessDetails: PropTypes.arrayOf(
         PropTypes.shape({
           detectedTime: PropTypes.string.isRequired,
