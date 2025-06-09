@@ -1,10 +1,12 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { createPortal } from 'react-dom';
+import { getSleepCountByDriver } from '@/api/sleepApi';
 import { calculateDriverSleepStats } from '@/utils/calculateDriverSleepStats.js';
 export default function DrowsyStatsModal({ isOpen, onConfirm, onClose, data }) {
   if (!isOpen) return null;
   const { sleepList, driverIndexMap, vehicleNumber } = data;
+  const [totalCount, setTotalCount] = useState(null);
 
   const status = useMemo(() => {
     const driverHashes = Object.keys(driverIndexMap);
@@ -14,18 +16,29 @@ export default function DrowsyStatsModal({ isOpen, onConfirm, onClose, data }) {
     if (!latestDriverHash) return null;
 
     const index = driverIndexMap[latestDriverHash];
-    const { totalCount, peakTime } = calculateDriverSleepStats(
-      sleepList,
-      latestDriverHash
-    );
+    const peakTime = calculateDriverSleepStats(sleepList, latestDriverHash);
 
     return {
       index,
-      totalCount,
       peakTime,
       hash: latestDriverHash,
     };
   }, [driverIndexMap, sleepList]);
+  useEffect(() => {
+    if (!isOpen || !status?.hash) return;
+
+    const fetchCount = async () => {
+      try {
+        const count = await getSleepCountByDriver(status.hash);
+        setTotalCount(count);
+      } catch (e) {
+        console.error('총 졸음 감지 횟수 조회 실패:', e);
+        setTotalCount('-');
+      }
+    };
+
+    fetchCount();
+  }, [isOpen, status?.hash]);
 
   if (!status) return null;
 
@@ -48,7 +61,7 @@ export default function DrowsyStatsModal({ isOpen, onConfirm, onClose, data }) {
             <div className="flex flex-col items-center gap-2">
               <div className="text-sm text-gray-600">총 졸음 감지 횟수</div>
               <div className="text-cornflower-600 text-3xl font-bold">
-                {status.totalCount}회
+                {totalCount}회
               </div>
             </div>
             <div className="flex flex-col items-center gap-2">

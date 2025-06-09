@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import 'react-datepicker/dist/react-datepicker.css';
 import DrowsinessAccordionTable from '@/components/DrowsinessAccordionTable';
 import Pagination from '@/components/Pagination';
-import { getSleepRecords } from '@/api/sleepApi';
+import { getSleepRecords, getSleepCountByDriver } from '@/api/sleepApi';
 import useDriverIndexMap from '@/hooks/useDriverIndexMap';
 import {
   getDeviceUidByVehicle,
@@ -17,6 +17,20 @@ export default function DrowsinessSearch() {
   useEffect(() => {
     handleSearch();
   }, []);
+  const [vehicleNumber, setVehicleNumber] = useState('');
+  useEffect(() => {
+    if (!vehicleNumber.trim()) {
+      setDriverList([]);
+      return;
+    }
+
+    const list = getDriverListByVehicleNumber(
+      vehicleNumber,
+      deviceUidMapRef,
+      driverIndexMapRef
+    );
+    setDriverList(list);
+  }, [vehicleNumber]);
   const navigate = useNavigate();
 
   const { driverIndexMapRef, deviceUidMapRef } = useDriverIndexMap();
@@ -30,7 +44,6 @@ export default function DrowsinessSearch() {
   const [filteredData, setFilteredData] = useState([]);
   const [driverList, setDriverList] = useState([]);
 
-  const [vehicleNumber, setVehicleNumber] = useState('');
   const formatDateLocal = (date) => {
     if (!date) return undefined;
     const offset = date.getTimezoneOffset();
@@ -68,7 +81,7 @@ export default function DrowsinessSearch() {
         driverHash: hash || undefined,
         startDate: formatDateLocal(startDate),
         endDate: formatDateLocal(endDate),
-        pageSize: 20,
+        pageSize: 1000,
         pageIdx: 0,
       });
       if (data.length > 0) {
@@ -85,7 +98,24 @@ export default function DrowsinessSearch() {
         deviceUidMapRef,
         driverIndexMapRef
       );
-      setFilteredData(groupedList);
+      const enrichedList = await Promise.all(
+        groupedList.map(async (group) => {
+          const driverHash = group.driverHash;
+          let count = null;
+          if (driverHash) {
+            try {
+              count = await getSleepCountByDriver(driverHash);
+            } catch (err) {
+              console.error(`감지 수 조회 실패: ${driverHash}`, err);
+            }
+          }
+          return {
+            ...group,
+            drowsinessCount: count,
+          };
+        })
+      );
+      setFilteredData(enrichedList);
       setCurrentPage(1);
     } catch (error) {
       if (error.response?.status === 401) {

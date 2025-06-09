@@ -1,25 +1,12 @@
 import { fetchDriversByDeviceUid } from '@/api/driverApi';
+import { saveDriverMapsToStorage } from './storageUtils';
 import apiClient from '@/api/apiClient';
 
 export async function recoverMappingsIfEmpty(
   driverIndexMapRef,
   deviceUidMapRef
 ) {
-  const isDriverIndexMapEmpty =
-    !driverIndexMapRef.current ||
-    Object.keys(driverIndexMapRef.current).length === 0;
-  const isDeviceUidMapEmpty =
-    !deviceUidMapRef.current ||
-    Object.keys(deviceUidMapRef.current).length === 0;
-
-  if (!isDriverIndexMapEmpty || !isDeviceUidMapEmpty) {
-    console.log('매핑 정보가 이미 존재합니다. 복구 불필요');
-    return;
-  }
-
   try {
-    console.log('매핑 정보 비어있음. 백엔드에서 정보 가져오는 중...');
-
     // deviceUidMap 복구
     const vehiclesResponse = await apiClient.get('/vehicles', {
       params: { pageSize: 1000, pageIdx: 0 },
@@ -48,6 +35,7 @@ export async function recoverMappingsIfEmpty(
         };
       }
     }
+    saveDriverMapsToStorage(driverIndexMapRef, deviceUidMapRef);
 
     console.log('매핑 정보 복구 완료:', {
       deviceUidMap: deviceUidMapRef.current,

@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import InputField from './InputField';
 import Button from './Button';
 import { loginApi } from '@/api/authApi';
-
+import { useCompany } from '@/contexts/CompanyContext.jsx';
 export default function LoginForm() {
   const [id, setId] = useState('');
   const [password, setPassword] = useState('');
@@ -13,7 +13,7 @@ export default function LoginForm() {
     if (name === 'pw') setPassword(value);
   };
   const navigate = useNavigate();
-
+  const { fetchCompanyName } = useCompany();
   const handleLogin = async (e) => {
     e.preventDefault();
     setError(null);
@@ -24,6 +24,7 @@ export default function LoginForm() {
         const { token } = response;
         localStorage.setItem('auth_token', token);
         localStorage.setItem('id', id);
+        await fetchCompanyName();
         navigate('/dashboard');
       }
     } catch (err) {

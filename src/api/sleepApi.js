@@ -129,3 +129,23 @@ export const downloadSleepVideosZip = async (ids = []) => {
     }
   }
 };
+export const getSleepCountByDriver = async (driverHash) => {
+  try {
+    const response = await apiClient.get(
+      `/sleep/count/by-driver/${driverHash}`
+    );
+    return response.data.data?.count || 0;
+  } catch (error) {
+    handleApiError(error);
+  }
+};
+export const getSleepCountByVehicle = async (deviceUid) => {
+  try {
+    const response = await apiClient.get(
+      `/sleep/count/by-vehicle/${deviceUid}`
+    );
+    return response.data.data?.count || 0;
+  } catch (error) {
+    handleApiError(error);
+  }
+};
